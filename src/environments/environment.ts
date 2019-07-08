@@ -3,7 +3,9 @@
 // The list of file replacements can be found in `angular.json`.
 
 export const environment = {
-  production: false
+  production: false,
+  server: 'https://api.02.unibas.dasch.swiss',
+  ontologyPrefix: 'http://api.02.unibas.dasch.swiss'
 };
 
 /*
@@ -14,3 +16,8 @@ export const environment = {
  * on performance if an error is thrown.
  */
 // import 'zone.js/dist/zone-error';  // Included with Angular CLI.
+/*
+PREFIX knora-api: c
+PREFIX mls: <http://api.02.unibas.dasch.swiss/ontology/0807/mls/simple/v2#>
+CONSTRUCT { ?lemma knora-api:isMainResource true . ?lemma mls:hasLemmaText ?text . ?lemma mls:hasFamilyName ?fname . ?lemma mls:hasGivenName ?gname . ?lemma mls:hasStartDate ?startdate . ?lemma mls:hasEndDate ?enddate .  } WHERE {  ?lemma a knora-api:Resource . ?lemma a mls:Lemma . ?lemma mls:hasLemmaText ?text . ?lemma mls:hasFamilyName ?fname . ?lemma mls:hasGivenName ?gname .  OPTIONAL { ?lemma mls:hasStartDate ?startdate . } OPTIONAL { ?lemma mls:hasEndDate ?enddate . } FILTER regex(?text, "^A", "i") } ORDER BY ASC(?text) OFFSET 0
+ */
