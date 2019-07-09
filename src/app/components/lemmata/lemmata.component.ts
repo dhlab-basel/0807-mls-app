@@ -2,6 +2,7 @@ import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { GetLemmataService } from '../../services/get-lemmata.service';
 import { KnoraResource, KnoraValue } from 'knora-jsonld-simplify';
 import { ActivatedRoute } from '@angular/router';
+import { ElementRef, ViewChild } from '@angular/core';
 
 @Component({
   selector: 'app-lemmata',
@@ -13,9 +14,9 @@ import { ActivatedRoute } from '@angular/router';
       <mat-card-content>
         <form (submit)="searchEvent($event)">
           <mat-form-field>
-            <input name="searchterm" [value]="searchterm" matInput type="search" placeholder="Suchbegriff für Lemma" />
-            <mat-icon matSuffix>search</mat-icon>
-            <mat-icon matSuffix (click)="searchCancel($event)">cancel</mat-icon>
+            <input #searchField name="searchterm" [value]="searchterm" matInput type="search" placeholder="Suchbegriff für Lemma" />
+            <mat-icon matSuffix class="clickable" (click)="searchEvent($event)">search</mat-icon>
+            <mat-icon matSuffix class="clickable" (click)="searchCancel($event)">cancel</mat-icon>
             <mat-hint>Suche in Lemma, Pseudonyms etc.</mat-hint>
           </mat-form-field>
         </form>
@@ -48,19 +49,28 @@ import { ActivatedRoute } from '@angular/router';
       </mat-card-content>
     </mat-card>
   `,
-  styles: ['td.mat-cell {padding-left: 10px; padding-right:20px}']
+  styles: [
+    'td.mat-cell {padding-left: 10px; padding-right:20px;}',
+    'tr.mat-row {height: 24px;}',
+    '.clickable {cursor: pointer;}'
+  ]
 })
+
 export class LemmataComponent implements OnInit {
+  @ViewChild('searchField')
+  private searchField: ElementRef;
   private lemmata: Array<{[index: string]: string}> = [];
   private startchar: string;
   private page: number;
   private nLemmata: number;
-  private columnsToDisplay = ['lemma_text', 'lemma_start', 'lemma_end'];
-  private show_progbar = false;
-  private show_aindex = true;
-  private searchterm;
+  private columnsToDisplay: Array<string> = ['lemma_text', 'lemma_start', 'lemma_end'];
+  private show_progbar:boolean = false;
+  private show_aindex: boolean = true;
+  private searchterm: string;
 
-  constructor(private getLemmataService: GetLemmataService, private activatedRoute: ActivatedRoute) {
+  constructor(private getLemmataService: GetLemmataService,
+              private activatedRoute: ActivatedRoute,
+              private elementRef: ElementRef) {
     this.startchar = 'A';
     this.page = 0;
     this.searchterm = '';
@@ -79,8 +89,11 @@ export class LemmataComponent implements OnInit {
 
   pageChanged(event): void {
     this.page = event.pageIndex;
-    this.getLemmata();
-    console.log('PAGE: ', this.page);
+    if (this.searchterm === '') {
+      this.getLemmata();
+    } else {
+      this.searchLemmata();
+    }
   }
 
   lemmaSelected(event): void {
@@ -110,12 +123,6 @@ export class LemmataComponent implements OnInit {
       });
   }
 
-  searchEvent(event): boolean {
-    this.searchterm = event.target.searchterm.value;
-    this.searchLemmata();
-    return false;
-  }
-
   searchLemmata(): void {
     this.show_progbar = true;
     this.show_aindex = false;
@@ -138,6 +145,13 @@ export class LemmataComponent implements OnInit {
           };
         });
       });
+  }
+
+  searchEvent(event): boolean {
+    this.searchterm = this.searchField.nativeElement.value;
+    this.page = 0;
+    this.searchLemmata();
+    return false;
   }
 
   searchCancel(event): void {

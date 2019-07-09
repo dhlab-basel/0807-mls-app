@@ -8,7 +8,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { LemmataComponent } from './components/lemmata/lemmata.component';
 import { HomeComponent } from './components/home/home.component';
 import { LexicaComponent } from './components/lexica/lexica.component';
-import { MatToolbarModule } from '@angular/material';
+import {MatButtonToggleModule, MatToolbarModule} from '@angular/material';
 import { MatButtonModule } from '@angular/material';
 import { MatIconModule } from '@angular/material';
 import { MatCardModule } from '@angular/material';
@@ -18,8 +18,11 @@ import { MatPaginatorModule} from '@angular/material';
 import { MatProgressBarModule } from '@angular/material';
 import { MatInputModule } from '@angular/material';
 import { MatFormFieldModule } from '@angular/material';
+import { MatMenuModule } from '@angular/material';
+import { MatButtonToggleModule } from '@angular/material';
 import { SparqlPrep } from './classes/sparql-prep';
 import { AindexComponent } from './components/aindex/aindex.component';
+import { LemmaComponent } from './components/lemma/lemma.component';
 
 @NgModule({
   declarations: [
@@ -27,7 +30,8 @@ import { AindexComponent } from './components/aindex/aindex.component';
     LemmataComponent,
     HomeComponent,
     LexicaComponent,
-    AindexComponent
+    AindexComponent,
+    LemmaComponent
   ],
   imports: [
     BrowserModule,
@@ -43,6 +47,8 @@ import { AindexComponent } from './components/aindex/aindex.component';
     MatProgressBarModule,
     MatInputModule,
     MatFormFieldModule,
+    MatMenuModule,
+    MatButtonToggleModule,
     HttpClientModule,
   ],
   providers: [
