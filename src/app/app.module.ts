@@ -19,7 +19,6 @@ import { MatProgressBarModule } from '@angular/material';
 import { MatInputModule } from '@angular/material';
 import { MatFormFieldModule } from '@angular/material';
 import { MatMenuModule } from '@angular/material';
-import { MatButtonToggleModule } from '@angular/material';
 import { SparqlPrep } from './classes/sparql-prep';
 import { AindexComponent } from './components/aindex/aindex.component';
 import { LemmaComponent } from './components/lemma/lemma.component';

@@ -4,7 +4,7 @@ import { ElementRef, ViewChild } from '@angular/core';
 @Component({
   selector: 'app-aindex',
   template: `
-    <mat-button-toggle-group #aindexGroup name="aInxex" aria-label="Alpha Index">
+    <mat-button-toggle-group #aindexGroup="matButtonToggleGroup" name="aIndex" aria-label="Alpha Index" >
       <mat-button-toggle *ngFor="let c of chars" value="{{c}}" (change)="charClicked($event)">{{c}}</mat-button-toggle>
    </mat-button-toggle-group>
     <!--
@@ -19,8 +19,9 @@ import { ElementRef, ViewChild } from '@angular/core';
 
 export class AindexComponent implements OnInit {
   private chars: Array<string>;
+  private selected;
 
-  @ViewChild('aindexGroup')
+  @ViewChild('aindexGroup', {static: false})
   private aindexGroup: ElementRef;
 
   @Input()
@@ -31,6 +32,7 @@ export class AindexComponent implements OnInit {
 
   constructor() {
     this.chars = AindexComponent.charRange('A', 'Z');
+
   }
 
   static charRange(start: string, end: string): Array<string> {
@@ -44,12 +46,12 @@ export class AindexComponent implements OnInit {
   }
 
   charClicked(event): void {
-    console.log(event.value);
+    //console.log(this.aindexGroup.selected);
     this.charChange.emit(event.value);
   }
 
   ngOnInit() {
-
+    //this.aindexGroup.sel
   }
 
 }

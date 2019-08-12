@@ -13,7 +13,8 @@ import { map } from 'rxjs/operators';
 
 export class GetLemmataService {
 
-  constructor(private knoraApi: KnoraApiService, private queryTemplates: GravsearchTemplatesService) { }
+  constructor(private knoraApi: KnoraApiService,
+              private queryTemplates: GravsearchTemplatesService) { }
 
   get_lemmata(page: number = 0, start: string) {
     const query = this.queryTemplates.lemmata_query({ontology: environment.ontologyPrefix, page: String(page), start: start});

@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { HomeComponent} from './components/home/home.component';
 import { LemmataComponent} from './components/lemmata/lemmata.component';
+import { LemmaComponent} from './components/lemma/lemma.component';
 import { LexicaComponent} from './components/lexica/lexica.component';
 
 const routes: Routes = [{
@@ -10,6 +11,9 @@ const routes: Routes = [{
 }, {
   path: 'lemmata',
   component: LemmataComponent
+}, {
+  path: 'lemma/:iri',
+  component: LemmaComponent
 }, {
   path: 'lexica',
   component: LexicaComponent

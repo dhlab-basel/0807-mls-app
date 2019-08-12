@@ -3,6 +3,7 @@ import { GetLemmataService } from '../../services/get-lemmata.service';
 import { KnoraResource, KnoraValue } from 'knora-jsonld-simplify';
 import { ActivatedRoute } from '@angular/router';
 import { ElementRef, ViewChild } from '@angular/core';
+import { Router} from '@angular/router';
 
 @Component({
   selector: 'app-lemmata',
@@ -20,8 +21,8 @@ import { ElementRef, ViewChild } from '@angular/core';
             <mat-hint>Suche in Lemma, Pseudonyms etc.</mat-hint>
           </mat-form-field>
         </form>
-        <app-aindex *ngIf="show_aindex" [activeChar]="startchar" (charChange)='charChanged($event)'></app-aindex>
-        <mat-progress-bar mode="indeterminate" *ngIf="show_progbar"></mat-progress-bar>
+        <app-aindex *ngIf="showAindex" [activeChar]="startchar" (charChange)='charChanged($event)'></app-aindex>
+        <mat-progress-bar mode="indeterminate" *ngIf="showProgbar"></mat-progress-bar>
         <table mat-table [dataSource]="lemmata">
           <ng-container matColumnDef="lemma_text">
             <th mat-header-cell *matHeaderCellDef> Lemma </th>
@@ -57,20 +58,22 @@ import { ElementRef, ViewChild } from '@angular/core';
 })
 
 export class LemmataComponent implements OnInit {
-  @ViewChild('searchField')
+  @ViewChild('searchField', {static: false})
   private searchField: ElementRef;
+
   private lemmata: Array<{[index: string]: string}> = [];
   private startchar: string;
   private page: number;
   private nLemmata: number;
   private columnsToDisplay: Array<string> = ['lemma_text', 'lemma_start', 'lemma_end'];
-  private show_progbar:boolean = false;
-  private show_aindex: boolean = true;
+  private showProgbar:boolean = false;
+  private showAindex: boolean = true;
   private searchterm: string;
 
   constructor(private getLemmataService: GetLemmataService,
               private activatedRoute: ActivatedRoute,
-              private elementRef: ElementRef) {
+              private elementRef: ElementRef,
+              private router: Router) {
     this.startchar = 'A';
     this.page = 0;
     this.searchterm = '';
@@ -83,12 +86,26 @@ export class LemmataComponent implements OnInit {
   charChanged(c: string): void {
     this.startchar = c;
     this.page = 0;
+    this.router.navigate(
+      [],
+      {
+        relativeTo: this.activatedRoute,
+        queryParams: {page: this.page, startchar: this.startchar},
+        queryParamsHandling: "merge", // remove to replace all query params by provided
+      });
     console.log(c);
     this.getLemmata();
   }
 
   pageChanged(event): void {
     this.page = event.pageIndex;
+    this.router.navigate(
+      [],
+      {
+        relativeTo: this.activatedRoute,
+        queryParams: {page: this.page},
+        queryParamsHandling: "merge", // remove to replace all query params by provided
+      });
     if (this.searchterm === '') {
       this.getLemmata();
     } else {
@@ -97,11 +114,18 @@ export class LemmataComponent implements OnInit {
   }
 
   lemmaSelected(event): void {
-    console.log(event);
+    const url = 'lemma/' + encodeURIComponent(event.lemma_iri);
+    this.router.navigateByUrl(url).then(e => {
+      if (e) {
+        console.log("Navigation is successful!");
+      } else {
+        console.log("Navigation has failed!");
+      }
+    });
   }
 
   getLemmata(): void {
-    this.show_progbar = true;
+    this.showProgbar = true;
     this.lemmata = [];
     this.getLemmataService.get_lemmata_count(this.startchar)
       .subscribe(n => (this.nLemmata = Number(n)));
@@ -112,7 +136,7 @@ export class LemmataComponent implements OnInit {
           const lemmaStart = x ? x.getValue('mls:hasStartDate') : undefined;
           const lemmaEnd = x ? x.getValue('mls:hasEndDate') : undefined;
           const lemmaIri = x ? x.iri : undefined;
-          this.show_progbar = false;
+          this.showProgbar = false;
           return {
             lemma_text: lemmaText ? lemmaText.strval : '-',
             lemma_start: lemmaStart ? lemmaStart.strval : '?',
@@ -124,8 +148,8 @@ export class LemmataComponent implements OnInit {
   }
 
   searchLemmata(): void {
-    this.show_progbar = true;
-    this.show_aindex = false;
+    this.showProgbar = true;
+    this.showAindex = false;
     this.lemmata = [];
     this.getLemmataService.search_lemmata_count(this.searchterm)
       .subscribe(n => (this.nLemmata = Number(n)));
@@ -136,7 +160,7 @@ export class LemmataComponent implements OnInit {
           const lemmaStart = x ? x.getValue('mls:hasStartDate') : undefined;
           const lemmaEnd = x ? x.getValue('mls:hasEndDate') : undefined;
           const lemmaIri = x ? x.iri : undefined;
-          this.show_progbar = false;
+          this.showProgbar = false;
           return {
             lemma_text: lemmaText ? lemmaText.strval : '-',
             lemma_start: lemmaStart ? lemmaStart.strval : '?',
@@ -156,7 +180,7 @@ export class LemmataComponent implements OnInit {
 
   searchCancel(event): void {
     this.searchterm = '';
-    this.show_aindex = true;
+    this.showAindex = true;
     this.getLemmata();
   }
 
