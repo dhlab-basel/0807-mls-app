@@ -4,8 +4,8 @@
 
 export const environment = {
   production: false,
-  server: 'https://api.test.dasch.swiss',
-  ontologyPrefix: 'http://api.test.dasch.swiss'
+  server: 'http://0.0.0.0:3333',
+  ontologyPrefix: 'http://0.0.0.0:3333'
 };
 
 /*

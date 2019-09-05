@@ -51,16 +51,18 @@ export class KnoraApiService {
       .pipe(map(jsonobj => {
         const simple: KnoraResource = simplifier.simplify(jsonobj)[0]; // todo: error handling if resource not here
         const propnames = simple.getPropNames();
+        console.log(propnames)
         let props: {[index: string]: Array<KnoraValue>} = {};
-        for (const name in propnames) {
-          if (simple.isValue(name)) {
-            const nvals = simple.getNValues(name);
+        for (const idx in propnames) {
+          console.log('NAME=' + propnames[idx])
+          if (simple.isValue(propnames[idx])) {
+            const nvals = simple.getNValues(propnames[idx]);
             const values: Array<KnoraValue> = [];
             for (let i = 0; i < nvals; i++) {
-              values.push(simple.getValue(name, i) as KnoraValue);
+              values.push(simple.getValue(propnames[idx], i) as KnoraValue);
             }
-            props[name] = values;
-          } else if (simple.isResource(name)) {
+            props[propnames[idx]] = values;
+          } else if (simple.isResource(propnames[idx])) {
             // TODO: NOT YET IMPLEMENTED
           } else {
             // TODO: NOT YET IMPLEMENTED
@@ -68,6 +70,7 @@ export class KnoraApiService {
         }
         const strvals: {[index: string]: string} = {};
         const listvals: {[index: string]: KnoraListValue} = {};
+        console.log(props)
         for(const name in props) {
           for (const val of props[name]) {
             const type = val.subtype;
