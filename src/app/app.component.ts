@@ -7,5 +7,5 @@ import { Component } from '@angular/core';
 })
 
 export class AppComponent {
-  title = 'mls-app-ng';
+  title = 'Musikalisches Lexikon der Schweiz (MLS)';
 }
