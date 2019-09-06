@@ -8,11 +8,11 @@ import { GetProjectInfoService} from '../../services/get-project-info.service';
   template: `
     <mat-card>
       <mat-card-title>
-        {{ projectInfo['longname'] }}
+       <!-- {{ projectInfo['longname'] }} -->
       </mat-card-title>
       <mat-card-content>
         <h3>Beschreibung</h3>
-        <p>{{ projectInfo['description']['de'] }}</p>
+        <p><!-- {{ projectInfo['description']['de'] }}--></p>
       </mat-card-content>
       <mat-divider></mat-divider>
       <mat-card-actions style="text-align: center;">
@@ -34,7 +34,19 @@ export class HomeComponent implements OnInit {
   getProjectInfo(shortcode: string): void {
     this.pinfoService.getProjectInfo(shortcode)
       .subscribe((data: ProjectInfo) => {
-        this.projectInfo = data;
+        if (data === undefined) {
+          this.projectInfo = {
+            longname: 'unknown',
+            shortname: 'unknonm',
+            shortcode: '0000',
+            iri: 'http://null.org',
+            description: {
+              de: 'unknown'
+            }
+          };
+        } else {
+          this.projectInfo = data;
+        }
       });
   }
 

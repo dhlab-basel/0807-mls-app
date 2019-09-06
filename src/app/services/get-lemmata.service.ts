@@ -10,6 +10,7 @@ import {AppInitService} from '../app-init.service';
 })
 
 export class GetLemmataService {
+  page = 0;
 
   constructor(private knoraApi: KnoraApiService,
               private queryTemplates: GravsearchTemplatesService,
