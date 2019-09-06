@@ -117,13 +117,17 @@ export class GravsearchTemplatesService {
         ?lexicon knora-api:isMainResource true .
         ?lexicon mls:hasCitationForm ?text .
         ?lexicon mls:hasYear ?year .
+        ?lexicon mls:hasLexiconComment ?comment .
         ?lexicon mls:hasLexiconWeblink ?weblink .
+        ?lexicon mls:hasShortname ?shortname .
     } WHERE {
         ?lexicon a knora-api:Resource .
         ?lexicon a mls:Lexicon .
         ?lexicon mls:hasCitationForm ?text .
         OPTIONAL { ?lexicon mls:hasYear ?year . }
+        OPTIONAL { ?lexicon mls:hasLexiconComment ?comment . }
         OPTIONAL { ?lexicon mls:hasLexiconWeblink ?weblink . }
+        OPTIONAL { ?lexicon mls:hasShortname ?shortname . }
     }
     ORDER BY ASC(?text)
     OFFSET {{ page }}

@@ -14,6 +14,24 @@ import { ActivatedRoute, Router } from '@angular/router';
             Lexika
         </mat-card-title>
         <mat-card-content>
+            <mat-progress-bar mode="indeterminate" *ngIf="showProgbar"></mat-progress-bar>
+            <table mat-table [dataSource]="lexica">
+                <ng-container matColumnDef="lexicon_shortname">
+                    <th mat-header-cell *matHeaderCellDef> Kürzeel </th>
+                    <td mat-cell *matCellDef="let element"> {{element.lexicon_shortname}} </td>
+                </ng-container>
+                <ng-container matColumnDef="lexicon_citation">
+                    <th mat-header-cell *matHeaderCellDef> Zitierform </th>
+                    <td mat-cell *matCellDef="let element"> {{element.lexicon_citation}} </td>
+                </ng-container>
+                <ng-container matColumnDef="lexicon_year">
+                    <th mat-header-cell *matHeaderCellDef> Jahr </th>
+                    <td mat-cell *matCellDef="let element"> {{element.lexicon_year}} </td>
+                </ng-container>
+                <tr mat-header-row *matHeaderRowDef="columnsToDisplay"></tr>
+                <tr mat-row *matRowDef="let row; columns: columnsToDisplay;" (click)="lexiconSelected(row)"></tr>
+            </table>
+
         </mat-card-content>
     </mat-card>
   `,
@@ -31,7 +49,7 @@ export class LexicaComponent implements OnInit {
   private startchar: string;
   private page: number;
   private nLexica: number;
-  private columnsToDisplay: Array<string> = ['lemma_text', 'lemma_start', 'lemma_end'];
+  private columnsToDisplay: Array<string> = ['lexicon_shortname', 'lexicon_citation', 'lexicon_year'];
   private showProgbar = false;
   private showAindex = true;
   private searchterm: string;
@@ -57,22 +75,25 @@ export class LexicaComponent implements OnInit {
       .subscribe(n => (this.nLexica = Number(n)));
     this.getLexicaService.get_lexica(this.page, this.startchar)
       .subscribe((data: Array<KnoraResource>) => {
-        console.log(data)
-        /*
+        console.log("LEXICA.....");
+        console.log(data);
         this.lexica = data.map((x) => {
-          const lemmaText = x ? x.getValue('mls:hasLemmaText') : undefined;
-          const lemmaStart = x ? x.getValue('mls:hasStartDate') : undefined;
-          const lemmaEnd = x ? x.getValue('mls:hasEndDate') : undefined;
-          const lemmaIri = x ? x.iri : undefined;
+          const lexiconCitation = x ? x.getValue('mls:hasCitationForm') : undefined;
+          const lexiconYear = x ? x.getValue('mls:hasYear') : undefined;
+          const lexiconShortname = x ? x.getValue('mls:hasShortname') : undefined;
+          const lexiconComment = x ? x.getValue('mls:hasLexiconComment') : undefined;
+          const lexiconWeblink = x ? x.getValue('mls:hasLexiconWeblink') : undefined;
+          const lexiconLibrary = x ? x.getValue('mls:hasLibrary') : undefined;
           this.showProgbar = false;
           return {
-            lemma_text: lemmaText ? lemmaText.strval : '-',
-            lemma_start: lemmaStart ? lemmaStart.strval : '?',
-            lemma_end: lemmaEnd ? lemmaEnd.strval : '?',
-            lemma_iri: lemmaIri ? lemmaIri : 'http://NULL'
+            lexicon_citation: lexiconCitation ? lexiconCitation.strval : '?',
+            lexicon_year: lexiconYear ? lexiconYear.strval : '?',
+            lexicon_shortname: lexiconShortname ? lexiconShortname.strval : '?',
+            lexicon_comment: lexiconComment ? lexiconComment.strval : '?',
+            lexicon_weblink: lexiconWeblink ? lexiconWeblink.strval : '?',
+            lexicon_library: lexiconLibrary ? lexiconLibrary.strval : '?',
           };
         });
-         */
       });
   }
 
