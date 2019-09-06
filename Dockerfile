@@ -37,4 +37,4 @@ LABEL maintainer="ivan.subotic@unibas.ch"
 
 RUN rm -rf /public/*
 
-COPY --from=builder /usr/app/dist/beol /public
+COPY --from=builder /usr/app/dist/mls-app-ng /public
