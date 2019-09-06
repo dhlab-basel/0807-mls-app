@@ -61,14 +61,14 @@ export class LemmataComponent implements OnInit {
   @ViewChild('searchField', {static: false})
   private searchField: ElementRef;
 
-  private lemmata: Array<{[index: string]: string}> = [];
-  private startchar: string;
-  private page: number;
-  private nLemmata: number;
-  private columnsToDisplay: Array<string> = ['lemma_text', 'lemma_start', 'lemma_end'];
-  private showProgbar:boolean = false;
-  private showAindex: boolean = true;
-  private searchterm: string;
+  lemmata: Array<{[index: string]: string}> = [];
+  startchar: string;
+  page: number;
+  nLemmata: number;
+  columnsToDisplay: Array<string> = ['lemma_text', 'lemma_start', 'lemma_end'];
+  showProgbar:boolean = false;
+  showAindex: boolean = true;
+  searchterm: string;
 
   constructor(private getLemmataService: GetLemmataService,
               private activatedRoute: ActivatedRoute,

@@ -35,11 +35,11 @@ import {map, mergeMap, concatMap, take} from 'rxjs/operators';
 })
 
 export class LemmaComponent implements OnInit {
-  private lemmaIri;
-  private lemma: Array<{[index: string]: string}> = [];
-  private lemmaTitle: string = 'GAGA';
-  private columnsToDisplay: Array<string> = ['KEY', 'VALUE'];
-  private labeltable: {[index: string]: string} = {
+  lemmaIri;
+  lemma: Array<{[index: string]: string}> = [];
+  lemmaTitle: string = 'GAGA';
+  columnsToDisplay: Array<string> = ['KEY', 'VALUE'];
+  labeltable: {[index: string]: string} = {
     lemmaText: 'Lemma',
     lemmaStart: 'Von',
     lemmaEnd: 'Bis',

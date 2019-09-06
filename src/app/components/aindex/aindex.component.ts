@@ -18,7 +18,7 @@ import { ElementRef, ViewChild } from '@angular/core';
 })
 
 export class AindexComponent implements OnInit {
-  private chars: Array<string>;
+  chars: Array<string>;
   private selected;
 
   @ViewChild('aindexGroup', {static: false})
