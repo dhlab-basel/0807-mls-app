@@ -54,7 +54,6 @@ export class KnoraApiService {
         console.log(propnames)
         let props: {[index: string]: Array<KnoraValue>} = {};
         for (const idx in propnames) {
-          console.log('NAME=' + propnames[idx])
           if (simple.isValue(propnames[idx])) {
             const nvals = simple.getNValues(propnames[idx]);
             const values: Array<KnoraValue> = [];
@@ -70,7 +69,6 @@ export class KnoraApiService {
         }
         const strvals: {[index: string]: string} = {};
         const listvals: {[index: string]: KnoraListValue} = {};
-        console.log(props)
         for(const name in props) {
           for (const val of props[name]) {
             const type = val.subtype;

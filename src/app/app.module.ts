@@ -8,7 +8,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { LemmataComponent } from './components/lemmata/lemmata.component';
 import { HomeComponent } from './components/home/home.component';
 import { LexicaComponent } from './components/lexica/lexica.component';
-import {MatButtonToggleModule, MatToolbarModule} from '@angular/material';
+import { MatButtonToggleModule, MatToolbarModule} from '@angular/material';
 import { MatButtonModule } from '@angular/material';
 import { MatIconModule } from '@angular/material';
 import { MatCardModule } from '@angular/material';

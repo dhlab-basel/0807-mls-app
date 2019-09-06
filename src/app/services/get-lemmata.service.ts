@@ -14,7 +14,9 @@ import { map } from 'rxjs/operators';
 export class GetLemmataService {
 
   constructor(private knoraApi: KnoraApiService,
-              private queryTemplates: GravsearchTemplatesService) { }
+              private queryTemplates: GravsearchTemplatesService) {
+    this.page = 0;
+  }
 
   get_lemmata(page: number = 0, start: string) {
     const query = this.queryTemplates.lemmata_query({ontology: environment.ontologyPrefix, page: String(page), start: start});

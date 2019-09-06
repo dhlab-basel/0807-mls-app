@@ -108,4 +108,26 @@ export class GravsearchTemplatesService {
 
     return result;
   }
+
+  lexica_query(params: {[index: string]: string}): string {
+    const result = this.sparqlPrep.compile(`
+    PREFIX knora-api: <http://api.knora.org/ontology/knora-api/simple/v2#>
+    PREFIX mls: <{{ ontology }}/ontology/0807/mls/simple/v2#>
+    CONSTRUCT {
+        ?lexicon knora-api:isMainResource true .
+        ?lexicon mls:hasCitationForm ?text .
+        ?lexicon mls:hasYear ?year .
+        ?lexicon mls:hasLexiconWeblink ?weblink .
+    } WHERE {
+        ?lexicon a knora-api:Resource .
+        ?lexicon a mls:Lexicon .
+        ?lexicon mls:hasCitationForm ?text .
+        OPTIONAL { ?lexicon mls:hasYear ?year . }
+        OPTIONAL { ?lexicon mls:hasLexiconWeblink ?weblink . }
+    }
+    ORDER BY ASC(?text)
+    OFFSET {{ page }}
+  `, params);
+    return result;
+  }
 }
