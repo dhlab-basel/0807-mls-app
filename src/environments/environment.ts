@@ -3,9 +3,7 @@
 // The list of file replacements can be found in `angular.json`.
 
 export const environment = {
-  production: false,
-  server: 'http://0.0.0.0:3333',
-  ontologyPrefix: 'http://0.0.0.0:3333'
+  production: false
 };
 
 /*

@@ -1,5 +1,5 @@
 import { BrowserModule } from '@angular/platform-browser';
-import { NgModule } from '@angular/core';
+import {APP_INITIALIZER, NgModule} from '@angular/core';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -22,6 +22,13 @@ import { MatMenuModule } from '@angular/material';
 import { SparqlPrep } from './classes/sparql-prep';
 import { AindexComponent } from './components/aindex/aindex.component';
 import { LemmaComponent } from './components/lemma/lemma.component';
+import {AppInitService} from './app-init.service';
+
+export function initializeApp(appInitService: AppInitService) {
+  return (): Promise<any> => {
+    return appInitService.Init();
+  };
+}
 
 @NgModule({
   declarations: [
@@ -51,6 +58,10 @@ import { LemmaComponent } from './components/lemma/lemma.component';
     HttpClientModule,
   ],
   providers: [
+    AppInitService,
+    {
+      provide: APP_INITIALIZER, useFactory: initializeApp, deps: [AppInitService], multi: true
+    },
     SparqlPrep
   ],
   bootstrap: [AppComponent]

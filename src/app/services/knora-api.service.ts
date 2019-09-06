@@ -1,15 +1,18 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { environment } from '../../environments/environment';
 import { KnoraJsonldSimplify, KnoraResource, KnoraValue, KnoraListValue  } from 'knora-jsonld-simplify';
 import {map} from 'rxjs/operators';
+import { AppInitService } from '../app-init.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class KnoraApiService {
 
-  constructor(private http: HttpClient) { }
+  constructor(
+    private http: HttpClient,
+    private appInitService: AppInitService
+  ) { }
 
   get(path: string, email?: string, password?: string): any {
     let headers;
@@ -22,9 +25,9 @@ export class KnoraApiService {
       };
     }
     if (headers === undefined) {
-      return this.http.get(environment.server + path);
+      return this.http.get( this.appInitService.getSettings().server + path);
     } else {
-      return this.http.get(environment.server + path, headers);
+      return this.http.get(this.appInitService.getSettings().server + path, headers);
     }
   }
 
@@ -39,9 +42,9 @@ export class KnoraApiService {
       };
     }
     if (headers === undefined) {
-      return this.http.post(environment.server + path, data);
+      return this.http.post(this.appInitService.getSettings().server + path, data);
     } else {
-      return this.http.post(environment.server + path, data, headers);
+      return this.http.post(this.appInitService.getSettings().server + path, data, headers);
     }
   }
 

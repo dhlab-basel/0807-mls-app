@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
-import {environment} from '../../environments/environment';
 import { GravsearchTemplatesService} from './gravsearch-templates.service';
 import { KnoraJsonldSimplify } from 'knora-jsonld-simplify';
 import { KnoraApiService} from './knora-api.service';
 import { map } from 'rxjs/operators';
+import {AppInitService} from '../app-init.service';
 
 @Injectable({
   providedIn: 'root'
@@ -11,10 +11,12 @@ import { map } from 'rxjs/operators';
 export class GetLexicaService {
 
   constructor(private knoraApi: KnoraApiService,
-              private queryTemplates: GravsearchTemplatesService) { }
+              private queryTemplates: GravsearchTemplatesService,
+              private appInitService: AppInitService
+  ) { }
 
   get_lexica(page: number = 0, start: string) {
-    const query = this.queryTemplates.lexica_query({ontology: environment.ontologyPrefix, page: String(page), start: start});
+    const query = this.queryTemplates.lexica_query({ontology: this.appInitService.getSettings().ontologyPrefix, page: String(page), start: start});
     return this.knoraApi.post('/v2/searchextended', query)
       .pipe(map(jsonobj => {
         const simplifier = new KnoraJsonldSimplify();
@@ -24,7 +26,7 @@ export class GetLexicaService {
 
   get_lexica_count(start: string) {
     const params = {
-      ontology: environment.ontologyPrefix,
+      ontology: this.appInitService.getSettings().ontologyPrefix,
       page: '0',
       start
     };
