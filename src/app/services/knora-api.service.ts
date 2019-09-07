@@ -76,11 +76,11 @@ export class KnoraApiService {
           for (const val of props[name]) {
             const type = val.subtype;
             switch (type) {
-              case 'KnoraTextValue': {
+              case isKnoraTextValue: {
                 strvals[name] = val.strval;
                 break;
               }
-              case 'KnoraListValue': {
+              case isKnoraListValue: {
                 listvals[name] = val as KnoraListValue;
                 break;
               }
