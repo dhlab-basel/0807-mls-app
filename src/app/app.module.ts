@@ -22,7 +22,8 @@ import { MatMenuModule } from '@angular/material';
 import { SparqlPrep } from './classes/sparql-prep';
 import { AindexComponent } from './components/aindex/aindex.component';
 import { LemmaComponent } from './components/lemma/lemma.component';
-import {AppInitService} from './app-init.service';
+import { AppInitService } from './app-init.service';
+import { LexiconComponent } from './components/lexicon/lexicon.component';
 
 export function initializeApp(appInitService: AppInitService) {
   return (): Promise<any> => {
@@ -37,7 +38,8 @@ export function initializeApp(appInitService: AppInitService) {
     HomeComponent,
     LexicaComponent,
     AindexComponent,
-    LemmaComponent
+    LemmaComponent,
+    LexiconComponent
   ],
   imports: [
     BrowserModule,

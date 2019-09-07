@@ -17,7 +17,7 @@ import { ActivatedRoute, Router } from '@angular/router';
             <mat-progress-bar mode="indeterminate" *ngIf="showProgbar"></mat-progress-bar>
             <table mat-table [dataSource]="lexica">
                 <ng-container matColumnDef="lexicon_shortname">
-                    <th mat-header-cell *matHeaderCellDef> Kürzeel </th>
+                    <th mat-header-cell *matHeaderCellDef> Kürzel </th>
                     <td mat-cell *matCellDef="let element"> {{element.lexicon_shortname}} </td>
                 </ng-container>
                 <ng-container matColumnDef="lexicon_citation">
@@ -68,6 +68,18 @@ export class LexicaComponent implements OnInit {
 
   }
 
+  lexiconSelected(event): void {
+    const url = 'lexicon/' + encodeURIComponent(event.lexicon_iri);
+    this.router.navigateByUrl(url).then(e => {
+      if (e) {
+        console.log("Navigation is successful!");
+      } else {
+        console.log("Navigation has failed!");
+      }
+    });
+  }
+
+
   getLexica(): void {
     this.showProgbar = true;
     this.lexica = [];
@@ -75,8 +87,6 @@ export class LexicaComponent implements OnInit {
       .subscribe(n => (this.nLexica = Number(n)));
     this.getLexicaService.get_lexica(this.page, this.startchar)
       .subscribe((data: Array<KnoraResource>) => {
-        console.log("LEXICA.....");
-        console.log(data);
         this.lexica = data.map((x) => {
           const lexiconCitation = x ? x.getValue('mls:hasCitationForm') : undefined;
           const lexiconYear = x ? x.getValue('mls:hasYear') : undefined;
@@ -84,6 +94,7 @@ export class LexicaComponent implements OnInit {
           const lexiconComment = x ? x.getValue('mls:hasLexiconComment') : undefined;
           const lexiconWeblink = x ? x.getValue('mls:hasLexiconWeblink') : undefined;
           const lexiconLibrary = x ? x.getValue('mls:hasLibrary') : undefined;
+          const lexiconIri = x ? x.iri : undefined;
           this.showProgbar = false;
           return {
             lexicon_citation: lexiconCitation ? lexiconCitation.strval : '?',
@@ -92,6 +103,7 @@ export class LexicaComponent implements OnInit {
             lexicon_comment: lexiconComment ? lexiconComment.strval : '?',
             lexicon_weblink: lexiconWeblink ? lexiconWeblink.strval : '?',
             lexicon_library: lexiconLibrary ? lexiconLibrary.strval : '?',
+            lexicon_iri: lexiconIri ? lexiconIri : 'http://NULL'
           };
         });
       });

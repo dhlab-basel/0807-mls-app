@@ -1,11 +1,11 @@
-import {  Component, OnChanges, OnInit, SimpleChanges} from '@angular/core';
+import { Component, OnChanges, OnInit, SimpleChanges} from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { KnoraResource, KnoraValue } from 'knora-jsonld-simplify';
 import { KnoraApiService } from '../../services/knora-api.service';
 import { Observable } from 'rxjs';
 import { GetLemmaService } from '../../services/get-lemma.service';
-import {GetLemmataService} from '../../services/get-lemmata.service';
-import {map, mergeMap, concatMap, take} from 'rxjs/operators';
+import { GetLemmataService} from '../../services/get-lemmata.service';
+import { map, mergeMap, concatMap, take} from 'rxjs/operators';
 
 
 @Component({
@@ -49,7 +49,7 @@ export class LemmaComponent implements OnInit {
     lemmaType: 'Lamma-Typ',
     lemmaSex: 'Geschlecht',
     lemmaRelevanceValue: 'Relevant'
-  }
+  };
 
   constructor(private getLemmaService: GetLemmaService,
               private route: ActivatedRoute,
@@ -66,7 +66,7 @@ export class LemmaComponent implements OnInit {
           }
         }
         this.lemma = tmp;
-        this.lemmaTitle = data.lemma_text;
+        this.lemmaTitle = data.lemmaText;
         console.log(data);
       });
     });
