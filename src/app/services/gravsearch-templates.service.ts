@@ -134,4 +134,43 @@ export class GravsearchTemplatesService {
   `, params);
     return result;
   }
+
+  /**
+   * Query all lexica that are referenced by a given lemma
+   *
+   * @param params ontology, lemma_iri [, lexicon_iri]
+   */
+  lexica_from_lemma_query(params: {[index: string]: string}): string {
+    const result = this.sparqlPrep.compile(`
+    PREFIX knora-api: <http://api.knora.org/ontology/knora-api/simple/v2#>
+    PREFIX mls: <{{ ontology }}/ontology/0807/mls/simple/v2#>
+    CONSTRUCT {
+        ?lexicon knora-api:isMainResource true .
+        ?article mls:hasALinkToLemma ?lemma .
+        ?lemma mls:hasLemmaText ?text .
+        ?article mls:hasALinkToLexicon ?lexicon .
+        ?article mls:hasArticleText ?arttext .
+        ?lexicon mls:hasShortname ?shortname .
+        ?lexicon mls:hasCitationForm ?citation .
+        ?lexicon mls:hasYear ?year.
+    } WHERE {
+        BIND(<{{ lemma_iri }}> AS ?lemma)
+        {{ #if lexicon_iri }}
+        BIND(<{{ lexicon_iri }}> AS ?lexicon)
+        {{ #endif }}
+        ?article a knora-api:Resource .
+        ?article a mls:Article .
+        ?article mls:hasALinkToLemma ?lemma .
+        ?lemma mls:hasLemmaText ?text .
+        ?lexicon a knora-api:Resource .
+        ?lexicon a mls:Lexicon .
+        ?article mls:hasALinkToLexicon ?lexicon .
+        OPTIONAL { ?article mls:hasArticleText ?arttext . }
+        OPTIONAL { ?lexicon mls:hasShortname ?shortname . }
+        OPTIONAL { ?lexicon mls:hasCitationForm ?citation . }
+        OPTIONAL { ?lexicon mls:hasYear ?year . }
+    }
+  `, params);
+    return result;
+  }
 }

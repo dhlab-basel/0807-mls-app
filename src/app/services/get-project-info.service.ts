@@ -15,7 +15,7 @@ export class GetProjectInfoService {
 
   getProjectInfo(shortcode: string): Observable<ProjectInfo> {
     return this.knoraApi.get('/admin/projects/shortcode/' + shortcode)
-      .pipe(map(data => {
+      .pipe(map((data: any) => {
         const jsonConvert: JsonConvert = new JsonConvert();
         jsonConvert.operationMode = OperationMode.LOGGING;
         jsonConvert.ignorePrimitiveChecks = false;

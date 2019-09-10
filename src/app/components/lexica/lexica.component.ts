@@ -3,7 +3,6 @@ import { GravsearchTemplatesService} from '../../services//gravsearch-templates.
 import { KnoraJsonldSimplify, KnoraResource, KnoraValue } from 'knora-jsonld-simplify';
 import { KnoraApiService} from '../../services/knora-api.service';
 import { map } from 'rxjs/operators';
-import { GetLexicaService } from '../../services/get-lexica.service';
 import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
@@ -31,6 +30,14 @@ import { ActivatedRoute, Router } from '@angular/router';
                 <tr mat-header-row *matHeaderRowDef="columnsToDisplay"></tr>
                 <tr mat-row *matRowDef="let row; columns: columnsToDisplay;" (click)="lexiconSelected(row)"></tr>
             </table>
+            
+            <mat-paginator *ngIf="nLexica > 25" [length]="nLexica"
+                           [pageIndex]="page"
+                           [pageSize]="25"
+                           [pageSizeOptions]="[25]"
+                           (page)="pageChanged($event)">
+            </mat-paginator>
+
 
         </mat-card-content>
     </mat-card>
@@ -54,7 +61,7 @@ export class LexicaComponent implements OnInit {
   private showAindex = true;
   private searchterm: string;
 
-  constructor(private getLexicaService: GetLexicaService,
+  constructor(private knoraApiService: KnoraApiService,
               private activatedRoute: ActivatedRoute,
               private elementRef: ElementRef,
               private router: Router) {
@@ -79,13 +86,34 @@ export class LexicaComponent implements OnInit {
     });
   }
 
+  pageChanged(event): void {
+    this.page = event.pageIndex;
+    this.router.navigate(
+      [],
+      {
+        relativeTo: this.activatedRoute,
+        queryParams: {page: this.page},
+        queryParamsHandling: "merge", // remove to replace all query params by provided
+      });
+    this.getLexica();
+  }
+
 
   getLexica(): void {
     this.showProgbar = true;
     this.lexica = [];
-    this.getLexicaService.get_lexica_count(this.startchar)
+
+    const params_cnt = {
+      page: '0',
+      start: this.startchar
+    };
+    this.knoraApiService.gravsearchQueryCount('lexica_query', params_cnt)
       .subscribe(n => (this.nLexica = Number(n)));
-    this.getLexicaService.get_lexica(this.page, this.startchar)
+    const params = {
+      page: String(this.page),
+      start: this.startchar
+    };
+    this.knoraApiService.gravsearchQuery('lexica_query', params)
       .subscribe((data: Array<KnoraResource>) => {
         this.lexica = data.map((x) => {
           const lexiconCitation = x ? x.getValue('mls:hasCitationForm') : undefined;

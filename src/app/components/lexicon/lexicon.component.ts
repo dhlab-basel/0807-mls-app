@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { KnoraApiService } from '../../services/knora-api.service';
-import { GetLexiconService } from '../../services/get-lexicon.service';
 
 @Component({
   selector: 'app-lexicon',
@@ -12,11 +11,13 @@ import { GetLexiconService } from '../../services/get-lexicon.service';
       <table mat-table [dataSource]="lexicon" class="mat-elevation-z8">
           <ng-container matColumnDef="KEY">
               <th mat-header-cell *matHeaderCellDef> Feld </th>
-              <td mat-cell *matCellDef="let element"> {{element.propname}}: </td>
+              <td mat-cell *matCellDef="let element"> {{element.label}}: </td>
           </ng-container>
           <ng-container matColumnDef="VALUE">
               <th mat-header-cell *matHeaderCellDef> Wert </th>
-              <td mat-cell *matCellDef="let element"> {{element.propvalue}} </td>
+              <td mat-cell *matCellDef="let element">
+                  <div *ngFor="let val of element.values">{{ val }}</div>
+              </td>
           </ng-container>
           <tr mat-header-row *matHeaderRowDef="columnsToDisplay"></tr>
           <tr mat-row *matRowDef="let row; columns: columnsToDisplay;" ></tr>
@@ -35,31 +36,34 @@ export class LexiconComponent implements OnInit {
   lexiconTitle: string = '';
 
   labeltable: {[index: string]: string} = {
-    lexiconShortname: 'Name',
-    lexiconCitation: 'Zitierform',
-    lexiconYear: 'Jahr',
-    lexiconComment: 'Kommentar',
-    lexiconWeblink: 'Weblink',
-    lexiconLibrary: 'Bibliothek',
+    'mls:hasShortname': 'Name',
+    'mls:hasCitationForm': 'Zitierform',
+    'mls:hasYear': 'Jahr',
+    'mls:hasLexiconComment': 'Kommentar',
+    'mls:hasLexiconWeblink': 'Weblink',
+    'mls:hasLibrary': 'Bibliothek',
   };
 
-  constructor(private getLexiconService: GetLexiconService,
-              private route: ActivatedRoute,
+  constructor(private route: ActivatedRoute,
               private knoraApiService: KnoraApiService) {}
 
   getLexicon() {
     this.route.params.subscribe(params => {
+      console.log(params.iri)
       this.lexiconIri = params.iri;
-      this.getLexiconService.getLexicon(params.iri).subscribe((data) => {
-        const tmp: Array<{ [index: string]: string }> = [];
-        for (const key in data) {
-          if (data.hasOwnProperty(key)) {
-            tmp.push({propname: this.labeltable[key], propvalue: data[key]});
+      this.knoraApiService.getResource(params.iri, this.labeltable).subscribe((data) => {
+        console.log("---------------------------------->");
+        console.log(data);
+        const lexicondata: Array<{ label: string, values: string }> = [];
+        for (const propname in data) {
+          if (data.hasOwnProperty(propname)) {
+            if (propname === 'mls:hasShortname') {
+              this.lexiconTitle = data[propname].propvalues[0];
+            }
+            lexicondata.push({label: data[propname].proplabel, values: data[propname].propvalues});
           }
         }
-        this.lexicon = tmp;
-        this.lexiconTitle = data.lexiconShortname;
-        console.log(data);
+        this.lexicon = lexicondata;
       });
     });
   }

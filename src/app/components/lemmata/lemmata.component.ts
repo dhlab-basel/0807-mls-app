@@ -1,9 +1,9 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
-import { GetLemmataService } from '../../services/get-lemmata.service';
 import { KnoraResource, KnoraValue } from 'knora-jsonld-simplify';
 import { ActivatedRoute } from '@angular/router';
 import { ElementRef, ViewChild } from '@angular/core';
 import { Router} from '@angular/router';
+import {KnoraApiService} from '../../services/knora-api.service';
 
 @Component({
   selector: 'app-lemmata',
@@ -40,7 +40,7 @@ import { Router} from '@angular/router';
           <tr mat-row *matRowDef="let row; columns: columnsToDisplay;" (click)="lemmaSelected(row)"></tr>
         </table>
 
-        <mat-paginator [length]="nLemmata"
+        <mat-paginator *ngIf="nLemmata > 25" [length]="nLemmata"
                        [pageIndex]="page"
                        [pageSize]="25"
                        [pageSizeOptions]="[25]"
@@ -70,7 +70,7 @@ export class LemmataComponent implements OnInit {
   showAindex: boolean = true;
   searchterm: string;
 
-  constructor(private getLemmataService: GetLemmataService,
+  constructor(private knoraApiService: KnoraApiService,
               private activatedRoute: ActivatedRoute,
               private elementRef: ElementRef,
               private router: Router) {
@@ -127,9 +127,17 @@ export class LemmataComponent implements OnInit {
   getLemmata(): void {
     this.showProgbar = true;
     this.lemmata = [];
-    this.getLemmataService.get_lemmata_count(this.startchar)
+    const params_cnt = {
+      page: '0',
+      start: this.startchar
+    };
+    this.knoraApiService.gravsearchQueryCount('lemmata_query', params_cnt)
       .subscribe(n => (this.nLemmata = Number(n)));
-    this.getLemmataService.get_lemmata(this.page, this.startchar)
+    const params = {
+      page: String(this.page),
+      start: this.startchar
+    };
+    this.knoraApiService.gravsearchQuery('lemmata_query', params)
       .subscribe((data: Array<KnoraResource>) => {
         this.lemmata = data.map((x) => {
           const lemmaText = x ? x.getValue('mls:hasLemmaText') : undefined;
@@ -151,9 +159,20 @@ export class LemmataComponent implements OnInit {
     this.showProgbar = true;
     this.showAindex = false;
     this.lemmata = [];
-    this.getLemmataService.search_lemmata_count(this.searchterm)
+
+    const params_cnt = {
+      page: '0',
+      searchterm: this.searchterm
+    };
+    this.knoraApiService.gravsearchQueryCount('lemmata_search', params_cnt)
       .subscribe(n => (this.nLemmata = Number(n)));
-    this.getLemmataService.search_lemmata(this.page, this.searchterm)
+
+    const params = {
+      page: String(this.page),
+      searchterm: this.searchterm
+    };
+
+    this.knoraApiService.gravsearchQuery('lemmata_search', params)
       .subscribe((data: Array<KnoraResource>) => {
         this.lemmata = data.map((x) => {
           const lemmaText = x ? x.getValue('mls:hasLemmaText') : undefined;

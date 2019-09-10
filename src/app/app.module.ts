@@ -8,7 +8,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { LemmataComponent } from './components/lemmata/lemmata.component';
 import { HomeComponent } from './components/home/home.component';
 import { LexicaComponent } from './components/lexica/lexica.component';
-import { MatButtonToggleModule, MatToolbarModule} from '@angular/material';
+import {MatButtonToggleModule, MatExpansionModule, MatToolbarModule} from '@angular/material';
 import { MatButtonModule } from '@angular/material';
 import { MatIconModule } from '@angular/material';
 import { MatCardModule } from '@angular/material';
@@ -24,6 +24,7 @@ import { AindexComponent } from './components/aindex/aindex.component';
 import { LemmaComponent } from './components/lemma/lemma.component';
 import { AppInitService } from './app-init.service';
 import { LexiconComponent } from './components/lexicon/lexicon.component';
+import { LexFromLemmaComponent } from './components/lex-from-lemma/lex-from-lemma.component';
 
 export function initializeApp(appInitService: AppInitService) {
   return (): Promise<any> => {
@@ -39,7 +40,8 @@ export function initializeApp(appInitService: AppInitService) {
     LexicaComponent,
     AindexComponent,
     LemmaComponent,
-    LexiconComponent
+    LexiconComponent,
+    LexFromLemmaComponent
   ],
   imports: [
     BrowserModule,
@@ -58,6 +60,7 @@ export function initializeApp(appInitService: AppInitService) {
     MatMenuModule,
     MatButtonToggleModule,
     HttpClientModule,
+    MatExpansionModule,
   ],
   providers: [
     AppInitService,
