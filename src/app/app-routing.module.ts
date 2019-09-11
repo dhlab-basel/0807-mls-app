@@ -5,6 +5,7 @@ import { LemmataComponent} from './components/lemmata/lemmata.component';
 import { LemmaComponent} from './components/lemma/lemma.component';
 import { LexicaComponent} from './components/lexica/lexica.component';
 import { LexiconComponent } from './components/lexicon/lexicon.component';
+import { ArticleComponent } from './components/article/article.component';
 
 const routes: Routes = [{
   path: 'home',
@@ -21,6 +22,9 @@ const routes: Routes = [{
 }, {
   path: 'lexicon/:iri',
   component: LexiconComponent
+}, {
+  path: 'article/:iri',
+  component: ArticleComponent
 }, {
   path: '**',
   redirectTo: '/home'

@@ -3,7 +3,7 @@ import { KnoraResource, KnoraValue } from 'knora-jsonld-simplify';
 import { ActivatedRoute } from '@angular/router';
 import { ElementRef, ViewChild } from '@angular/core';
 import { Router} from '@angular/router';
-import {KnoraApiService} from '../../services/knora-api.service';
+import { KnoraApiService } from '../../services/knora-api.service';
 
 @Component({
   selector: 'app-lemmata',

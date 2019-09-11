@@ -58,7 +58,6 @@ export class LexicaComponent implements OnInit {
   private nLexica: number;
   private columnsToDisplay: Array<string> = ['lexicon_shortname', 'lexicon_citation', 'lexicon_year'];
   private showProgbar = false;
-  private showAindex = true;
   private searchterm: string;
 
   constructor(private knoraApiService: KnoraApiService,

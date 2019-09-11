@@ -25,6 +25,7 @@ import { LemmaComponent } from './components/lemma/lemma.component';
 import { AppInitService } from './app-init.service';
 import { LexiconComponent } from './components/lexicon/lexicon.component';
 import { LexFromLemmaComponent } from './components/lex-from-lemma/lex-from-lemma.component';
+import { ArticleComponent } from './components/article/article.component';
 
 export function initializeApp(appInitService: AppInitService) {
   return (): Promise<any> => {
@@ -41,7 +42,8 @@ export function initializeApp(appInitService: AppInitService) {
     AindexComponent,
     LemmaComponent,
     LexiconComponent,
-    LexFromLemmaComponent
+    LexFromLemmaComponent,
+    ArticleComponent
   ],
   imports: [
     BrowserModule,

@@ -79,30 +79,45 @@ export class KnoraApiService {
    */
   getResource(iri: string, labelmap: {[index: string]: string}): Observable<KnoraResource> {
     return this.get('/v2/resources/' + encodeURIComponent(iri)).pipe(mergeMap(jsonobj => {
+      //
+      // let's simplify the JSON-LD...
+      //
       const simple = this.simplifier.simplify(jsonobj).map((res) => {
+        console.log(res);
         const result: {[index: string]: PropVal} = {};
         const obs: Array<Observable<Array<string>>> = [];
+        //
+        // now we loop over all property names
+        //
         for (const pname of res.getPropNames()) {
           const values: Array<string> = [];
           for (let i = 0; i < res.getNValues(pname); i++) {
-            const value: KnoraValue | undefined = res.getValue(pname, i);
-            if (value !== undefined) {
-              switch (value.subtype) {
-                case isKnoraListValue: {
-                  const v = value as KnoraListValue;
-                  obs.push(this.getListNodeLabel(v.nodeIri, values));
-                  break;
-                }
-                default: {
-                  values.push(value.strval);
+            if (res.isValue(pname, i)) { // let's check if we  have a value
+              const value: KnoraValue | undefined = res.getValue(pname, i);
+              if (value !== undefined) {
+                switch (value.subtype) {
+                  case isKnoraListValue: {
+                    const v = value as KnoraListValue;
+                    obs.push(this.getListNodeLabel(v.nodeIri, values));
+                    break;
+                  }
+                  default: {
+                    values.push(value.strval);
+                  }
                 }
               }
+            } else if (res.isResource(pname, i)) {
+              console.log(res.getResource(pname, i));
+            } else {
+              console.log('We should never see this!');
             }
           } // for (let i = 0; i < res.getNValues(pname); i++)
-          if (labelmap.hasOwnProperty(pname)) {
-            result[pname] = {proplabel: labelmap[pname], propvalues: values};
-          } else {
-            result[pname] = {proplabel: pname, propvalues: values};
+          if  (values.length > 0) {
+            if (labelmap.hasOwnProperty(pname)) {
+              result[pname] = {proplabel: labelmap[pname], propvalues: values};
+            } else {
+              result[pname] = {proplabel: pname, propvalues: values};
+            }
           }
         }
         if (obs.length > 0) {
