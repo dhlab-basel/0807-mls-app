@@ -173,4 +173,31 @@ export class GravsearchTemplatesService {
   `, params);
     return result;
   }
+
+  newsitem_search(params: {[index: string]: string}): string {
+    const result = this.sparqlPrep.compile(`
+    PREFIX knora-api: <http://api.knora.org/ontology/knora-api/simple/v2#>
+    PREFIX mls: <http://0.0.0.0:3333/ontology/0807/mls/simple/v2#>
+    CONSTRUCT {
+        ?newsitem knora-api:isMainResource true .
+        ?newsitem mls:hasNewsTitle ?title .
+        ?newsitem knora-api:hasStillImageFileValue ?image .
+        ?newsitem mls:hasNewsText ?text .
+        ?newsitem mls:hasNewsitemLinkToLemma ?lemma .
+        ?newsitem mls:hasNewsitemWeblink ?weblink .
+        ?newsitem mls:hasNewitemActiveDate ?date .
+    } WHERE {
+        ?newsitem a knora-api:Resource .
+        ?newsitem a mls:Newsitem .
+        ?newsitem mls:hasNewsTitle ?title .
+        ?newsitem knora-api:hasStillImageFileValue ?image .
+        ?newsitem mls:hasNewsText ?text .
+        ?newsitem mls:hasNewitemActiveDate ?date .
+        FILTER(?date = "{{ today }}"^^knora-api:Date) .
+        OPTIONAL { ?newsitem mls:hasNewsitemLinkToLemma ?lemma . }
+        OPTIONAL { ?newsitem mls:hasNewsitemWeblink ?weblink .}
+    } ORDER BY ?date
+    `, params);
+    return result;
+  }
 }

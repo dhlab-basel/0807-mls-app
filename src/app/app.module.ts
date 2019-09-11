@@ -8,7 +8,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { LemmataComponent } from './components/lemmata/lemmata.component';
 import { HomeComponent } from './components/home/home.component';
 import { LexicaComponent } from './components/lexica/lexica.component';
-import {MatButtonToggleModule, MatExpansionModule, MatToolbarModule} from '@angular/material';
+import {MatButtonToggleModule, MatExpansionModule, MatGridListModule, MatToolbarModule} from '@angular/material';
 import { MatButtonModule } from '@angular/material';
 import { MatIconModule } from '@angular/material';
 import { MatCardModule } from '@angular/material';
@@ -28,6 +28,9 @@ import { LexFromLemmaComponent } from './components/lex-from-lemma/lex-from-lemm
 import { ArticleComponent } from './components/article/article.component';
 import { InfoComponent } from './components/info/info.component';
 import { BackButtonDirective } from './directives/back-button.directive';
+import { AboutComponent } from './components/about/about.component';
+import { NewsItemsComponent } from './components/news-items/news-items.component';
+import { DatePipe } from '@angular/common';
 
 export function initializeApp(appInitService: AppInitService) {
   return (): Promise<any> => {
@@ -47,7 +50,9 @@ export function initializeApp(appInitService: AppInitService) {
     LexFromLemmaComponent,
     ArticleComponent,
     InfoComponent,
-    BackButtonDirective
+    BackButtonDirective,
+    AboutComponent,
+    NewsItemsComponent
   ],
   imports: [
     BrowserModule,
@@ -67,13 +72,16 @@ export function initializeApp(appInitService: AppInitService) {
     MatButtonToggleModule,
     HttpClientModule,
     MatExpansionModule,
+    MatGridListModule,
+    MatGridListModule,
   ],
   providers: [
     AppInitService,
     {
       provide: APP_INITIALIZER, useFactory: initializeApp, deps: [AppInitService], multi: true
     },
-    SparqlPrep
+    SparqlPrep,
+    DatePipe
   ],
   bootstrap: [AppComponent]
 })

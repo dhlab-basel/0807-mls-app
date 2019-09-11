@@ -24,6 +24,9 @@ import {Router} from '@angular/router';
           </form>
       </mat-card-actions>
     </mat-card>
+    <mat-card>
+        <app-news-items></app-news-items>
+    </mat-card>
   `,
   styles: [
     '.bgimg {background: url("../assets/mls-title-bg-img.jpg"); background-repeat: no-repeat; background-size: cover; background-position: center;}',

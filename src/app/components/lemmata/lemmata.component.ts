@@ -9,9 +9,9 @@ import { KnoraApiService } from '../../services/knora-api.service';
   selector: 'app-lemmata',
   template: `
     <mat-card *ngIf="lexicon_iri">
-        <mat-card-title>
+        
             <app-lexicon [lexiconIri]="lexicon_iri"></app-lexicon>
-        </mat-card-title>
+        
     </mat-card>
     <mat-card>
       <mat-card-title>
@@ -79,7 +79,7 @@ export class LemmataComponent implements OnInit {
   showProgbar: boolean = false;
   showAindex: boolean = true;
   searchterm: string;
-  lexicon_iri: string ='';
+  lexicon_iri?: string;
 
   constructor(private knoraApiService: KnoraApiService,
               private activatedRoute: ActivatedRoute,
@@ -119,7 +119,7 @@ export class LemmataComponent implements OnInit {
         queryParams: {page: this.page},
         queryParamsHandling: "merge", // remove to replace all query params by provided
       });
-    if (this.searchterm === '' && this.lexicon_iri === '') {
+    if (this.searchterm === '' && this.lexicon_iri === undefined) {
       this.getLemmata();
     } else {
       this.searchLemmata();
@@ -177,7 +177,7 @@ export class LemmataComponent implements OnInit {
       page: '0',
       searchterm: this.searchterm
     };
-    if (this.lexicon_iri !== '') {
+    if (this.lexicon_iri !== undefined) {
       paramsCnt.lexicon_iri = this.lexicon_iri;
     }
     console.log(paramsCnt);
@@ -188,7 +188,7 @@ export class LemmataComponent implements OnInit {
       page: String(this.page),
       searchterm: this.searchterm
     };
-    if (this.lexicon_iri !== '') {
+    if (this.lexicon_iri !== undefined) {
       params.lexicon_iri = this.lexicon_iri;
     }
     console.log(params);
@@ -235,7 +235,7 @@ export class LemmataComponent implements OnInit {
         this.page = Number(params.hasOwnProperty('startchar'));
         console.log('PAGE: ' + this.page); // Print the parameter to the console.
       }
-      if (this.searchterm !== '' || this.lexicon_iri !=='') {
+      if (this.searchterm !== '' || this.lexicon_iri !== undefined) {
         this.page = 0;
         this.searchLemmata();
       } else {
