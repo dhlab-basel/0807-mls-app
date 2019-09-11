@@ -8,6 +8,11 @@ import { KnoraApiService } from '../../services/knora-api.service';
 @Component({
   selector: 'app-lemmata',
   template: `
+    <mat-card *ngIf="lexicon_iri">
+        <mat-card-title>
+            <app-lexicon [lexiconIri]="lexicon_iri"></app-lexicon>
+        </mat-card-title>
+    </mat-card>
     <mat-card>
       <mat-card-title>
         Lemmata
@@ -49,7 +54,7 @@ import { KnoraApiService } from '../../services/knora-api.service';
                        [pageIndex]="page"
                        [pageSize]="25"
                        [pageSizeOptions]="[25]"
-                       (page)="pageChanged($event)">
+                       (page)="pageChanged($event)" showFirstLastButtons>
         </mat-paginator>
 
       </mat-card-content>
@@ -71,9 +76,10 @@ export class LemmataComponent implements OnInit {
   page: number;
   nLemmata: number;
   columnsToDisplay: Array<string> = ['lemma_text', 'lemma_start', 'lemma_end'];
-  showProgbar:boolean = false;
+  showProgbar: boolean = false;
   showAindex: boolean = true;
   searchterm: string;
+  lexicon_iri: string ='';
 
   constructor(private knoraApiService: KnoraApiService,
               private activatedRoute: ActivatedRoute,
@@ -84,7 +90,9 @@ export class LemmataComponent implements OnInit {
     this.searchterm = '';
     this.activatedRoute.queryParams.subscribe(params => {
       this.startchar = params.hasOwnProperty('startchar') ? params.startchar : 'A';
-      console.log(this.startchar); // Print the parameter to the console.
+      console.log('STARTCHAR=' + this.startchar); // Print the parameter to the console.
+      this.lexicon_iri = params.hasOwnProperty('lexicon_iri') ? params.lexicon_iri : undefined;
+      console.log('LEXICON_IRI=' + this.lexicon_iri);
     });
   }
 
@@ -111,7 +119,7 @@ export class LemmataComponent implements OnInit {
         queryParams: {page: this.page},
         queryParamsHandling: "merge", // remove to replace all query params by provided
       });
-    if (this.searchterm === '') {
+    if (this.searchterm === '' && this.lexicon_iri === '') {
       this.getLemmata();
     } else {
       this.searchLemmata();
@@ -132,11 +140,11 @@ export class LemmataComponent implements OnInit {
   getLemmata(): void {
     this.showProgbar = true;
     this.lemmata = [];
-    const params_cnt = {
+    const paramsCnt = {
       page: '0',
       start: this.startchar
     };
-    this.knoraApiService.gravsearchQueryCount('lemmata_query', params_cnt)
+    this.knoraApiService.gravsearchQueryCount('lemmata_query', paramsCnt)
       .subscribe(n => (this.nLemmata = Number(n)));
     const params = {
       page: String(this.page),
@@ -165,18 +173,25 @@ export class LemmataComponent implements OnInit {
     this.showAindex = false;
     this.lemmata = [];
 
-    const params_cnt = {
+    const paramsCnt: {[index: string]: string} = {
       page: '0',
       searchterm: this.searchterm
     };
-    this.knoraApiService.gravsearchQueryCount('lemmata_search', params_cnt)
+    if (this.lexicon_iri !== '') {
+      paramsCnt.lexicon_iri = this.lexicon_iri;
+    }
+    console.log(paramsCnt);
+    this.knoraApiService.gravsearchQueryCount('lemmata_search', paramsCnt)
       .subscribe(n => (this.nLemmata = Number(n)));
 
-    const params = {
+    const params: {[index: string]: string} = {
       page: String(this.page),
       searchterm: this.searchterm
     };
-
+    if (this.lexicon_iri !== '') {
+      params.lexicon_iri = this.lexicon_iri;
+    }
+    console.log(params);
     this.knoraApiService.gravsearchQuery('lemmata_search', params)
       .subscribe((data: Array<KnoraResource>) => {
         this.lemmata = data.map((x) => {
@@ -220,7 +235,7 @@ export class LemmataComponent implements OnInit {
         this.page = Number(params.hasOwnProperty('startchar'));
         console.log('PAGE: ' + this.page); // Print the parameter to the console.
       }
-      if (this.searchterm !== '') {
+      if (this.searchterm !== '' || this.lexicon_iri !=='') {
         this.page = 0;
         this.searchLemmata();
       } else {

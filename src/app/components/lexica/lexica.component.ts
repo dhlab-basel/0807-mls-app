@@ -75,8 +75,10 @@ export class LexicaComponent implements OnInit {
   }
 
   lexiconSelected(event): void {
-    const url = 'lexicon/' + encodeURIComponent(event.lexicon_iri);
-    this.router.navigateByUrl(url).then(e => {
+    const url = '/lemmata' + encodeURIComponent(event.lexicon_iri);
+    this.router.navigate(['/lemmata'], {
+      queryParams: {lexicon_iri: event.lexicon_iri}
+    }).then(e => {
       if (e) {
         console.log("Navigation is successful!");
       } else {

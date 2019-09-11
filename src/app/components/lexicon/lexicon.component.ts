@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, Input, OnInit} from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { KnoraApiService } from '../../services/knora-api.service';
 
@@ -30,7 +30,9 @@ import { KnoraApiService } from '../../services/knora-api.service';
   ]
 })
 export class LexiconComponent implements OnInit {
+  @Input()
   lexiconIri: string;
+
   lexicon: Array<{[index: string]: string}> = [];
   columnsToDisplay: Array<string> = ['KEY', 'VALUE'];
   lexiconTitle: string = '';
@@ -49,9 +51,11 @@ export class LexiconComponent implements OnInit {
 
   getLexicon() {
     this.route.params.subscribe(params => {
-      console.log(params.iri)
-      this.lexiconIri = params.iri;
-      this.knoraApiService.getResource(params.iri, this.labeltable).subscribe((data) => {
+      if  (params.hasOwnProperty('iri')) {
+        console.log(params.iri);
+        this.lexiconIri = params.iri;
+      }
+      this.knoraApiService.getResource(this.lexiconIri, this.labeltable).subscribe((data) => {
         console.log("---------------------------------->");
         console.log(data);
         const lexicondata: Array<{ label: string, values: string }> = [];
