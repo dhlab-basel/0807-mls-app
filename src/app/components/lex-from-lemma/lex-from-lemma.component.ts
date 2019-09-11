@@ -7,9 +7,6 @@ import { Router} from '@angular/router';
 @Component({
   selector: 'app-lex-from-lemma',
   template: `
-    <p>
-      lex-from-lemma works! {{ lemmaIri }}
-    </p>
     <table mat-table [dataSource]="lexica">
         <ng-container matColumnDef="lexicon_shortname">
             <th mat-header-cell *matHeaderCellDef> Kürzel </th>

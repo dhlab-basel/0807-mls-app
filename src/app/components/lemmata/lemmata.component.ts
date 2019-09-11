@@ -13,9 +13,14 @@ import { KnoraApiService } from '../../services/knora-api.service';
         Lemmata
       </mat-card-title>
       <mat-card-content>
-        <form (submit)="searchEvent($event)">
+        <form (submit)="searchEvent($event)" (keyup.enter)="searchEvent($event)">
           <mat-form-field>
-            <input #searchField name="searchterm" [value]="searchterm" matInput type="search" placeholder="Suchbegriff für Lemma" />
+            <input #searchField
+                   name="searchterm"
+                   [value]="searchterm"
+                   matInput
+                   type="search"
+                   placeholder="Suchbegriff für Lemma" />
             <mat-icon matSuffix class="clickable" (click)="searchEvent($event)">search</mat-icon>
             <mat-icon matSuffix class="clickable" (click)="searchCancel($event)">cancel</mat-icon>
             <mat-hint>Suche in Lemma, Pseudonyms etc.</mat-hint>
@@ -204,7 +209,24 @@ export class LemmataComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.getLemmata();
+    this.activatedRoute.queryParams.subscribe(params => {
+      if (params.hasOwnProperty('searchterm')) {
+        this.searchterm = params.searchterm;
+        console.log('SEARCHTERM: ' + params.searchterm); // Print the parameter to the console.
+      } else if (params.hasOwnProperty('startchar')) {
+        this.startchar = params.hasOwnProperty('startchar') ? params.startchar : 'A';
+        console.log('STARTCHAR: ' + this.startchar); // Print the parameter to the console.
+      } else if (params.hasOwnProperty('page')) {
+        this.page = Number(params.hasOwnProperty('startchar'));
+        console.log('PAGE: ' + this.page); // Print the parameter to the console.
+      }
+      if (this.searchterm !== '') {
+        this.page = 0;
+        this.searchLemmata();
+      } else {
+        this.getLemmata();
+      }
+    });
   }
 
 }

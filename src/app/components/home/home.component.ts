@@ -1,57 +1,67 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
 import { ProjectInfo } from '../../classes/project-info';
 import { GetProjectInfoService} from '../../services/get-project-info.service';
+import {Router} from '@angular/router';
 
 @Component({
   selector: 'app-home',
   providers:  [ GetProjectInfoService ],
   template: `
-    <mat-card>
-      <mat-card-title>
-       <!-- {{ projectInfo['longname'] }} -->
-      </mat-card-title>
-      <mat-card-content>
-        <h3>Beschreibung</h3>
-        <p><!-- {{ projectInfo['description']['de'] }}--></p>
-      </mat-card-content>
-      <mat-divider></mat-divider>
-      <mat-card-actions style="text-align: center;">
-        <a mat-button routerLink="/lemmata">Lemmata</a>
-        <a mat-button routerLink="/lexica">Lexika</a>
+    <mat-card class="bgimg gaga">
+      <mat-card-actions style="text-align: center;" class="gugus">
+          <form (submit)="searchEvent($event)" (keyup.enter)="searchEvent($event)">
+              <mat-form-field>
+                  <input #searchField
+                         name="searchterm"
+                         [value]="searchterm"
+                         matInput
+                         type="search"
+                         placeholder="Suchbegriff für Lemma" />
+                  <mat-icon matSuffix class="clickable" (click)="searchEvent($event)">search</mat-icon>
+                  <mat-icon matSuffix class="clickable" (click)="searchCancel($event)">cancel</mat-icon>
+                  <mat-hint>Suche in Lemma, Pseudonyms etc.</mat-hint>
+              </mat-form-field>
+          </form>
       </mat-card-actions>
     </mat-card>
   `,
-  styles: []
+  styles: [
+    '.bgimg {background: url("../assets/mls-title-bg-img.jpg"); background-repeat: no-repeat; background-size: cover; background-position: center;}',
+    '.gaga {min-height: max-content;}',
+    '.gugus {min-height: 400px;}'
+  ]
 })
 
 export class HomeComponent implements OnInit {
-  projectInfo: ProjectInfo;
+  @ViewChild('searchField', {static: false})
+  private searchField: ElementRef;
 
-  constructor(private pinfoService: GetProjectInfoService) {
-    this.projectInfo = new ProjectInfo();
+  searchterm: string = '';
+
+  constructor(private router: Router) {
   }
 
-  getProjectInfo(shortcode: string): void {
-    this.pinfoService.getProjectInfo(shortcode)
-      .subscribe((data: ProjectInfo) => {
-        if (data === undefined) {
-          this.projectInfo = {
-            longname: 'unknown',
-            shortname: 'unknonm',
-            shortcode: '0000',
-            iri: 'http://null.org',
-            description: {
-              de: 'unknown'
-            }
-          };
-        } else {
-          this.projectInfo = data;
-        }
-      });
+  searchEvent(event): boolean {
+    this.searchterm = this.searchField.nativeElement.value;
+    this.router.navigate(['/lemmata'], {
+      queryParams: {
+        searchterm: this.searchField.nativeElement.value
+      }
+    });
+    //this.page = 0;
+    //this.searchLemmata();
+    return false;
   }
+
+  searchCancel(event): void {
+    this.searchterm = '';
+    //this.showAindex = true;
+    //this.getLemmata();
+  }
+
+
 
   ngOnInit() {
-    this.getProjectInfo('0807');
   }
 
 }

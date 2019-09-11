@@ -19,9 +19,9 @@ import {KnoraApiService} from '../../services/knora-api.service';
             <tr *ngIf="article.fonotecacode"><td>Fonoteca</td><td>:</td><td>{{ article.fonotecacode }}</td></tr>
             <tr *ngIf="article.hlscode"><td>HLS</td><td>:</td><td>{{ article.hlscode }}</td></tr>
             <tr *ngIf="article.oemlcode"><td>OEML</td><td>:</td><td>{{ article.oemlcode }}</td></tr>
-            <tr *ngIf="article.theaterlexcode"><td>Theaterlexikon</td><td>:</td><td>{{ article.theaterlexcode }}</td></tr>
+            <tr *ngIf="article.theaterlexcode"><td>Theaterlexikon</td><td>:</td><td><a href="{{ 'http://tls.theaterwissenschaft.ch/wiki/' + article.theaterlexcode }}">{{ article.theaterlexcode }}</a></td></tr>
             <tr *ngIf="article.ticinolexcode"><td>Ticino Lexikon</td><td>:</td><td>{{ article.ticinolexcode }}</td></tr>
-            <tr *ngIf="article.weblink"><td>Weblink</td><td>:</td><td><a href="article.weblink" target="_blank">{{ article.weblink }}</a></td></tr>
+            <tr *ngIf="article.weblink"><td>Weblink</td><td>:</td><td><a href="{{article.weblink}}" target="_blank">{{ article.weblink }}</a></td></tr>
         </table>
 
     </mat-card>
@@ -43,7 +43,9 @@ export class ArticleComponent implements OnInit {
     this.route.params.subscribe(params => {
       this.articleIri = params.iri;
       this.knoraApiService.getResource(params.iri, {}).subscribe((data) => {
+        console.log('BEGIN ARTICLE DATA');
         console.log(data);
+        console.log('END ARTICLE DATA');
         const articledata: {[index: string]: string} = {};
         for (const propname in data) {
           if (data.hasOwnProperty(propname)) {
