@@ -9,9 +9,7 @@ import { KnoraApiService } from '../../services/knora-api.service';
   selector: 'app-lemmata',
   template: `
     <mat-card *ngIf="lexicon_iri">
-        
-            <app-lexicon [lexiconIri]="lexicon_iri"></app-lexicon>
-        
+        <app-lexicon [lexiconIri]="lexicon_iri"></app-lexicon>
     </mat-card>
     <mat-card>
       <mat-card-title>

@@ -56,8 +56,6 @@ export class LexiconComponent implements OnInit {
         this.lexiconIri = params.iri;
       }
       this.knoraApiService.getResource(this.lexiconIri, this.labeltable).subscribe((data) => {
-        console.log("---------------------------------->");
-        console.log(data);
         const lexicondata: Array<{ label: string, values: string }> = [];
         for (const propname in data) {
           if (data.hasOwnProperty(propname)) {
