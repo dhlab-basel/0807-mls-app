@@ -1,5 +1,7 @@
+import { Injectable } from "@angular/core";
 enum Status { COPY, INWATCH, OUTWATCH, INSIDE }
 
+@Injectable()
 export class SparqlPrep {
 
   constructor() { }
