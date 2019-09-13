@@ -36,8 +36,8 @@ export class LexFromLemmaComponent implements OnInit {
   lexiconIri: string;
   @Input()
   lemmaIri: string;
-  private lexica: Array<{[index: string]: string}> = [];
-  private columnsToDisplay: Array<string> = ['lexicon_shortname', 'lexicon_citation', 'lexicon_year'];
+  lexica: Array<{[index: string]: string}> = [];
+  columnsToDisplay: Array<string> = ['lexicon_shortname', 'lexicon_citation', 'lexicon_year'];
 
   constructor(private route: ActivatedRoute,
               private knoraApiService: KnoraApiService,

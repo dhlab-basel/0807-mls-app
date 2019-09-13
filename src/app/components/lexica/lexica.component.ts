@@ -50,15 +50,15 @@ import { ActivatedRoute, Router } from '@angular/router';
 })
 export class LexicaComponent implements OnInit {
   @ViewChild('searchField', {static: false})
-  private searchField: ElementRef;
+  searchField: ElementRef;
 
-  private lexica: Array<{[index: string]: string}> = [];
-  private startchar: string;
-  private page: number;
-  private nLexica: number;
-  private columnsToDisplay: Array<string> = ['lexicon_shortname', 'lexicon_citation', 'lexicon_year'];
-  private showProgbar = false;
-  private searchterm: string;
+  lexica: Array<{[index: string]: string}> = [];
+  startchar: string;
+  page: number;
+  nLexica: number;
+  columnsToDisplay: Array<string> = ['lexicon_shortname', 'lexicon_citation', 'lexicon_year'];
+  showProgbar = false;
+  searchterm: string;
 
   constructor(private knoraApiService: KnoraApiService,
               private activatedRoute: ActivatedRoute,
