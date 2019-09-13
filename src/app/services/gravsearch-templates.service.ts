@@ -177,7 +177,7 @@ export class GravsearchTemplatesService {
   newsitem_search(params: {[index: string]: string}): string {
     const result = this.sparqlPrep.compile(`
     PREFIX knora-api: <http://api.knora.org/ontology/knora-api/simple/v2#>
-    PREFIX mls: <http://0.0.0.0:3333/ontology/0807/mls/simple/v2#>
+    PREFIX mls: <{{ ontology }}/ontology/0807/mls/simple/v2#>
     CONSTRUCT {
         ?newsitem knora-api:isMainResource true .
         ?newsitem mls:hasNewsTitle ?title .
