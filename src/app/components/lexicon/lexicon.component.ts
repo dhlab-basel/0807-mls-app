@@ -1,6 +1,6 @@
 import {Component, Input, OnInit} from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { KnoraApiService } from '../../services/knora-api.service';
+import {KnoraService, ResourceData} from "../../services/knora.service";
 
 @Component({
   selector: 'app-lexicon',
@@ -8,7 +8,7 @@ import { KnoraApiService } from '../../services/knora-api.service';
       <h2>
           {{ lexiconTitle }}
       </h2>
-      <table mat-table [dataSource]="lexicon" class="mat-elevation-z8">
+      <table mat-table [dataSource]="lexicon.properties" class="mat-elevation-z8">
           <ng-container matColumnDef="KEY">
               <th mat-header-cell *matHeaderCellDef> Feld </th>
               <td mat-cell *matCellDef="let element"> {{element.label}}: </td>
@@ -33,21 +33,14 @@ export class LexiconComponent implements OnInit {
   @Input()
   lexiconIri: string;
 
-  lexicon: Array<{[index: string]: string}> = [];
+  //lexicon: Array<{[index: string]: string}> = [];
+  lexicon: ResourceData;
   columnsToDisplay: Array<string> = ['KEY', 'VALUE'];
   lexiconTitle: string = '';
 
-  labeltable: {[index: string]: string} = {
-    'mls:hasShortname': 'Name',
-    'mls:hasCitationForm': 'Zitierform',
-    'mls:hasYear': 'Jahr',
-    'mls:hasLexiconComment': 'Kommentar',
-    'mls:hasLexiconWeblink': 'Weblink',
-    'mls:hasLibrary': 'Bibliothek',
-  };
 
   constructor(private route: ActivatedRoute,
-              private knoraApiService: KnoraApiService) {}
+              private knoraService: KnoraService) {}
 
   getLexicon() {
     this.route.params.subscribe(params => {
@@ -55,17 +48,13 @@ export class LexiconComponent implements OnInit {
         console.log(params.iri);
         this.lexiconIri = params.iri;
       }
-      this.knoraApiService.getResource(this.lexiconIri, this.labeltable).subscribe((data) => {
-        const lexicondata: Array<{ label: string, values: string }> = [];
-        for (const propname in data) {
-          if (data.hasOwnProperty(propname)) {
-            if (propname === 'mls:hasShortname') {
-              this.lexiconTitle = data[propname].propvalues[0];
-            }
-            lexicondata.push({label: data[propname].proplabel, values: data[propname].propvalues});
+      this.knoraService.getResource(this.lexiconIri).subscribe(data => {
+        this.lexicon = data;
+        for (const ele of data.properties) {
+          if (ele.label === 'Kürzel') {
+            this.lexiconTitle = ele.values[0];
           }
         }
-        this.lexicon = lexicondata;
       });
     });
   }

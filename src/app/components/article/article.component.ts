@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
-import {KnoraApiService} from '../../services/knora-api.service';
+import {KnoraService} from "../../services/knora.service";
 
 @Component({
   selector: 'app-article',
@@ -31,49 +31,42 @@ import {KnoraApiService} from '../../services/knora-api.service';
 export class ArticleComponent implements OnInit {
   articleIri: string;
   article: {[index: string]: string} = {};
-  articleTitle: string = '';
-  columnsToDisplay: Array<string> = ['KEY', 'VALUE'];
 
   constructor(private route: ActivatedRoute,
-              private knoraApiService: KnoraApiService) {
+              private knoraService: KnoraService) {
 
   }
 
   getArticle() {
     this.route.params.subscribe(params => {
       this.articleIri = params.iri;
-      this.knoraApiService.getResource(params.iri, {}).subscribe((data) => {
-        console.log('BEGIN ARTICLE DATA');
-        console.log(data);
-        console.log('END ARTICLE DATA');
+      this.knoraService.getResource(this.articleIri).subscribe((data) => {
         const articledata: {[index: string]: string} = {};
-        for (const propname in data) {
-          if (data.hasOwnProperty(propname)) {
-            switch (propname) {
-              case 'mls:hasArticleText': {
-                articledata.arttext = data[propname].propvalues[0].replace(/\\n/g, '<br />');
-                break;
-              }
-              case 'mls:hasPages': {
-                articledata.npages = data[propname].propvalues[0];
-                break;
-              }
-              case 'mls:hasFonotecacode': {
-                articledata.fonotecacode = data[propname].propvalues[0];
-                break;
-              }
-              case 'mls:hasHlsCcode': {
-                articledata.hlscode = data[propname].propvalues[0];
-                break;
-              }
-              case 'mls:hasTheaterLexCode': {
-                articledata.theaterlexcode = data[propname].propvalues[0];
-                break;
-              }
-              case 'mls:hasWebLink': {
-                articledata.weblink = data[propname].propvalues[0];
-                break;
-              }
+        for (const ele of data.properties) {
+          switch (ele.propname) {
+            case this.knoraService.mlsOntology + 'hasArticleText': {
+              articledata.arttext = ele.values[0].replace(/\\n/g, '<br />');
+              break;
+            }
+            case this.knoraService.mlsOntology + 'hasPages': {
+              articledata.npages = ele.values[0];
+              break;
+            }
+            case this.knoraService.mlsOntology + 'hasFonotecacode': {
+              articledata.fonotecacode = ele.values[0];
+              break;
+            }
+            case this.knoraService.mlsOntology + 'hasHlsCcode': {
+              articledata.hlscode = ele.values[0];
+              break;
+            }
+            case this.knoraService.mlsOntology + 'hasTheaterLexCode': {
+              articledata.theaterlexcode = ele.values[0];
+              break;
+            }
+            case this.knoraService.mlsOntology + 'hasWebLink': {
+              articledata.weblink = ele.values[0];
+              break;
             }
           }
         }

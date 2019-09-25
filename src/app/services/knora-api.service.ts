@@ -4,8 +4,8 @@ import { KnoraJsonldSimplify, KnoraResource, KnoraValue, KnoraListValue  } from 
 import { map, mergeMap } from 'rxjs/operators';
 import { Observable, forkJoin, EMPTY, of } from 'rxjs';
 import { AppInitService } from '../app-init.service';
-import {isKnoraListValue} from 'knora-jsonld-simplify/dist/src';
-import {GravsearchTemplatesService} from './gravsearch-templates.service';
+import { isKnoraListValue } from 'knora-jsonld-simplify/dist/src';
+import { GravsearchTemplatesService } from './gravsearch-templates.service';
 
 export interface PropVal {
   proplabel: string;

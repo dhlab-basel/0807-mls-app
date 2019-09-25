@@ -1,11 +1,9 @@
 import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
-import { ProjectInfo } from '../../classes/project-info';
-import { GetProjectInfoService} from '../../services/get-project-info.service';
 import {Router} from '@angular/router';
 
 @Component({
   selector: 'app-home',
-  providers:  [ GetProjectInfoService ],
+  providers:  [],
   template: `
     <mat-card class="bgimg gaga">
       <mat-card-actions style="text-align: center;" class="gugus">
@@ -51,18 +49,12 @@ export class HomeComponent implements OnInit {
         searchterm: this.searchField.nativeElement.value
       }
     });
-    //this.page = 0;
-    //this.searchLemmata();
-    return false;
+   return false;
   }
 
   searchCancel(event): void {
     this.searchterm = '';
-    //this.showAindex = true;
-    //this.getLemmata();
   }
-
-
 
   ngOnInit() {
   }

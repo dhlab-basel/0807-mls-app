@@ -3,6 +3,9 @@ import { Injectable } from '@angular/core';
 export interface IAppConfig {
   server: string;
   ontologyPrefix: string;
+  protocol: string;
+  servername: string;
+  port: number;
 }
 
 @Injectable()

@@ -865,6 +865,14 @@
     lodash "^4.17.13"
     to-fast-properties "^2.0.0"
 
+"@knora/api@file:.yalc/@knora/api":
+  version "0.0.1-b4640e80"
+  dependencies:
+    "@types/jsonld" "^1.5.0"
+    json2typescript "^1.2.0"
+    jsonld "^1.6.2"
+    rxjs "^6.4.0"
+
 "@ngtools/webpack@8.3.4":
   version "8.3.4"
   resolved "https://registry.yarnpkg.com/@ngtools/webpack/-/webpack-8.3.4.tgz#c4cf9a077eecec76cb1a9004fb7f0feade3d43db"
@@ -928,6 +936,11 @@
   version "0.0.29"
   resolved "https://registry.yarnpkg.com/@types/json5/-/json5-0.0.29.tgz#ee28707ae94e11d2b827bcbe5270bcea7f3e71ee"
   integrity sha1-7ihweulOEdK4J7y+UnC86n8+ce4=
+
+"@types/jsonld@^1.5.0":
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/@types/jsonld/-/jsonld-1.5.0.tgz#cd5cb660dcbeffd391290f820efebab571af65d9"
+  integrity sha512-EG2N8JLQ1xDfO6Z/1QRdiUcYX3428CqVRqmY7LyK5or5J1RQ16dpKH6qQ4umVD0vBHU47xHlMeyMbQ6o+6tiYg==
 
 "@types/minimatch@*":
   version "3.0.3"
@@ -4490,7 +4503,7 @@ json-stringify-safe@~5.0.1:
   resolved "https://registry.yarnpkg.com/json-stringify-safe/-/json-stringify-safe-5.0.1.tgz#1296a2d58fd45f19a0f6ce01d65701e2c735b6eb"
   integrity sha1-Epai1Y/UXxmg9s4B1lcB4sc1tus=
 
-json2typescript@^1.2.3:
+json2typescript@^1.2.0, json2typescript@^1.2.3:
   version "1.2.3"
   resolved "https://registry.yarnpkg.com/json2typescript/-/json2typescript-1.2.3.tgz#f6760f41fc6f606af5ea309368755518b32d353f"
   integrity sha512-XJzQXMXJgRgCSmz2nYzeUBCIq/+feVtOnLzwAOMplXgGFqsXVnOwL5IEjYKkbx2sjyRuMRIfY76elUVv7P6NsQ==
@@ -4521,7 +4534,7 @@ jsonfile@^4.0.0:
   optionalDependencies:
     graceful-fs "^4.1.6"
 
-jsonld@^1.7.0:
+jsonld@^1.6.2, jsonld@^1.7.0:
   version "1.8.0"
   resolved "https://registry.yarnpkg.com/jsonld/-/jsonld-1.8.0.tgz#02960df11483a35c0c2d8d72ce13ff3d0bc2a324"
   integrity sha512-a3bwbR0wqFstxKsGoimUIIKBdfJ+yb9kWK+WK7MpVyvfYtITMpUtF3sNoN1wG/W+jGDgya0ACRh++jtTozxtyQ==

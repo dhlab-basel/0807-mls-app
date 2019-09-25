@@ -1,9 +1,8 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
-import { KnoraResource, KnoraValue } from 'knora-jsonld-simplify';
 import { ActivatedRoute } from '@angular/router';
 import { ElementRef, ViewChild } from '@angular/core';
 import { Router} from '@angular/router';
-import { KnoraApiService } from '../../services/knora-api.service';
+import {KnoraService} from "../../services/knora.service";
 
 @Component({
   selector: 'app-lemmata',
@@ -34,15 +33,15 @@ import { KnoraApiService } from '../../services/knora-api.service';
         <table mat-table [dataSource]="lemmata">
           <ng-container matColumnDef="lemma_text">
             <th mat-header-cell *matHeaderCellDef> Lemma </th>
-            <td mat-cell *matCellDef="let element"> {{element.lemma_text}} </td>
+            <td mat-cell *matCellDef="let element"> {{element[1]}} </td>
           </ng-container>
           <ng-container matColumnDef="lemma_start">
             <th mat-header-cell *matHeaderCellDef> Start </th>
-            <td mat-cell *matCellDef="let element"> {{element.lemma_start}} </td>
+            <td mat-cell *matCellDef="let element"> {{element[2]}} </td>
           </ng-container>
           <ng-container matColumnDef="lemma_end">
             <th mat-header-cell *matHeaderCellDef> End </th>
-            <td mat-cell *matCellDef="let element"> {{element.lemma_end}} </td>
+            <td mat-cell *matCellDef="let element"> {{element[3]}} </td>
           </ng-container>
           <tr mat-header-row *matHeaderRowDef="columnsToDisplay"></tr>
           <tr mat-row *matRowDef="let row; columns: columnsToDisplay;" (click)="lemmaSelected(row)"></tr>
@@ -69,7 +68,7 @@ export class LemmataComponent implements OnInit {
   @ViewChild('searchField', {static: false})
   private searchField: ElementRef;
 
-  lemmata: Array<{[index: string]: string}> = [];
+  lemmata: Array<Array<string>> = [];
   startchar: string;
   page: number;
   nLemmata: number;
@@ -79,7 +78,7 @@ export class LemmataComponent implements OnInit {
   searchterm: string;
   lexicon_iri?: string;
 
-  constructor(private knoraApiService: KnoraApiService,
+  constructor(private knoraService: KnoraService,
               private activatedRoute: ActivatedRoute,
               private elementRef: ElementRef,
               private router: Router) {
@@ -88,9 +87,7 @@ export class LemmataComponent implements OnInit {
     this.searchterm = '';
     this.activatedRoute.queryParams.subscribe(params => {
       this.startchar = params.hasOwnProperty('startchar') ? params.startchar : 'A';
-      console.log('STARTCHAR=' + this.startchar); // Print the parameter to the console.
       this.lexicon_iri = params.hasOwnProperty('lexicon_iri') ? params.lexicon_iri : undefined;
-      console.log('LEXICON_IRI=' + this.lexicon_iri);
     });
   }
 
@@ -125,7 +122,7 @@ export class LemmataComponent implements OnInit {
   }
 
   lemmaSelected(event): void {
-    const url = 'lemma/' + encodeURIComponent(event.lemma_iri);
+    const url = 'lemma/' + encodeURIComponent(event[0]);
     this.router.navigateByUrl(url).then(e => {
       if (e) {
         console.log("Navigation is successful!");
@@ -142,27 +139,25 @@ export class LemmataComponent implements OnInit {
       page: '0',
       start: this.startchar
     };
-    this.knoraApiService.gravsearchQueryCount('lemmata_query', paramsCnt)
-      .subscribe(n => (this.nLemmata = Number(n)));
+
+    this.knoraService.gravsearchQueryCount('lemmata_query', paramsCnt).subscribe(
+      n => this.nLemmata = n
+    );
     const params = {
       page: String(this.page),
       start: this.startchar
     };
-    this.knoraApiService.gravsearchQuery('lemmata_query', params)
-      .subscribe((data: Array<KnoraResource>) => {
-        this.lemmata = data.map((x) => {
-          const lemmaText = x ? x.getValue('mls:hasLemmaText') : undefined;
-          const lemmaStart = x ? x.getValue('mls:hasStartDate') : undefined;
-          const lemmaEnd = x ? x.getValue('mls:hasEndDate') : undefined;
-          const lemmaIri = x ? x.iri : undefined;
-          this.showProgbar = false;
-          return {
-            lemma_text: lemmaText ? lemmaText.strval : '-',
-            lemma_start: lemmaStart ? lemmaStart.strval : '?',
-            lemma_end: lemmaEnd ? lemmaEnd.strval : '?',
-            lemma_iri: lemmaIri ? lemmaIri : 'http://NULL'
-          };
-        });
+    const fields: Array<string> = [
+      'id',
+      this.knoraService.mlsOntology + 'hasLemmaText',
+      this.knoraService.mlsOntology + 'hasStartDate',
+      this.knoraService.mlsOntology + 'hasEndDate'
+    ];
+
+    this.knoraService.gravsearchQuery('lemmata_query', params, fields)
+      .subscribe(data => {
+        this.lemmata = data;
+        this.showProgbar = false;
       });
   }
 
@@ -179,8 +174,9 @@ export class LemmataComponent implements OnInit {
       paramsCnt.lexicon_iri = this.lexicon_iri;
     }
     console.log(paramsCnt);
-    this.knoraApiService.gravsearchQueryCount('lemmata_search', paramsCnt)
-      .subscribe(n => (this.nLemmata = Number(n)));
+    this.knoraService.gravsearchQueryCount('lemmata_search', paramsCnt).subscribe(
+      n => this.nLemmata = n
+    );
 
     const params: {[index: string]: string} = {
       page: String(this.page),
@@ -189,22 +185,17 @@ export class LemmataComponent implements OnInit {
     if (this.lexicon_iri !== undefined) {
       params.lexicon_iri = this.lexicon_iri;
     }
-    console.log(params);
-    this.knoraApiService.gravsearchQuery('lemmata_search', params)
-      .subscribe((data: Array<KnoraResource>) => {
-        this.lemmata = data.map((x) => {
-          const lemmaText = x ? x.getValue('mls:hasLemmaText') : undefined;
-          const lemmaStart = x ? x.getValue('mls:hasStartDate') : undefined;
-          const lemmaEnd = x ? x.getValue('mls:hasEndDate') : undefined;
-          const lemmaIri = x ? x.iri : undefined;
-          this.showProgbar = false;
-          return {
-            lemma_text: lemmaText ? lemmaText.strval : '-',
-            lemma_start: lemmaStart ? lemmaStart.strval : '?',
-            lemma_end: lemmaEnd ? lemmaEnd.strval : '?',
-            lemma_iri: lemmaIri ? lemmaIri : 'http://NULL'
-          };
-        });
+
+    const fields: Array<string> = [
+      'id',
+      this.knoraService.mlsOntology + 'hasLemmaText',
+      this.knoraService.mlsOntology + 'hasStartDate',
+      this.knoraService.mlsOntology + 'hasEndDate'
+    ];
+    this.knoraService.gravsearchQuery('lemmata_search', params, fields)
+      .subscribe(data => {
+        this.lemmata = data;
+        this.showProgbar = false;
       });
   }
 
@@ -225,13 +216,10 @@ export class LemmataComponent implements OnInit {
     this.activatedRoute.queryParams.subscribe(params => {
       if (params.hasOwnProperty('searchterm')) {
         this.searchterm = params.searchterm;
-        console.log('SEARCHTERM: ' + params.searchterm); // Print the parameter to the console.
       } else if (params.hasOwnProperty('startchar')) {
         this.startchar = params.hasOwnProperty('startchar') ? params.startchar : 'A';
-        console.log('STARTCHAR: ' + this.startchar); // Print the parameter to the console.
       } else if (params.hasOwnProperty('page')) {
         this.page = Number(params.hasOwnProperty('startchar'));
-        console.log('PAGE: ' + this.page); // Print the parameter to the console.
       }
       if (this.searchterm !== '' || this.lexicon_iri !== undefined) {
         this.page = 0;
