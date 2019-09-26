@@ -173,7 +173,6 @@ export class LemmataComponent implements OnInit {
     if (this.lexicon_iri !== undefined) {
       paramsCnt.lexicon_iri = this.lexicon_iri;
     }
-    console.log(paramsCnt);
     this.knoraService.gravsearchQueryCount('lemmata_search', paramsCnt).subscribe(
       n => this.nLemmata = n
     );

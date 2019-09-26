@@ -222,6 +222,7 @@ export class KnoraService {
     const query = this.queryTemplates[queryname](params);
     return this.knoraApiConnection.v2.search.doExtendedSearch(query, this.ontologyCache, this.listNodeCache).pipe(
       map((data: Array<ReadResource>) => {
+        console.log(data);
         return this.processSearchResult(data, fields);
       }));
   }
