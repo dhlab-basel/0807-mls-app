@@ -50,119 +50,12 @@ export class KnoraService {
     this.mlsOntology = appInitService.getSettings().ontologyPrefix + '/ontology/0807/mls/v2#';
   }
 
-  private propToString(data: ReadResource, prop: string): Array<string> {
-    const values: Array<string> = [];
-    // const type = data.getValuesType(prop);
-    // switch(type) {
-    switch (data.getValues(prop)[0].type) {
-      case Constants.KnoraApiV2 + Constants.Delimiter + 'IntegerValue': {
-        const vals: Array<ReadIntValue> = data.getValuesAs(prop, ReadIntValue);
-        for (const val of vals) {
-          values.push(val.int ? val.int.toString() : '?');
-        }
-        break;
-      }
-      case Constants.KnoraApiV2 + Constants.Delimiter + 'BooleanValue': {
-        const vals: Array<ReadBooleanValue> = data.getValuesAs(prop, ReadBooleanValue);
-        for (const val of vals) {
-          values.push(val.bool ? '1' : '0');
-        }
-        break;
-      }
-      case Constants.KnoraApiV2 + Constants.Delimiter + 'DecimalValue': {
-        const vals: Array<ReadDecimalValue> = data.getValuesAs(prop, ReadDecimalValue);
-        for (const val of vals) {
-          values.push(val.decimal ? val.decimal.toString() : '0');
-        }
-        break;
-      }
-      case Constants.KnoraApiV2 + Constants.Delimiter + 'UriValue': {
-        const vals: Array<ReadUriValue> = data.getValuesAs(prop, ReadUriValue);
-        for (const val of vals) {
-          values.push(val.uri ? val.uri : '0');
-        }
-        break;
-      }
-      case Constants.KnoraApiV2 + Constants.Delimiter + 'TextValue': {
-        const vals: Array<ReadTextValueAsString> = data.getValuesAs(prop, ReadTextValueAsString);
-        for (const val of vals) {
-          values.push(val.text ? val.text : '?');
-        }
-        break;
-      }
-      case Constants.KnoraApiV2 + Constants.Delimiter + 'ListValue': {
-        const vals: Array<ReadListValue> = data.getValuesAs(prop, ReadListValue);
-        for (const val of vals) {
-          values.push(val.listNodeLabel ? val.listNodeLabel : '?');
-        }
-        break;
-      }
-      case Constants.KnoraApiV2 + Constants.Delimiter + 'DateValue': {
-        const vals: Array<ReadDateValue> = data.getValuesAs(prop, ReadDateValue);
-        for (const val of vals) {
-          let datestr: string;
-          if (val.date instanceof KnoraPeriod) {
-            datestr = val.date.start.year.toString();
-            if (val.date.start.precision === Precision.monthPrecision && val.date.start.month) {
-              datestr += '/' + val.date.start.month.toString();
-            }
-            if (val.date.start.precision === Precision.dayPrecision && val.date.start.day) {
-              datestr += '/' + val.date.start.day.toString();
-            }
-            datestr += ' - ' + val.date.end.year.toString();
-            if (val.date.end.precision === Precision.monthPrecision && val.date.end.month) {
-              datestr += '/' + val.date.end.month.toString();
-            }
-            if (val.date.end.precision === Precision.dayPrecision && val.date.end.day) {
-              datestr += '/' + val.date.end.day.toString();
-            }
-          } else if (val.date instanceof KnoraDate) {
-            datestr = val.date.year.toString();
-            if (val.date.precision === Precision.monthPrecision && val.date.month) {
-              datestr += '/' + val.date.month.toString();
-            }
-            if (val.date.precision === Precision.dayPrecision && val.date.day) {
-              datestr += '/' + val.date.day.toString();
-            }
-          } else {
-            // ToDo: error message
-          }
-        }
-        break;
-      }
-      case Constants.KnoraApiV2 + Constants.Delimiter + 'StillImageFileValue': {
-        const vals: Array<ReadStillImageFileValue> = data.getValuesAs(prop, ReadStillImageFileValue);
-        for (const val of vals) {
-          console.log(val);
-          values.push(val.fileUrl ? val.fileUrl : 'http://null');
-        }
-        break;
-      }
-      case Constants.KnoraApiV2 + Constants.Delimiter + 'LinkValue': {
-        const vals: Array<ReadLinkValue> = data.getValuesAs(prop, ReadLinkValue);
-        for (const val of vals) {
-          values.push(val.linkedResourceIri ? val.linkedResourceIri : 'http://null');
-        }
-        break;
-      }
-      default: {
-        console.log('DEFAULT:::::', data.getValues(prop)[0].type);
-        const vals: Array<ReadValue> = data.getValuesAs(prop, ReadValue);
-        for (const val of vals) {
-          values.push(data.getValues(prop)[0].type);
-        }
-      }
-    }
-
-    return values;
-  }
-
   private processResourceProperties(data: ReadResource): Array<{propname: string; label: string; values: Array<string> }> {
     const propdata: Array<{propname: string;  label: string; values: Array<string>}> = [];
     for (const prop in data.properties) {
       if (data.properties.hasOwnProperty(prop)) {
         const label: string = data.getValues(prop)[0].propertyLabel ? data.getValues(prop)[0].propertyLabel as string : '?';
-        const values: Array<string> = this.propToString(data, prop);
+        const values: Array<string> = data.getValuesAsStringArray(prop);
         propdata.push({propname: prop, label: label, values: values});
       }
     }
@@ -190,7 +83,7 @@ export class KnoraService {
         if (data.properties.hasOwnProperty(prop)) {
           const index = fields.indexOf(prop);
           if (index > -1) {
-            proparr[index] = this.propToString(data, prop)[0];
+            proparr[index] = data.getValuesAsStringArray(prop)[0];
           }
         }
       }
