@@ -2,8 +2,7 @@ import { Injectable } from '@angular/core';
 import {
   KnoraApiConfig,
   KnoraApiConnection,
-  ListNodeCache,
-  OntologyCache, ReadBooleanValue, ReadDateValue, ReadDecimalValue, ReadIntValue, ReadLinkValue, ReadListValue,
+  ReadBooleanValue, ReadDateValue, ReadDecimalValue, ReadIntValue, ReadLinkValue, ReadListValue,
   ReadResource, ReadStillImageFileValue,
   ReadTextValueAsString, ReadUriValue, ReadValue
 } from "@knora/api";
@@ -31,8 +30,6 @@ export interface ResourceData {
 
 export class KnoraService {
   knoraApiConnection: KnoraApiConnection;
-  ontologyCache: OntologyCache;
-  listNodeCache: ListNodeCache;
   mlsOntology: string;
 
   // this.appInitService.getSettings().server
@@ -45,8 +42,6 @@ export class KnoraService {
     const port = this.appInitService.getSettings().port;
     const config = new KnoraApiConfig('http', servername, port, undefined, undefined, true);
     this.knoraApiConnection = new KnoraApiConnection(config);
-    this.ontologyCache = new OntologyCache(this.knoraApiConnection, config);
-    this.listNodeCache = new ListNodeCache(this.knoraApiConnection);
     this.mlsOntology = appInitService.getSettings().ontologyPrefix + '/ontology/0807/mls/v2#';
   }
 
@@ -94,7 +89,7 @@ export class KnoraService {
   }
 
   getResource(iri: string): Observable<ResourceData> {
-    return this.knoraApiConnection.v2.res.getResource(iri, this.ontologyCache, this.listNodeCache).pipe(
+    return this.knoraApiConnection.v2.res.getResource(iri).pipe(
       map((data: ReadResource) => {
         return {id: data.id, label: data.label, properties: this.processResourceProperties(data)};
       }
@@ -113,7 +108,7 @@ export class KnoraService {
   gravsearchQuery(queryname: string, params: {[index: string]: string}, fields: Array<string>): Observable<Array<Array<string>>> {
     params.ontology = this.appInitService.getSettings().ontologyPrefix;
     const query = this.queryTemplates[queryname](params);
-    return this.knoraApiConnection.v2.search.doExtendedSearch(query, this.ontologyCache, this.listNodeCache).pipe(
+    return this.knoraApiConnection.v2.search.doExtendedSearch(query).pipe(
       map((data: Array<ReadResource>) => {
         console.log(data);
         return this.processSearchResult(data, fields);
