@@ -12,7 +12,7 @@ import {KnoraService} from "../../services/knora.service";
     </mat-card>
     <mat-card>
       <mat-card-title>
-        Lemmata
+        Stichworte
       </mat-card-title>
       <mat-card-content>
         <form (submit)="searchEvent($event)" (keyup.enter)="searchEvent($event)">
@@ -22,29 +22,29 @@ import {KnoraService} from "../../services/knora.service";
                    [value]="searchterm"
                    matInput
                    type="search"
-                   placeholder="Suchbegriff für Lemma" />
+                   placeholder="Stichwortsuche" />
             <mat-icon matSuffix class="clickable" (click)="searchEvent($event)">search</mat-icon>
             <mat-icon matSuffix class="clickable" (click)="searchCancel($event)">cancel</mat-icon>
-            <mat-hint>Suche in Lemma, Pseudonyms etc.</mat-hint>
+            <mat-hint>Suche</mat-hint>
           </mat-form-field>
         </form>
         <app-aindex *ngIf="showAindex" [activeChar]="startchar" (charChange)='charChanged($event)'></app-aindex>
         <mat-progress-bar mode="indeterminate" *ngIf="showProgbar"></mat-progress-bar>
         <table mat-table [dataSource]="lemmata">
           <ng-container matColumnDef="lemma_text">
-            <th mat-header-cell *matHeaderCellDef> Lemma </th>
+            <th mat-header-cell *matHeaderCellDef> Stichwort </th>
             <td mat-cell *matCellDef="let element"> {{element[1]}} </td>
           </ng-container>
           <ng-container matColumnDef="lemma_start">
-            <th mat-header-cell *matHeaderCellDef> Start </th>
+            <th mat-header-cell *matHeaderCellDef> Von </th>
             <td mat-cell *matCellDef="let element"> {{element[2]}} </td>
           </ng-container>
           <ng-container matColumnDef="lemma_end">
-            <th mat-header-cell *matHeaderCellDef> End </th>
+            <th mat-header-cell *matHeaderCellDef> Bis </th>
             <td mat-cell *matCellDef="let element"> {{element[3]}} </td>
           </ng-container>
           <tr mat-header-row *matHeaderRowDef="columnsToDisplay"></tr>
-          <tr mat-row *matRowDef="let row; columns: columnsToDisplay;" (click)="lemmaSelected(row)"></tr>
+          <tr mat-row *matRowDef="let row; columns: columnsToDisplay;" (click)="lemmaSelected(row)" class="clickable"></tr>
         </table>
 
         <mat-paginator *ngIf="nLemmata > 25" [length]="nLemmata"

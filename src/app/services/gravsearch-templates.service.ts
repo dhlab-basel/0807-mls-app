@@ -37,7 +37,6 @@ export class GravsearchTemplatesService {
         ?lemma a mls:Lemma .
         ?lemma mls:hasLemmaText ?text .
         ?lemma mls:hasFamilyName ?fname .
-        ?lemma mls:hasGivenName ?gname .
         {{ #if lexicon_iri }}
         ?lexicon a knora-api:Resource .
         ?lexicon a mls:Lexicon .
@@ -45,6 +44,7 @@ export class GravsearchTemplatesService {
         ?article mls:hasALinkToLexicon ?lexicon .
         OPTIONAL { ?lexicon mls:hasShortname ?shortname . }
         {{ #endif }}
+        OPTIONAL { ?lemma mls:hasGivenName ?gname . }
         OPTIONAL { ?lemma mls:hasStartDate ?startdate . }
         OPTIONAL { ?lemma mls:hasEndDate ?enddate . }
         FILTER regex(?text, "^{{ start }}", "i")
@@ -129,7 +129,7 @@ export class GravsearchTemplatesService {
         OPTIONAL { ?lexicon mls:hasLexiconWeblink ?weblink . }
         OPTIONAL { ?lexicon mls:hasShortname ?shortname . }
     }
-    ORDER BY ASC(?text)
+    ORDER BY ASC(?year)
     OFFSET {{ page }}
   `, params);
     return result;
@@ -170,6 +170,7 @@ export class GravsearchTemplatesService {
         OPTIONAL { ?lexicon mls:hasCitationForm ?citation . }
         OPTIONAL { ?lexicon mls:hasYear ?year . }
     }
+    ORDER BY ASC(?year)
   `, params);
     return result;
   }

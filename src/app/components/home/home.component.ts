@@ -14,10 +14,10 @@ import {Router} from '@angular/router';
                          [value]="searchterm"
                          matInput
                          type="search"
-                         placeholder="Suchbegriff für Lemma" />
+                         placeholder="Suche" />
                   <mat-icon matSuffix class="clickable" (click)="searchEvent($event)">search</mat-icon>
                   <mat-icon matSuffix class="clickable" (click)="searchCancel($event)">cancel</mat-icon>
-                  <mat-hint>Suche in Lemma, Pseudonyms etc.</mat-hint>
+                  <mat-hint>Suche</mat-hint>
               </mat-form-field>
           </form>
       </mat-card-actions>

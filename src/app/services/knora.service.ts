@@ -24,6 +24,12 @@ export interface ResourceData {
   properties: Array<{propname: string; label: string; values: Array<string>}>;
 }
 
+export interface LemmaData {
+  id: string;
+  label: string;
+  properties: {[index: string]: {label: string, values: Array<string>}};
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -114,5 +120,27 @@ export class KnoraService {
         return this.processSearchResult(data, fields);
       }));
   }
+
+  private processLemmaProperties(data: ReadResource): {[index: string]: {label: string, values: Array<string>}} {
+    const propdata: {[index: string]: {label: string, values: Array<string>}} = {};
+    for (const prop in data.properties) {
+      if (data.properties.hasOwnProperty(prop)) {
+        const label: string = data.getValues(prop)[0].propertyLabel ? data.getValues(prop)[0].propertyLabel as string : '?';
+        const values: Array<string> = data.getValuesAsStringArray(prop);
+        propdata[prop] = {label: label, values: values};
+      }
+    }
+    console.log('propdata:', propdata)
+    return propdata;
+  }
+
+  getLemma(iri: string): Observable<LemmaData> {
+    return this.knoraApiConnection.v2.res.getResource(iri).pipe(
+      map((data: ReadResource) => {
+          return {id: data.id, label: data.label, properties: this.processLemmaProperties(data)};
+        }
+      ));
+  }
+
 
 }

@@ -7,7 +7,7 @@ import {KnoraService} from "../../services/knora.service";
   template: `
     <mat-card>
         <mat-card-title>
-            Lexika
+          Für das MLS ausgewertete Lexika
         </mat-card-title>
         <mat-card-content>
             <mat-progress-bar mode="indeterminate" *ngIf="showProgbar"></mat-progress-bar>
@@ -25,7 +25,7 @@ import {KnoraService} from "../../services/knora.service";
                     <td mat-cell *matCellDef="let element"> {{element[3]}} </td>
                 </ng-container>
                 <tr mat-header-row *matHeaderRowDef="columnsToDisplay"></tr>
-                <tr mat-row *matRowDef="let row; columns: columnsToDisplay;" (click)="lexiconSelected(row)"></tr>
+                <tr mat-row *matRowDef="let row; columns: columnsToDisplay;" (click)="lexiconSelected(row)" class="clickable"></tr>
             </table>
             
             <mat-paginator *ngIf="nLexica > 25" [length]="nLexica"
