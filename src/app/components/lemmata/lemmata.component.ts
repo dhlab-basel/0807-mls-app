@@ -122,7 +122,12 @@ export class LemmataComponent implements OnInit {
   }
 
   lemmaSelected(event): void {
-    const url = 'lemma/' + encodeURIComponent(event[0]);
+    let url: string;
+    if (this.lexicon_iri !== undefined) {
+      url = 'article/' + encodeURIComponent(event[4]);
+    } else {
+      url = 'lemma/' + encodeURIComponent(event[0]);
+    }
     this.router.navigateByUrl(url).then(e => {
       if (e) {
         console.log("Navigation is successful!");
@@ -151,7 +156,8 @@ export class LemmataComponent implements OnInit {
       'id',
       this.knoraService.mlsOntology + 'hasLemmaText',
       this.knoraService.mlsOntology + 'hasStartDate',
-      this.knoraService.mlsOntology + 'hasEndDate'
+      this.knoraService.mlsOntology + 'hasEndDate',
+      'http://api.knora.org/ontology/knora-api/v2#hasIncomingLinkValue'
     ];
 
     this.knoraService.gravsearchQuery('lemmata_query', params, fields)
@@ -189,11 +195,13 @@ export class LemmataComponent implements OnInit {
       'id',
       this.knoraService.mlsOntology + 'hasLemmaText',
       this.knoraService.mlsOntology + 'hasStartDate',
-      this.knoraService.mlsOntology + 'hasEndDate'
+      this.knoraService.mlsOntology + 'hasEndDate',
+      'http://api.knora.org/ontology/knora-api/v2#hasIncomingLinkValue'
     ];
     this.knoraService.gravsearchQuery('lemmata_search', params, fields)
       .subscribe(data => {
         this.lemmata = data;
+        console.log('==========>', data)
         this.showProgbar = false;
       });
   }

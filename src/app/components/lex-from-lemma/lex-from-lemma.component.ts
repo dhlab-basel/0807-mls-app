@@ -21,7 +21,7 @@ import {Constants} from "@knora/api/src/models/v2/Constants";
             <td mat-cell *matCellDef="let element"> {{element[3]}} </td>
         </ng-container>
         <tr mat-header-row *matHeaderRowDef="columnsToDisplay"></tr>
-        <tr mat-row *matRowDef="let row; columns: columnsToDisplay;" (click)="articleSelected(row)"></tr>
+        <tr mat-row *matRowDef="let row; columns: columnsToDisplay;" (click)="articleSelected(row)" class="clickable"></tr>
     </table>
   `,
   styles: [

@@ -69,21 +69,21 @@ export class LemmaComponent implements OnInit {
   lemmaIri: string;
   lemma: LemmaData;
   columnsToDisplay: Array<string> = ['KEY', 'VALUE'];
-  hasLemmaDescription = 'http://0.0.0.0:3333/ontology/0807/mls/v2#hasLemmaDescription';
-  hasLemmaComment = 'http://0.0.0.0:3333/ontology/0807/mls/v2#hasLemmaComment';
-  hasDeceasedValue = 'http://0.0.0.0:3333/ontology/0807/mls/v2#hasDeceasedValue';
-  hasEndDate = 'http://0.0.0.0:3333/ontology/0807/mls/v2#hasEndDate';
-  hasEndDateInfo = 'http://0.0.0.0:3333/ontology/0807/mls/v2#hasEndDateInfo';
-  hasFamilyName = 'http://0.0.0.0:3333/ontology/0807/mls/v2#hasFamilyName';
-  hasGivenName = 'http://0.0.0.0:3333/ontology/0807/mls/v2#hasGivenName';
-  hasLemmaText = 'http://0.0.0.0:3333/ontology/0807/mls/v2#hasLemmaText';
-  hasLemmaType = 'http://0.0.0.0:3333/ontology/0807/mls/v2#hasLemmaType';
-  hasStartDate = 'http://0.0.0.0:3333/ontology/0807/mls/v2#hasStartDate';
-  hasStartDateInfo = 'http://0.0.0.0:3333/ontology/0807/mls/v2#hasStartDateInfo';
-  hasViaf = 'http://0.0.0.0:3333/ontology/0807/mls/v2#hasViaf';
-  hasGnd = 'http://0.0.0.0:3333/ontology/0807/mls/v2#hasGnd'
-  hasVariants = 'http://0.0.0.0:3333/ontology/0807/mls/v2#hasVariants';
-  hasPseudonym = 'http://0.0.0.0:3333/ontology/0807/mls/v2#hasPseudonym';
+  hasLemmaDescription = this.knoraService.mlsOntology + 'hasLemmaDescription';
+  hasLemmaComment = this.knoraService.mlsOntology + 'hasLemmaComment';
+  hasDeceasedValue = this.knoraService.mlsOntology + 'hasDeceasedValue';
+  hasEndDate = this.knoraService.mlsOntology + 'hasEndDate';
+  hasEndDateInfo = this.knoraService.mlsOntology + 'hasEndDateInfo';
+  hasFamilyName = this.knoraService.mlsOntology + 'hasFamilyName';
+  hasGivenName = this.knoraService.mlsOntology + 'hasGivenName';
+  hasLemmaText = this.knoraService.mlsOntology + 'hasLemmaText';
+  hasLemmaType = this.knoraService.mlsOntology + 'hasLemmaType';
+  hasStartDate = this.knoraService.mlsOntology + 'hasStartDate';
+  hasStartDateInfo = this.knoraService.mlsOntology + 'hasStartDateInfo';
+  hasViaf = this.knoraService.mlsOntology + 'hasViaf';
+  hasGnd = this.knoraService.mlsOntology + 'hasGnd'
+  hasVariants = this.knoraService.mlsOntology + 'hasVariants';
+  hasPseudonym = this.knoraService.mlsOntology + 'hasPseudonym';
 
 
 

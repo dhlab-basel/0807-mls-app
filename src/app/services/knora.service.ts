@@ -84,7 +84,12 @@ export class KnoraService {
         if (data.properties.hasOwnProperty(prop)) {
           const index = fields.indexOf(prop);
           if (index > -1) {
-            proparr[index] = data.getValuesAsStringArray(prop)[0];
+            if (prop === 'http://api.knora.org/ontology/knora-api/v2#hasIncomingLinkValue') {
+              const tmp = data.getValuesAs(prop, ReadLinkValue)[0];
+              proparr[index] = tmp.linkedResourceIri;
+            } else {
+              proparr[index] = data.getValuesAsStringArray(prop)[0];
+            }
           }
         }
       }
@@ -116,7 +121,7 @@ export class KnoraService {
     const query = this.queryTemplates[queryname](params);
     return this.knoraApiConnection.v2.search.doExtendedSearch(query).pipe(
       map((data: Array<ReadResource>) => {
-        console.log(data);
+        console.log('gravsearchQuery', data);
         return this.processSearchResult(data, fields);
       }));
   }
