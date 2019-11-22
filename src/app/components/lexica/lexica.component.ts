@@ -9,6 +9,13 @@ import {KnoraService} from "../../services/knora.service";
         <mat-card-title>
           Für das MLS ausgewertete Lexika
         </mat-card-title>
+        <mat-card-subtitle>
+          Das Musiklexikon der Schweiz greift auf eine Vielzahl bereits bestehender
+          (teilweise gemeinfreier) Lexika zurück. Eine Liste dieser Lexika sehen Sie hier
+          aufgelistet. Es ist möglich die Lexika einzeln aufzurufen und separat zu durchsuchen.
+          Jedoch sind nicht alle Lexika in gleicher Detailtiefe erfasst. Einige sind in
+          Volltexten verfügbar, andere nur als Stichwortliste einsehbar
+        </mat-card-subtitle>
         <mat-card-content>
             <mat-progress-bar mode="indeterminate" *ngIf="showProgbar"></mat-progress-bar>
             <table mat-table [dataSource]="lexica">

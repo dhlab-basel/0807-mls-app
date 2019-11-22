@@ -7,13 +7,13 @@ import {Constants} from "@knora/api/src/models/v2/Constants";
 @Component({
   selector: 'app-news-items',
   template: `
-    <mat-grid-list cols="6" rowHeight="1:2">
+    <mat-grid-list cols="6" rowHeight="1:1.5">
         <mat-grid-tile *ngFor="let x of items">
             <mat-card>
                 <mat-card-title>
                 {{x[1]}}
                 </mat-card-title>
-                <img mat-card-image src="{{x[3]}}"/>
+                <img class="newimg" mat-card-image src="{{x[3]}}"/>
                 <mat-card-content>
                     <p>{{x[2]}}</p>
                 </mat-card-content>
@@ -21,7 +21,11 @@ import {Constants} from "@knora/api/src/models/v2/Constants";
         </mat-grid-tile>
     </mat-grid-list>
   `,
-  styles: []
+  styles: [
+    '.mat-grid-list {margin-left: 50px; margin-right: 50px;}',
+    '.mat-card-title {font-size: 12pt;}',
+    '.newimg {max-width: 150px; max-height: 150px;}'
+  ]
 })
 export class NewsItemsComponent implements OnInit {
   today: string;

@@ -14,6 +14,12 @@ import {KnoraService} from "../../services/knora.service";
       <mat-card-title>
         Stichworte
       </mat-card-title>
+      <mat-card-subtitle>
+        Auf dieser Seite finden Sie eine Übersicht über alle im MLS verzeichneten Stichwörter/Lemmata.
+        Sie können das Lexikon alphabetisch durchblättern oder gezielt durchsuchen.
+        Vorsicht: Bislang verbirgt sich noch nicht hinter jedem Eintrag ein vollwertiger Artikel.
+        Wir arbeiten daran!
+      </mat-card-subtitle>
       <mat-card-content>
         <form (submit)="searchEvent($event)" (keyup.enter)="searchEvent($event)">
           <mat-form-field>
