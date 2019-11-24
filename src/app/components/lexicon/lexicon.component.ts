@@ -34,9 +34,12 @@ export class LexiconComponent implements OnInit {
   lexiconIri: string;
 
   //lexicon: Array<{[index: string]: string}> = [];
-  lexicon: ResourceData;
+  lexicon: ResourceData = {id: '', label: '', properties: [{propname: '', label: '', values: ['']}]};
   columnsToDisplay: Array<string> = ['KEY', 'VALUE'];
   lexiconTitle: string = '';
+  //
+  // array of fields to be displayed
+  //
   fields: Array<string> = [
     this.knoraService.mlsOntology + 'hasShortname',
     this.knoraService.mlsOntology + 'hasCitationForm',
@@ -60,16 +63,22 @@ export class LexiconComponent implements OnInit {
         this.lexiconIri = params.iri;
       }
       this.knoraService.getResource(this.lexiconIri).subscribe(data => {
-        this.lexicon = data;
         const properties = data.properties;
         const filtered_properties = properties.filter((ele) => this.fields.indexOf(ele.propname) !== -1);
-        console.log(data.properties)
         data.properties = filtered_properties;
+        let i = 0;
+        let idx: number = -1;
         for (const ele of data.properties) {
           if (ele.label === 'Kürzel') {
             this.lexiconTitle = ele.values[0];
+            idx = i;
           }
+          i++;
         }
+        if ((idx >= 0) && (idx < data.properties.length)) {
+          data.properties.splice(idx, 1);
+        }
+        this.lexicon = data;
       });
     });
   }

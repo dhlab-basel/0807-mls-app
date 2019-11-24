@@ -8,7 +8,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { LemmataComponent } from './components/lemmata/lemmata.component';
 import { HomeComponent } from './components/home/home.component';
 import { LexicaComponent } from './components/lexica/lexica.component';
-import {MatButtonToggleModule, MatExpansionModule, MatGridListModule, MatToolbarModule} from '@angular/material';
+import { MatButtonToggleModule, MatExpansionModule, MatGridListModule, MatToolbarModule} from '@angular/material';
 import { MatButtonModule } from '@angular/material';
 import { MatIconModule } from '@angular/material';
 import { MatCardModule } from '@angular/material';
@@ -31,6 +31,9 @@ import { BackButtonDirective } from './directives/back-button.directive';
 import { AboutComponent } from './components/about/about.component';
 import { NewsItemsComponent } from './components/news-items/news-items.component';
 import { DatePipe } from '@angular/common';
+import { LoginComponent } from './components/login/login.component';
+import { MatDialogModule } from '@angular/material/dialog';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 export function initializeApp(appInitService: AppInitService) {
   return (): Promise<any> => {
@@ -52,7 +55,11 @@ export function initializeApp(appInitService: AppInitService) {
     InfoComponent,
     BackButtonDirective,
     AboutComponent,
-    NewsItemsComponent
+    NewsItemsComponent,
+    LoginComponent
+  ],
+  entryComponents: [
+    LoginComponent
   ],
   imports: [
     BrowserModule,
@@ -74,6 +81,9 @@ export function initializeApp(appInitService: AppInitService) {
     MatExpansionModule,
     MatGridListModule,
     MatGridListModule,
+    MatDialogModule,
+    FormsModule,
+    ReactiveFormsModule
   ],
   providers: [
     AppInitService,
@@ -86,3 +96,4 @@ export function initializeApp(appInitService: AppInitService) {
   bootstrap: [AppComponent]
 })
 export class AppModule { }
+

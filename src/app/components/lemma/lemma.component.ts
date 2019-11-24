@@ -30,6 +30,9 @@ import {KnoraService, ResourceData, LemmaData} from "../../services/knora.servic
       <div *ngIf="lemma.properties[hasGnd]">
         {{lemma.properties[hasGnd].label}}: <a href="http://d-nb.info/gnd/{{ lemma.properties[hasGnd].values[0] }}">{{ lemma.properties[hasGnd].values[0] }}</a> }}
       </div>
+      <mat-card-actions *ngIf="knoraService.loggedin">
+        <button mat-raised-button >edit</button>
+      </mat-card-actions>
     </mat-card>
    <!--<mat-card>
         <mat-card-title>
@@ -97,7 +100,8 @@ export class LemmaComponent implements OnInit {
     this.route.params.subscribe(params => {
       this.lemmaIri = params.iri;
       this.knoraService.getLemma(params.iri).subscribe((data) => {
-        console.log(data)
+        console.log(data);
+        console.log('LOGGEDIN: ', this.knoraService.loggedin);
         this.lemma = data;
       });
     });

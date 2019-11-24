@@ -1,16 +1,17 @@
 import { Injectable } from '@angular/core';
 import {
+  ApiResponseData,
   KnoraApiConfig,
-  KnoraApiConnection,
+  KnoraApiConnection, LoginResponse, LogoutResponse,
   ReadBooleanValue, ReadDateValue, ReadDecimalValue, ReadIntValue, ReadLinkValue, ReadListValue,
   ReadResource, ReadStillImageFileValue,
-  ReadTextValueAsString, ReadUriValue, ReadValue
+  ReadTextValueAsString, ReadUriValue, ReadValue, ApiResponseError
 } from "@knora/api";
 import { CountQueryResponse} from "@knora/api/src/models/v2/search/count-query-response";
 
 import { AppInitService } from '../app-init.service';
-import { Observable } from "rxjs";
-import { map, mergeMap } from 'rxjs/operators';
+import { Observable, of } from "rxjs";
+import { catchError, map, mergeMap} from 'rxjs/operators';
 import {Constants} from "@knora/api/src/models/v2/Constants";
 import {KnoraDate, KnoraPeriod, Precision} from "@knora/api/src/models/v2/resources/values/read-date-value";
 import {stringify} from "querystring";
@@ -37,6 +38,8 @@ export interface LemmaData {
 export class KnoraService {
   knoraApiConnection: KnoraApiConnection;
   mlsOntology: string;
+  loggedin: boolean;
+  useremail: string;
 
   // this.appInitService.getSettings().server
   constructor(
@@ -49,6 +52,8 @@ export class KnoraService {
     const config = new KnoraApiConfig('http', servername, port, undefined, undefined, true);
     this.knoraApiConnection = new KnoraApiConnection(config);
     this.mlsOntology = appInitService.getSettings().ontologyPrefix + '/ontology/0807/mls/v2#';
+    this.loggedin = true;
+    this.useremail = '';
   }
 
   private processResourceProperties(data: ReadResource): Array<{propname: string; label: string; values: Array<string> }> {
@@ -99,9 +104,45 @@ export class KnoraService {
     return result;
   }
 
+  login(email: string, password: string): Observable<{success: boolean, token: string, user: string}> {
+    return this.knoraApiConnection.v2.auth.login('email', email, password)
+      .pipe(
+        catchError((err) => {
+          return of(err.error.response['knora-api:error']);
+        }),
+        map((response) => {
+          if (response instanceof ApiResponseData) {
+            const apiResponse = response as ApiResponseData<LoginResponse>;
+            this.loggedin = true;
+            this.useremail = email;
+            return {success: true, token: apiResponse.body.token, user: email};
+          } else {
+            return {success: false, token: response, user: '-'};
+          }
+        }));
+  }
+
+  logout(): Observable<string> {
+    return this.knoraApiConnection.v2.auth.logout().pipe(
+      catchError((err) => {
+        return of(err.error.response['knora-api:error']);
+      }),
+      map((response) => {
+        if (response instanceof ApiResponseData) {
+          const apiResponse = response as ApiResponseData<LogoutResponse>;
+          this.loggedin = false;
+          this.useremail = '';
+          return apiResponse.body.message;
+        } else {
+          return response;
+        }
+      }));
+  }
+
   getResource(iri: string): Observable<ResourceData> {
     return this.knoraApiConnection.v2.res.getResource(iri).pipe(
       map((data: ReadResource) => {
+        console.log(data.userHasPermission);
         return {id: data.id, label: data.label, properties: this.processResourceProperties(data)};
       }
     ));
