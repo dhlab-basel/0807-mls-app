@@ -1,6 +1,9 @@
 import { Component, OnChanges, OnInit, SimpleChanges} from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import {KnoraService, ResourceData, LemmaData} from "../../services/knora.service";
+import {MatDialog, MatDialogConfig} from "@angular/material/dialog";
+import {LoginComponent} from "../login/login.component";
+import {EditLemmaComponent} from "../edit-lemma/edit-lemma.component";
 
 
 @Component({
@@ -31,28 +34,9 @@ import {KnoraService, ResourceData, LemmaData} from "../../services/knora.servic
         {{lemma.properties[hasGnd].label}}: <a href="http://d-nb.info/gnd/{{ lemma.properties[hasGnd].values[0] }}">{{ lemma.properties[hasGnd].values[0] }}</a> }}
       </div>
       <mat-card-actions *ngIf="knoraService.loggedin">
-        <button mat-raised-button >edit</button>
+        <button mat-raised-button (click)="openEditDialog()">edit</button>
       </mat-card-actions>
     </mat-card>
-   <!--<mat-card>
-        <mat-card-title>
-            {{ lemma.label }}
-        </mat-card-title>
-        <table mat-table [dataSource]="lemma.properties" class="mat-elevation-z8">
-            <ng-container matColumnDef="KEY">
-                <th mat-header-cell *matHeaderCellDef> Feld </th>
-                <td mat-cell *matCellDef="let element"> {{element.label}}: </td>
-            </ng-container>
-            <ng-container matColumnDef="VALUE">
-                <th mat-header-cell *matHeaderCellDef> Wert </th>
-                <td mat-cell *matCellDef="let element">
-                    <div *ngFor="let val of element.values">{{ val }}</div>
-                </td>
-            </ng-container>
-            <tr mat-header-row *matHeaderRowDef="columnsToDisplay"></tr>
-            <tr mat-row *matRowDef="let row; columns: columnsToDisplay;"></tr>
-        </table>
-    </mat-card>-->
     <mat-card>
         <mat-card-title>
             In Lexika:
@@ -92,6 +76,7 @@ export class LemmaComponent implements OnInit {
 
 
   constructor(private route: ActivatedRoute,
+              public dialog: MatDialog,
               private knoraService: KnoraService) {
     this.lemma = {id: '', label: '', properties: {}};
   }
@@ -105,6 +90,19 @@ export class LemmaComponent implements OnInit {
         this.lemma = data;
       });
     });
+  }
+
+  openEditDialog() {
+    this.route.params.subscribe(params => {
+      const editConfig = new MatDialogConfig();
+      editConfig.autoFocus = true;
+      editConfig.width = "500px";
+      editConfig.data = {
+        resIri: params.iri
+      };
+      const dialogRef = this.dialog.open(EditLemmaComponent, editConfig);
+    });
+
   }
 
   ngOnInit() {

@@ -34,6 +34,8 @@ import { DatePipe } from '@angular/common';
 import { LoginComponent } from './components/login/login.component';
 import { MatDialogModule } from '@angular/material/dialog';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { EditLemmaComponent } from './components/edit-lemma/edit-lemma.component';
+import { StringValueEditComponent } from './valedit/string-value-edit/string-value-edit.component';
 
 export function initializeApp(appInitService: AppInitService) {
   return (): Promise<any> => {
@@ -56,10 +58,13 @@ export function initializeApp(appInitService: AppInitService) {
     BackButtonDirective,
     AboutComponent,
     NewsItemsComponent,
-    LoginComponent
+    LoginComponent,
+    EditLemmaComponent,
+    StringValueEditComponent
   ],
   entryComponents: [
-    LoginComponent
+    LoginComponent,
+    EditLemmaComponent
   ],
   imports: [
     BrowserModule,

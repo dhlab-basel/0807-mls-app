@@ -1,20 +1,21 @@
-import { Injectable } from '@angular/core';
+import {Injectable} from '@angular/core';
 import {
   ApiResponseData,
+  Cardinality,
   KnoraApiConfig,
-  KnoraApiConnection, LoginResponse, LogoutResponse,
-  ReadBooleanValue, ReadDateValue, ReadDecimalValue, ReadIntValue, ReadLinkValue, ReadListValue,
-  ReadResource, ReadStillImageFileValue,
-  ReadTextValueAsString, ReadUriValue, ReadValue, ApiResponseError
+  KnoraApiConnection,
+  LoginResponse,
+  LogoutResponse,
+  ReadLinkValue,
+  ReadOntology,
+  ReadResource,
+  ResourcePropertyDefinition
 } from "@knora/api";
-import { CountQueryResponse} from "@knora/api/src/models/v2/search/count-query-response";
+import {CountQueryResponse} from "@knora/api/src/models/v2/search/count-query-response";
 
-import { AppInitService } from '../app-init.service';
-import { Observable, of } from "rxjs";
-import { catchError, map, mergeMap} from 'rxjs/operators';
-import {Constants} from "@knora/api/src/models/v2/Constants";
-import {KnoraDate, KnoraPeriod, Precision} from "@knora/api/src/models/v2/resources/values/read-date-value";
-import {stringify} from "querystring";
+import {AppInitService} from '../app-init.service';
+import {Observable, of} from "rxjs";
+import {catchError, map} from 'rxjs/operators';
 import {GravsearchTemplatesService} from "./gravsearch-templates.service";
 
 const __file__ = "knora.services.ts";
@@ -29,6 +30,26 @@ export interface LemmaData {
   id: string;
   label: string;
   properties: {[index: string]: {label: string, values: Array<string>}};
+}
+
+export interface ResInfoProps {
+  label?: string;
+  cardinality: string;
+  comment?: string;
+  guiElement?: string;
+  guiAttributes?: Array<string>;
+  subjectType?: string;
+  objectType?: string;
+  isEditable?: boolean;
+  isLinkProperty?: boolean;
+  isLinkValueProperty?: boolean;
+}
+
+export interface ResInfo {
+  id: string;
+  label: string;
+  comment: string;
+  properties: {[index: string]: ResInfoProps};
 }
 
 @Injectable({
@@ -52,7 +73,7 @@ export class KnoraService {
     const config = new KnoraApiConfig('http', servername, port, undefined, undefined, true);
     this.knoraApiConnection = new KnoraApiConnection(config);
     this.mlsOntology = appInitService.getSettings().ontologyPrefix + '/ontology/0807/mls/v2#';
-    this.loggedin = true;
+    this.loggedin = false;
     this.useremail = '';
   }
 
@@ -139,6 +160,55 @@ export class KnoraService {
       }));
   }
 
+  getOntology(iri: string): Observable<ReadOntology> {
+    return this.knoraApiConnection.v2.onto.getOntology(iri).pipe(
+      map((data: ReadOntology) => data)
+    );
+  }
+
+  getResinfo(ontoIri: string, resIri: string): Observable<ResInfo> {
+    return this.knoraApiConnection.v2.onto.getOntology(ontoIri).pipe(
+      map((data: ReadOntology) => {
+        const resInfo: ResInfo = {
+          id: data.classes[resIri].id,
+          comment: data.classes[resIri].comment ? data.classes[resIri].comment as string : '',
+          label: data.classes[resIri].label ? data.classes[resIri].label as string : '',
+          properties: {}
+        };
+        for (const prop of data.classes[resIri].propertiesList) {
+          const propNamesParts = prop.propertyIndex.split('#');
+          if ((propNamesParts[0] === "http://api.knora.org/ontology/knora-api/v2")
+            || (propNamesParts[0] === "http://www.w3.org/2000/01/rdf-schema")) {
+            continue;
+          }
+          let cardinalityStr: string = '';
+          switch (prop.cardinality) {
+            case Cardinality._1: cardinalityStr = '1'; break;
+            case Cardinality._0_1: cardinalityStr = '0-1'; break;
+            case Cardinality._0_n: cardinalityStr = '0-n'; break;
+            case Cardinality._1_n: cardinalityStr = '1-n'; break;
+          }
+          const pdata = data.properties[prop.propertyIndex] as ResourcePropertyDefinition;
+          const propInfo: ResInfoProps = {
+            cardinality: cardinalityStr,
+            label: pdata.label,
+            comment: pdata.comment,
+            subjectType: pdata.subjectType,
+            objectType: pdata.objectType,
+            guiElement: pdata.guiElement,
+            guiAttributes: pdata.guiAttributes,
+            isEditable: pdata.isEditable,
+            isLinkProperty: pdata.isLinkProperty,
+            isLinkValueProperty: pdata.isLinkValueProperty
+          };
+          resInfo.properties[prop.propertyIndex] = propInfo;
+        }
+        return resInfo;
+      })
+    );
+
+  }
+
   getResource(iri: string): Observable<ResourceData> {
     return this.knoraApiConnection.v2.res.getResource(iri).pipe(
       map((data: ReadResource) => {
@@ -162,7 +232,6 @@ export class KnoraService {
     const query = this.queryTemplates[queryname](params);
     return this.knoraApiConnection.v2.search.doExtendedSearch(query).pipe(
       map((data: Array<ReadResource>) => {
-        console.log('gravsearchQuery', data);
         return this.processSearchResult(data, fields);
       }));
   }
@@ -176,7 +245,6 @@ export class KnoraService {
         propdata[prop] = {label: label, values: values};
       }
     }
-    console.log('propdata:', propdata)
     return propdata;
   }
 
