@@ -34,7 +34,7 @@ export class LexiconComponent implements OnInit {
   lexiconIri: string;
 
   //lexicon: Array<{[index: string]: string}> = [];
-  lexicon: ResourceData = {id: '', label: '', properties: [{propname: '', label: '', values: ['']}]};
+  lexicon: ResourceData = {id: '', label: '', properties: [{propname: '', label: '', values: [''], ids: ['']}]};
   columnsToDisplay: Array<string> = ['KEY', 'VALUE'];
   lexiconTitle: string = '';
   //

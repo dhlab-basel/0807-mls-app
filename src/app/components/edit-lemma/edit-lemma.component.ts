@@ -3,6 +3,7 @@ import {MAT_DIALOG_DATA, MatDialogRef, MatDialogConfig } from "@angular/material
 import {KnoraService} from "../../services/knora.service";
 import {map} from "rxjs/operators";
 import {forkJoin} from "rxjs";
+import {ValueData} from "../../valedit/string-value-edit/string-value-edit.component";
 
 @Component({
   selector: 'app-edit-lemma',
@@ -11,8 +12,7 @@ import {forkJoin} from "rxjs";
     <mat-dialog-content>
       <div *ngFor="let arrayItem of arrayItems; let i=index">
         <app-string-value-edit
-                [label]="arrayItem.title"
-                [values]="arrayItem.values">
+                [valueData]="arrayItem">
         </app-string-value-edit>
         <mat-divider></mat-divider>
       </div>
@@ -26,9 +26,12 @@ import {forkJoin} from "rxjs";
 })
 export class EditLemmaComponent implements OnInit {
 
-  arrayItems: Array<{id: string, title: string, values: Array<string>}> ;
+  arrayItems: Array<ValueData>; //Array<{id: string, title: string, values: Array<string>, ids: Array<string>}> ;
 
   inData: any;
+
+  resourceId: string;
+  resourceType: string;
 
   constructor(private dialogRef: MatDialogRef<EditLemmaComponent>,
               @Inject(MAT_DIALOG_DATA) data,
@@ -41,17 +44,17 @@ export class EditLemmaComponent implements OnInit {
 
     const resinfoObs = this.knoraService.getResinfo(this.knoraService.mlsOntology.slice(0, -1), resClassIri).pipe(map(
       data => {
-        console.log(data);
-        const items: Array<{id: string, title: string}> = [];
+        console.log('RAW RESINFO: ', data);
+        const items: Array<{id: string, label: string}> = [];
         for (const p in data.properties) {
           if (data.properties.hasOwnProperty(p)) {
             items.push({
               id: p,
-              title: data.properties[p].label ? data.properties[p].label as string : '?'
+              label: data.properties[p].label ? data.properties[p].label as string : '?'
             });
           }
         }
-        return items;
+        return {id: data.id, items};
       }
     ));
 
@@ -63,13 +66,10 @@ export class EditLemmaComponent implements OnInit {
       resInfo: resinfoObs,
       resData: resDataObs
     }).subscribe(data => {
-      console.log(data.resData);
-/*
-properties: Array (13)
-0 {propname: "http://0.0.0.0:3333/ontology/0807/mls/v2#hasCentury", label: "Jahrhundertangabe", values: ["16._Jh."]}
-1 {propname: "http://0.0.0.0:3333/ontology/0807/mls/v2#hasDeceasedValue", label: "Verstorben", values: ["Ja"]}
- */
-      //console.log(data.resInfo);
+      console.log('RAW RESDATA: ', data.resData);
+      this.resourceId = data.resData.id;
+      this.resourceType = data.resInfo.id;
+
       const tmpmap: {[index: string]: number} = {};
       let i = 0;
       for (const tmp of data.resData.properties) {
@@ -78,21 +78,31 @@ properties: Array (13)
       }
 
       this.arrayItems = [];
-      for (const tmp of data.resInfo) {
+      for (const tmp of data.resInfo.items) {
         if (tmpmap.hasOwnProperty(tmp.id)) {
           const dataIndex = tmpmap[tmp.id];
-          this.arrayItems.push({id: tmp.id, title: tmp.title, values: data.resData.properties[dataIndex].values});
+          this.arrayItems.push({
+            resourceType: this.resourceType,
+            resourceId: this.resourceId,
+            property: tmp.id,
+            label: tmp.label,
+            values: data.resData.properties[dataIndex].values.map((value, idx) => {
+              return {value, id: data.resData.properties[dataIndex].ids[idx]};
+            })
+          });
         } else {
-          this.arrayItems.push({id: tmp.id, title: tmp.title, values: ['']});
+          this.arrayItems.push({
+            resourceType: this.resourceType,
+            resourceId: this.resourceId,
+            property: tmp.id,
+            label: tmp.label,
+            values: [],
+          });
         }
       }
     });
 
-    //this.knoraForm.addControl('a', new FormControl(({value: '--AAA--', disabled: true})));
-    //this.knoraForm.addControl('b', new FormControl(({value: '--BB--', disabled: true})));
     this.arrayItems = [];
-    console.log('=== End ngOnInit ===============');
-
   }
 
   save() {
