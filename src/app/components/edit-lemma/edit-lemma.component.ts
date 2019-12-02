@@ -45,12 +45,13 @@ export class EditLemmaComponent implements OnInit {
     const resinfoObs = this.knoraService.getResinfo(this.knoraService.mlsOntology.slice(0, -1), resClassIri).pipe(map(
       data => {
         console.log('RAW RESINFO: ', data);
-        const items: Array<{id: string, label: string}> = [];
+        const items: Array<{id: string, label: string, cardinality: string}> = [];
         for (const p in data.properties) {
           if (data.properties.hasOwnProperty(p)) {
             items.push({
               id: p,
-              label: data.properties[p].label ? data.properties[p].label as string : '?'
+              label: data.properties[p].label ? data.properties[p].label as string : '?',
+              cardinality: data.properties[p].cardinality
             });
           }
         }
@@ -86,6 +87,7 @@ export class EditLemmaComponent implements OnInit {
             resourceId: this.resourceId,
             property: tmp.id,
             label: tmp.label,
+            cardinality: tmp.cardinality,
             values: data.resData.properties[dataIndex].values.map((value, idx) => {
               return {value, id: data.resData.properties[dataIndex].ids[idx]};
             })
@@ -96,13 +98,13 @@ export class EditLemmaComponent implements OnInit {
             resourceId: this.resourceId,
             property: tmp.id,
             label: tmp.label,
+            cardinality: tmp.cardinality,
             values: [],
           });
         }
       }
     });
 
-    this.arrayItems = [];
   }
 
   save() {
