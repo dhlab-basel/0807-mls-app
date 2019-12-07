@@ -7,7 +7,7 @@ import {ValueData} from "../../valedit/string-value-edit/string-value-edit.compo
 import {KnoraStringVal} from "../knora/knora-string-value/knora-string-input.component";
 
 @Component({
-  selector: 'app-edit-lemma',
+  selector: 'app-edit-resource',
   template: `
     <h1 mat-dialog-title>Edit</h1>
     <mat-dialog-content>
@@ -24,7 +24,7 @@ import {KnoraStringVal} from "../knora/knora-string-value/knora-string-input.com
   `,
   styles: []
 })
-export class EditLemmaComponent implements OnInit {
+export class EditResourceComponent implements OnInit {
 
   arrayItems: Array<ValueData>; //Array<{id: string, title: string, values: Array<string>, ids: Array<string>}> ;
 
@@ -33,16 +33,14 @@ export class EditLemmaComponent implements OnInit {
   resourceId: string;
   resourceType: string;
 
-  constructor(private dialogRef: MatDialogRef<EditLemmaComponent>,
+  constructor(private dialogRef: MatDialogRef<EditResourceComponent>,
               @Inject(MAT_DIALOG_DATA) data,
               private knoraService: KnoraService) {
     this.inData = data;
   }
 
   ngOnInit() {
-    const resClassIri = this.knoraService.mlsOntology + 'Lemma';
-
-    const resinfoObs = this.knoraService.getResinfo(this.knoraService.mlsOntology.slice(0, -1), resClassIri).pipe(map(
+    const resinfoObs = this.knoraService.getResinfo(this.knoraService.mlsOntology.slice(0, -1), this.inData.resClassIri).pipe(map(
       data => {
         console.log('RAW RESINFO: ', data);
         const items: Array<{id: string, label: string, cardinality: string}> = [];

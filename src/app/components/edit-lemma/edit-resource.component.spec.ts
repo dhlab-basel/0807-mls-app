@@ -1,20 +1,20 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { EditLemmaComponent } from './edit-lemma.component';
+import { EditResourceComponent } from './edit-resource.component';
 
 describe('EditLemmaComponent', () => {
-  let component: EditLemmaComponent;
-  let fixture: ComponentFixture<EditLemmaComponent>;
+  let component: EditResourceComponent;
+  let fixture: ComponentFixture<EditResourceComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ EditLemmaComponent ]
+      declarations: [ EditResourceComponent ]
     })
     .compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(EditLemmaComponent);
+    fixture = TestBed.createComponent(EditResourceComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
