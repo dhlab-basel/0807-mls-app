@@ -1,15 +1,16 @@
-<!--The content below is only a placeholder and can be replaced.-->
+
 <mat-toolbar>
   <button mat-button  (click)="openLoginDialog()">
     <img src="../assets/mls-toolbar-logo.png" style="max-height: 64px;">
   </button>
   <a mat-button *ngIf="knoraService.loggedin" (click)="logout()">{{ knoraService.useremail }}</a>
   <span class="fill-remaining-space"></span>
-  <mat-icon appBackButton>arrow_back</mat-icon>
-  <a mat-button routerLink="lexica">Lexika</a>
+  <mat-icon appBackButton class="clickable">arrow_back</mat-icon>
+  <a mat-button routerLink="lexica">Quellen (Lexika)</a>
   <a mat-button routerLink="lemmata">Stichworte</a>
-  <a mat-button routerLink="info">Projekt</a>
-  <a mat-button routerLink="about">Kontakt</a>
+  <a mat-button routerLink="info">Das MLS</a>
+  <a mat-button routerLink="theproject">Das Projekt</a>
+  <a mat-button routerLink="about">Über uns</a>
   <a mat-icon-button routerLink="home"><mat-icon>home</mat-icon></a>
 </mat-toolbar>
 

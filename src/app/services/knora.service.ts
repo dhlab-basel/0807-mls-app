@@ -20,10 +20,18 @@ import {GravsearchTemplatesService} from "./gravsearch-templates.service";
 
 const __file__ = "knora.services.ts";
 
+export interface PropertyData {
+  propname: string;
+  label: string;
+  values: Array<string>;
+  ids: Array<string>;
+  comments: Array<string | undefined>;
+}
+
 export interface ResourceData {
   id: string;
   label: string;
-  properties: Array<{propname: string; label: string; values: Array<string>, ids: Array<string>}>;
+  properties: Array<PropertyData>;
 }
 
 export interface LemmaData {
@@ -76,36 +84,17 @@ export class KnoraService {
     this.loggedin = false;
     this.useremail = '';
   }
-/*
-properties: Object
-http://0.0.0.0:3333/ontology/0807/mls/v2#hasCentury: Array (1)
-0 ReadTextValueAsString
-arkUrl: "http://0.0.0.0:3336/ark:/72163/1/0807/5WSv=JBaRFyw2ThgHA3CpAb/VjK8IvI_SeKh3fLplZWscwS"
-attachedToUser: "http://rdfh.ch/users/mls-0807-import-user"
-hasPermissions: "CR knora-admin:Creator|M knora-admin:ProjectMember|V knora-admin:KnownUser,knora-admin:UnknownUser"
-id: "http://rdfh.ch/0807/5WSv-JBaRFyw2ThgHA3CpA/values/N6KJbaUbSEO5JWsd5CP_zA"
-property: "http://0.0.0.0:3333/ontology/0807/mls/v2#hasCentury"
-propertyComment: "none"
-propertyLabel: "Jahrhundertangabe"
-strval: "20.-21._Jh."
-text: "20.-21._Jh."
-type: "http://api.knora.org/ontology/knora-api/v2#TextValue"
-userHasPermission: "CR"
-uuid: "VjK8IvI_SeKh3fLplZWscw"
-valueCreationDate: "2019-11-20T09:48:18.823105Z"
-valueHasComment: undefined
-versionArkUrl: "http://0.0.0.0:3336/ark:/72163/1/0807/5WSv=JBaRFyw2ThgHA3CpAb/VjK8IvI_SeKh3fLplZWscwS.20191120T094818823105Z"
-ReadTextValueAsString Prototyp
- */
-  private processResourceProperties(data: ReadResource): Array<{propname: string; label: string; values: Array<string>; ids: Array<string> }> {
-    const propdata: Array<{propname: string;  label: string; values: Array<string>; ids: Array<string>}> = [];
+
+  private processResourceProperties(data: ReadResource): Array<PropertyData> {
+    const propdata: Array<PropertyData> = [];
     console.log('DATA FROM ReadResource:', data);
     for (const prop in data.properties) {
       if (data.properties.hasOwnProperty(prop)) {
         const label: string = data.getValues(prop)[0].propertyLabel ? data.getValues(prop)[0].propertyLabel as string : '?';
         const values: Array<string> = data.getValuesAsStringArray(prop);
         const ids: Array<string> = data.getValues(prop).map(valobj => valobj.id);
-        propdata.push({propname: prop, label, values, ids});
+        const comments: Array<string | undefined> = data.getValues(prop).map(valobj => valobj.valueHasComment);
+        propdata.push({propname: prop, label, values, ids, comments});
       }
     }
     return propdata;

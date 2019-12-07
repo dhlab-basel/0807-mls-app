@@ -3,7 +3,7 @@ import { ActivatedRoute } from '@angular/router';
 import {KnoraService, ResourceData, LemmaData} from "../../services/knora.service";
 import {MatDialog, MatDialogConfig} from "@angular/material/dialog";
 import {LoginComponent} from "../login/login.component";
-import {EditLemmaComponent} from "../edit-lemma/edit-lemma.component";
+import {EditResourceComponent} from "../edit-lemma/edit-resource.component";
 
 
 @Component({
@@ -31,7 +31,7 @@ import {EditLemmaComponent} from "../edit-lemma/edit-lemma.component";
         {{lemma.properties[hasViaf].label}}: <a href="http://viaf.org/viaf/{{ lemma.properties[hasViaf].values[0] }}">{{ lemma.properties[hasViaf].values[0] }}</a>
       </div>
       <div *ngIf="lemma.properties[hasGnd]">
-        {{lemma.properties[hasGnd].label}}: <a href="http://d-nb.info/gnd/{{ lemma.properties[hasGnd].values[0] }}">{{ lemma.properties[hasGnd].values[0] }}</a> }}
+        {{lemma.properties[hasGnd].label}}: <a href="http://d-nb.info/gnd/{{ lemma.properties[hasGnd].values[0] }}">{{ lemma.properties[hasGnd].values[0] }}</a>
       </div>
       <mat-card-actions *ngIf="knoraService.loggedin">
         <button mat-raised-button (click)="openEditDialog()">edit</button>
@@ -96,11 +96,12 @@ export class LemmaComponent implements OnInit {
     this.route.params.subscribe(params => {
       const editConfig = new MatDialogConfig();
       editConfig.autoFocus = true;
-      editConfig.width = "500px";
+      editConfig.width = "800px";
       editConfig.data = {
-        resIri: params.iri
+        resIri: params.iri,
+        resClassIri: this.knoraService.mlsOntology + 'Lemma'
       };
-      const dialogRef = this.dialog.open(EditLemmaComponent, editConfig);
+      const dialogRef = this.dialog.open(EditResourceComponent, editConfig);
     });
 
   }

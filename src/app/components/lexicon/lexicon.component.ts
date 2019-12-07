@@ -1,6 +1,8 @@
 import {Component, Input, OnInit} from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import {KnoraService, ResourceData} from "../../services/knora.service";
+import {MatDialog, MatDialogConfig} from "@angular/material/dialog";
+import {EditResourceComponent} from "../edit-lemma/edit-resource.component";
 
 @Component({
   selector: 'app-lexicon',
@@ -22,6 +24,10 @@ import {KnoraService, ResourceData} from "../../services/knora.service";
           <tr mat-header-row *matHeaderRowDef="columnsToDisplay"></tr>
           <tr mat-row *matRowDef="let row; columns: columnsToDisplay;" ></tr>
       </table>
+      <mat-card-actions *ngIf="knoraService.loggedin">
+        <button mat-raised-button (click)="openEditDialog()">edit</button>
+      </mat-card-actions>
+
   `,
   styles: [
     'td.mat-cell {padding-left: 10px; padding-right:20px;}',
@@ -34,7 +40,11 @@ export class LexiconComponent implements OnInit {
   lexiconIri: string;
 
   //lexicon: Array<{[index: string]: string}> = [];
-  lexicon: ResourceData = {id: '', label: '', properties: [{propname: '', label: '', values: [''], ids: ['']}]};
+  lexicon: ResourceData = {
+    id: '',
+    label: '',
+    properties: [{propname: '', label: '', values: [''], ids: [''], comments: ['']}]
+  };
   columnsToDisplay: Array<string> = ['KEY', 'VALUE'];
   lexiconTitle: string = '';
   //
@@ -54,6 +64,7 @@ export class LexiconComponent implements OnInit {
 
 
   constructor(private route: ActivatedRoute,
+              public dialog: MatDialog,
               private knoraService: KnoraService) {}
 
   getLexicon() {
@@ -81,6 +92,20 @@ export class LexiconComponent implements OnInit {
         this.lexicon = data;
       });
     });
+  }
+
+  openEditDialog() {
+    this.route.params.subscribe(params => {
+      const editConfig = new MatDialogConfig();
+      editConfig.autoFocus = true;
+      editConfig.width = "800px";
+      editConfig.data = {
+        resIri: this.lexiconIri,
+        resClassIri: this.knoraService.mlsOntology + 'Lexicon'
+      };
+      const dialogRef = this.dialog.open(EditResourceComponent, editConfig);
+    });
+
   }
 
   ngOnInit() {

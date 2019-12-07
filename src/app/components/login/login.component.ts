@@ -23,6 +23,7 @@ export interface LoginData {
       <br/>
       <mat-form-field>
         <input matInput
+               type="password"
                placeholder="Password"
                formControlName="password">
       </mat-form-field>

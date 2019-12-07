@@ -4,6 +4,7 @@ import {KnoraService} from "../../services/knora.service";
 import {map} from "rxjs/operators";
 import {forkJoin} from "rxjs";
 import {ValueData} from "../../valedit/string-value-edit/string-value-edit.component";
+import {KnoraStringVal} from "../knora/knora-string-value/knora-string-input.component";
 
 @Component({
   selector: 'app-edit-lemma',
@@ -18,8 +19,7 @@ import {ValueData} from "../../valedit/string-value-edit/string-value-edit.compo
       </div>
     </mat-dialog-content>
     <mat-dialog-actions>
-      <button class="mat-raised-button" (click)="close()">Cancel</button>
-      <button class="mat-raised-button mat-primary" (click)="save()">Save</button>
+       <button class="mat-raised-button mat-primary" (click)="close()">Close</button>
     </mat-dialog-actions>
   `,
   styles: []
@@ -89,7 +89,11 @@ export class EditLemmaComponent implements OnInit {
             label: tmp.label,
             cardinality: tmp.cardinality,
             values: data.resData.properties[dataIndex].values.map((value, idx) => {
-              return {value, id: data.resData.properties[dataIndex].ids[idx]};
+              const comment = data.resData.properties[dataIndex].comments[idx] ? data.resData.properties[dataIndex].comments[idx] as string : '';
+              return {
+                value: new KnoraStringVal(value, comment),
+                id: data.resData.properties[dataIndex].ids[idx]
+              };
             })
           });
         } else {
@@ -103,12 +107,9 @@ export class EditLemmaComponent implements OnInit {
           });
         }
       }
+      console.log('======>>>>>', this.arrayItems);
     });
 
-  }
-
-  save() {
-    this.dialogRef.close();
   }
 
   close() {
