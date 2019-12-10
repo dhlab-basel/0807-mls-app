@@ -1,20 +1,20 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { StringValueEditComponent } from './string-value-edit.component';
+import { ValueEditComponent } from './value-edit.component';
 
 describe('StringValueEditComponent', () => {
-  let component: StringValueEditComponent;
-  let fixture: ComponentFixture<StringValueEditComponent>;
+  let component: ValueEditComponent;
+  let fixture: ComponentFixture<ValueEditComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ StringValueEditComponent ]
+      declarations: [ ValueEditComponent ]
     })
     .compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(StringValueEditComponent);
+    fixture = TestBed.createComponent(ValueEditComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

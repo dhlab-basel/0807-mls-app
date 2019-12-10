@@ -8,8 +8,10 @@ import {
   CreateValue,
   WriteValueResponse, DeleteValue, DeleteValueResponse
 } from "@knora/api";
-import {KnoraStringVal} from "../../components/knora/knora-string-value/knora-string-input.component";
-import { KnoraService } from "../../services/knora.service";
+import {KnoraStringVal} from "../knora-string-value/knora-string-input.component";
+import { KnoraService } from "../../../services/knora.service";
+import {MatDialog} from "@angular/material/dialog";
+import {ConfirmDialogComponent, ConfirmDialogModel, ConfirmDialogResult} from "../confirm-dialog/confirm-dialog.component";
 
 export interface ValueData {
   resourceType: string;
@@ -90,7 +92,7 @@ export interface ValueData {
     '.commentlabel { color: lightgrey; font-size: 0.75em; }'
   ]
 })
-export class StringValueEditComponent implements OnInit {
+export class ValueEditComponent implements OnInit {
   @Input()
   valueData: ValueData;
 
@@ -106,6 +108,7 @@ export class StringValueEditComponent implements OnInit {
   addButtonVisible: boolean;
 
   constructor(private changeDetectorRef: ChangeDetectorRef,
+              public dialog: MatDialog,
               private knoraService: KnoraService) {
     this.inputControl = [];
     this.inputForm  = new FormGroup({});
@@ -197,7 +200,7 @@ export class StringValueEditComponent implements OnInit {
       const createTextVal = new CreateTextValueAsString();
       createTextVal.text = this.inputForm.controls[this.valueControlTable[index]].value.value;
       if (this.inputForm.controls[this.valueControlTable[index]].value.comment) {
-        createTextVal.valueHasComment = this.inputForm.controls[this.valueControlTable[index]].value;
+        createTextVal.valueHasComment = this.inputForm.controls[this.valueControlTable[index]].value.comment;
       }
 
       const createResource = new UpdateResource<CreateValue>();
@@ -239,42 +242,61 @@ export class StringValueEditComponent implements OnInit {
   deleteValue(index: number) {
     console.log('deleteValue: ', index);
     console.log('valueData.values[index]: ', this.valueData.values[index]);
-    const deleteVal = new DeleteValue();
 
-    deleteVal.id = this.valueData.values[index].id;
-    deleteVal.type = this.valueData.propertyType ? this.valueData.propertyType as string : ''; // ToDo: why is the type necessary?
-    deleteVal.deleteComment = "this value was incorrect";
-
-    const updateResource = new UpdateResource<DeleteValue>();
-
-    updateResource.id = this.valueData.resourceId;;
-    updateResource.type = this.valueData.resourceType;
-    updateResource.property = this.valueData.property;
-
-    updateResource.value = deleteVal;
-    console.log(updateResource);
-
-    this.knoraService.knoraApiConnection.v2.values.deleteValue(updateResource).subscribe(
-      (res: DeleteValueResponse) => console.log(res)
+    const dialogData = new ConfirmDialogModel(
+      "Löschen bestätigen",
+      'Diesen Wert löschen?',
+      'Löschkommentar'
     );
 
-    this.inputForm.removeControl(this.valueControlTable[index]);
-    for (let i = this.valueData.values.length - 2; i >= index; i--) {
-      this.valueData.values[i] = this.valueData.values[i + 1];
-      this.valueControlTable[i] = this.valueControlTable[i + 1];
-      this.editButtonVisible[i] = this.editButtonVisible[i + 1];
-      this.saveButtonVisible[i] = this.saveButtonVisible[i + 1];
-      this.cancelButtonVisible[i] = this.cancelButtonVisible[i + 1];
-      this.deleteButtonVisible[i] = this.deleteButtonVisible[i + 1];
-      this.isNew[i] = this.isNew[i + 1];
-    }
-    this.valueData.values.pop();
-    this.editButtonVisible.pop();
-    this.saveButtonVisible.pop();
-    this.cancelButtonVisible.pop();
-    this.valueControlTable.pop();
-    this.isNew.pop();
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      maxWidth: "400px",
+      data: dialogData
+    });
 
+    dialogRef.afterClosed().subscribe(dialogResult => {
+      const result = dialogResult;
+
+      if (result.status) {
+        const deleteVal = new DeleteValue();
+
+        deleteVal.id = this.valueData.values[index].id;
+        deleteVal.type = this.valueData.propertyType ? this.valueData.propertyType as string : ''; // ToDo: why is the type necessary?
+        if (result.comment) {
+          deleteVal.deleteComment = result.value.comment;
+        }
+
+        const updateResource = new UpdateResource<DeleteValue>();
+
+        updateResource.id = this.valueData.resourceId;;
+        updateResource.type = this.valueData.resourceType;
+        updateResource.property = this.valueData.property;
+
+        updateResource.value = deleteVal;
+        console.log(updateResource);
+
+        this.knoraService.knoraApiConnection.v2.values.deleteValue(updateResource).subscribe(
+          (res: DeleteValueResponse) => console.log(res)
+        );
+
+        this.inputForm.removeControl(this.valueControlTable[index]);
+        for (let i = this.valueData.values.length - 2; i >= index; i--) {
+          this.valueData.values[i] = this.valueData.values[i + 1];
+          this.valueControlTable[i] = this.valueControlTable[i + 1];
+          this.editButtonVisible[i] = this.editButtonVisible[i + 1];
+          this.saveButtonVisible[i] = this.saveButtonVisible[i + 1];
+          this.cancelButtonVisible[i] = this.cancelButtonVisible[i + 1];
+          this.deleteButtonVisible[i] = this.deleteButtonVisible[i + 1];
+          this.isNew[i] = this.isNew[i + 1];
+        }
+        this.valueData.values.pop();
+        this.editButtonVisible.pop();
+        this.saveButtonVisible.pop();
+        this.cancelButtonVisible.pop();
+        this.valueControlTable.pop();
+        this.isNew.pop();
+      }
+    });
   }
 
   addField() {

@@ -1,10 +1,10 @@
 import {Component, Inject, OnInit} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef, MatDialogConfig } from "@angular/material/dialog";
-import {KnoraService} from "../../services/knora.service";
+import {KnoraService} from "../../../services/knora.service";
 import {map} from "rxjs/operators";
 import {forkJoin} from "rxjs";
-import {ValueData} from "../../valedit/string-value-edit/string-value-edit.component";
-import {KnoraStringVal} from "../knora/knora-string-value/knora-string-input.component";
+import {ValueData} from "../string-value-edit/value-edit.component";
+import {KnoraStringVal} from "../knora-string-value/knora-string-input.component";
 
 @Component({
   selector: 'app-edit-resource',

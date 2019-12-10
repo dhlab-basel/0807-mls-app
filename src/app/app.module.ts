@@ -34,11 +34,12 @@ import { DatePipe } from '@angular/common';
 import { LoginComponent } from './components/login/login.component';
 import { MatDialogModule } from '@angular/material/dialog';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { EditResourceComponent } from './components/edit-resource/edit-resource.component';
-import { StringValueEditComponent } from './valedit/string-value-edit/string-value-edit.component';
+import { EditResourceComponent } from './components/knora/edit-resource/edit-resource.component';
+import { ValueEditComponent } from './components/knora/string-value-edit/value-edit.component';
 import { TheprojectComponent } from './components/theproject/theproject.component';
 import { KnoraStringInputComponent } from './components/knora/knora-string-value/knora-string-input.component';
-import {MatFormFieldControl} from "@angular/material/form-field";
+import { MatFormFieldControl } from "@angular/material/form-field";
+import { ConfirmDialogComponent } from './components/knora/confirm-dialog/confirm-dialog.component';
 
 export function initializeApp(appInitService: AppInitService) {
   return (): Promise<any> => {
@@ -63,13 +64,15 @@ export function initializeApp(appInitService: AppInitService) {
     NewsItemsComponent,
     LoginComponent,
     EditResourceComponent,
-    StringValueEditComponent,
+    ValueEditComponent,
     TheprojectComponent,
-    KnoraStringInputComponent
+    KnoraStringInputComponent,
+    ConfirmDialogComponent,
   ],
   entryComponents: [
     LoginComponent,
-    EditResourceComponent
+    EditResourceComponent,
+    ConfirmDialogComponent,
   ],
   imports: [
     BrowserModule,
