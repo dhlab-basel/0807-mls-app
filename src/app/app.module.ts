@@ -34,7 +34,7 @@ import { DatePipe } from '@angular/common';
 import { LoginComponent } from './components/login/login.component';
 import { MatDialogModule } from '@angular/material/dialog';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { EditResourceComponent } from './components/edit-lemma/edit-resource.component';
+import { EditResourceComponent } from './components/edit-resource/edit-resource.component';
 import { StringValueEditComponent } from './valedit/string-value-edit/string-value-edit.component';
 import { TheprojectComponent } from './components/theproject/theproject.component';
 import { KnoraStringInputComponent } from './components/knora/knora-string-value/knora-string-input.component';

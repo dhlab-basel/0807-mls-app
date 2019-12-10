@@ -6,7 +6,7 @@ import {
   CreateTextValueAsString,
   UpdateValue,
   CreateValue,
-  WriteValueResponse
+  WriteValueResponse, DeleteValue, DeleteValueResponse
 } from "@knora/api";
 import {KnoraStringVal} from "../../components/knora/knora-string-value/knora-string-input.component";
 import { KnoraService } from "../../services/knora.service";
@@ -14,6 +14,7 @@ import { KnoraService } from "../../services/knora.service";
 export interface ValueData {
   resourceType: string;
   resourceId: string;
+  propertyType?: string;
   property: string;
   label: string;
   cardinality: string;
@@ -212,8 +213,10 @@ export class StringValueEditComponent implements OnInit {
 
   cancelEdit(index) {
     console.log('cancelEdit: ', index);
-    if (this.isNew[index]) {
+    if (this.isNew[index]) { // we cancel an edit of a field just added by the (+) button
       this.inputForm.removeControl(this.valueControlTable[index]);
+      this.valueControlTable.pop();
+
       this.editButtonVisible.pop();
       this.saveButtonVisible.pop();
       this.cancelButtonVisible.pop();
@@ -235,6 +238,26 @@ export class StringValueEditComponent implements OnInit {
 
   deleteValue(index: number) {
     console.log('deleteValue: ', index);
+    console.log('valueData.values[index]: ', this.valueData.values[index]);
+    const deleteVal = new DeleteValue();
+
+    deleteVal.id = this.valueData.values[index].id;
+    deleteVal.type = this.valueData.propertyType ? this.valueData.propertyType as string : ''; // ToDo: why is the type necessary?
+    deleteVal.deleteComment = "this value was incorrect";
+
+    const updateResource = new UpdateResource<DeleteValue>();
+
+    updateResource.id = this.valueData.resourceId;;
+    updateResource.type = this.valueData.resourceType;
+    updateResource.property = this.valueData.property;
+
+    updateResource.value = deleteVal;
+    console.log(updateResource);
+
+    this.knoraService.knoraApiConnection.v2.values.deleteValue(updateResource).subscribe(
+      (res: DeleteValueResponse) => console.log(res)
+    );
+
     this.inputForm.removeControl(this.valueControlTable[index]);
     for (let i = this.valueData.values.length - 2; i >= index; i--) {
       this.valueData.values[i] = this.valueData.values[i + 1];
@@ -252,7 +275,6 @@ export class StringValueEditComponent implements OnInit {
     this.valueControlTable.pop();
     this.isNew.pop();
 
-    console.log('Deleting: ', index);
   }
 
   addField() {
@@ -260,8 +282,6 @@ export class StringValueEditComponent implements OnInit {
     // prepare next control
     //
     this.inputForm.addControl('textval' + this.valueControlIndex.toString(), new FormControl({value: '', disabled: false}));
-    console.log('INPUT_FORM AFTER addControl()', this.inputForm);
-    console.log('ADD: control name: ', 'textval' + this.valueControlIndex.toString());
     this.valueControlTable.push('textval' + this.valueControlIndex.toString());
     this.valueControlIndex++;
 

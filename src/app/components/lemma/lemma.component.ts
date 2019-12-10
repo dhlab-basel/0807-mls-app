@@ -3,7 +3,7 @@ import { ActivatedRoute } from '@angular/router';
 import {KnoraService, ResourceData, LemmaData} from "../../services/knora.service";
 import {MatDialog, MatDialogConfig} from "@angular/material/dialog";
 import {LoginComponent} from "../login/login.component";
-import {EditResourceComponent} from "../edit-lemma/edit-resource.component";
+import {EditResourceComponent} from "../edit-resource/edit-resource.component";
 
 
 @Component({
