@@ -1,4 +1,9 @@
 import { Injectable } from '@angular/core';
+import {ApiResponseError, KnoraApiConfig, KnoraApiConnection, ProjectLists} from "@knora/api";
+import {map,tap} from "rxjs/operators";
+import {HttpClient, HttpClientModule} from '@angular/common/http';
+import { JsonConvert, OperationMode, ValueCheckingMode } from "json2typescript";
+import { PropertyMatchingRule } from "json2typescript/src/json2typescript/json-convert-enums";
 
 export interface IAppConfig {
   server: string;
@@ -12,11 +17,13 @@ export interface IAppConfig {
 export class AppInitService {
 
   static settings: IAppConfig;
+  static projectLists: Array<ProjectLists>;
 
-  constructor() {
+
+  constructor(private http: HttpClient) {
   }
 
-  Init() {
+  Init(): Promise<any> {
 
     return new Promise<void>((resolve, reject) => {
       // console.log('AppInitService.init() called');
@@ -25,6 +32,8 @@ export class AppInitService {
       const data = <IAppConfig>window['tempConfigStorage'];
       // console.log('AppInitService: json', data);
       AppInitService.settings = data;
+
+
       // console.log('AppInitService: finished');
       resolve();
     });

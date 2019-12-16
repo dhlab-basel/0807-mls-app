@@ -9,29 +9,56 @@ import {
   ReadLinkValue,
   ReadOntology,
   ReadResource,
-  ResourcePropertyDefinition
+  ResourcePropertyDefinition,
+  CountQueryResponse,
+  ReadListValue,
+  Constants,
+  ReadTextValueAsString,
+  FullList,
+  ProjectLists, FullListResponse, ListNode
 } from "@knora/api";
-import {CountQueryResponse} from "@knora/api/src/models/v2/search/count-query-response";
 
 import {AppInitService} from '../app-init.service';
 import {Observable, of} from "rxjs";
 import {catchError, map} from 'rxjs/operators';
 import {GravsearchTemplatesService} from "./gravsearch-templates.service";
+//import {FullList, ProjectLists} from "../../../.yalc/@knora/api/src/models/admin/lists";
+//import {FullList, ProjectLists} from "@knora/api";
 
 const __file__ = "knora.services.ts";
 
-export interface PropertyData {
-  propname: string;
-  label: string;
-  values: Array<string>;
-  ids: Array<string>;
-  comments: Array<string | undefined>;
+/**
+ * Data structures for properties from a resource (instance)
+ */
+export class PropertyData {
+  constructor(public propname: string,
+              public label: string,
+              public values: Array<string>,
+              public ids: Array<string>,
+              public comments: Array<string | undefined>) {}
 }
 
+export class ListPropertyData extends PropertyData {
+  public nodeIris: Array<string>;
+
+  constructor(propname: string,
+              label: string,
+              nodeIris: Array<string>,
+              values: Array<string>,
+              ids: Array<string>,
+              comments: Array<string | undefined>) {
+    super(propname, label, values, ids, comments);
+    this.nodeIris = nodeIris;
+  }
+}
+
+/**
+ *  Data structure for representing a resource (instance)
+ */
 export interface ResourceData {
-  id: string;
-  label: string;
-  properties: Array<PropertyData>;
+  id: string; /** Id (iri) of the resource */
+  label: string; /** Label of the resource */
+  properties: Array<PropertyData>; /** Array of properties with associated value(s) */
 }
 
 export interface LemmaData {
@@ -40,6 +67,9 @@ export interface LemmaData {
   properties: {[index: string]: {label: string, values: Array<string>}};
 }
 
+/**
+ * Data structure representing the information about the property definitions of resource class
+ */
 export interface ResInfoProps {
   label?: string;
   cardinality: string;
@@ -90,11 +120,35 @@ export class KnoraService {
     console.log('DATA FROM ReadResource:', data);
     for (const prop in data.properties) {
       if (data.properties.hasOwnProperty(prop)) {
-        const label: string = data.getValues(prop)[0].propertyLabel ? data.getValues(prop)[0].propertyLabel as string : '?';
-        const values: Array<string> = data.getValuesAsStringArray(prop);
-        const ids: Array<string> = data.getValues(prop).map(valobj => valobj.id);
-        const comments: Array<string | undefined> = data.getValues(prop).map(valobj => valobj.valueHasComment);
-        propdata.push({propname: prop, label, values, ids, comments});
+        switch (data.getValues(prop)[0].type) {
+          case Constants.TextValue: {
+            const vals = data.getValuesAs(prop, ReadTextValueAsString);
+            const label: string = vals[0].propertyLabel || '?';
+            const values: Array<string> = vals.map(v => v.text);
+            const ids: Array<string> = vals.map(v => v.id);
+            const comments: Array<string | undefined> = vals.map(v => v.valueHasComment);
+            propdata.push(new PropertyData(prop, label, values, ids, comments));
+            break;
+          }
+          case Constants.ListValue: {
+            const vals = data.getValuesAs(prop, ReadListValue);
+            const label: string = vals[0].propertyLabel || '?';
+            const values: Array<string> = vals.map(v => v.listNodeLabel);
+            const nodeIris: Array<string> = vals.map(v => v.listNode);
+            const ids: Array<string> = vals.map(v => v.id);
+            const comments: Array<string | undefined> = vals.map(v => v.valueHasComment);
+            propdata.push(new ListPropertyData(prop, label, nodeIris, values, ids, comments));
+            break;
+          }
+          default: {
+            const vals = data.getValuesAs(prop, ReadTextValueAsString);
+            const label: string = vals[0].propertyLabel || '?';
+            const values: Array<string> = vals.map(v => v.text);
+            const ids: Array<string> = vals.map(v => v.id);
+            const comments: Array<string | undefined> = vals.map(v => v.valueHasComment);
+            propdata.push(new PropertyData(prop, label, values, ids, comments));
+          }
+        }
       }
     }
     return propdata;
@@ -172,14 +226,15 @@ export class KnoraService {
   }
 
   getOntology(iri: string): Observable<ReadOntology> {
-    return this.knoraApiConnection.v2.onto.getOntology(iri).pipe(
-      map((data: ReadOntology) => data)
+    return this.knoraApiConnection.v2.ontologyCache.getOntology(iri).pipe( // ToDo: Use cache
+      map((cachedata: Map<string, ReadOntology>)  => cachedata.get(iri) as ReadOntology)
     );
   }
 
   getResinfo(ontoIri: string, resIri: string): Observable<ResInfo> {
-    return this.knoraApiConnection.v2.onto.getOntology(ontoIri).pipe(
-      map((data: ReadOntology) => {
+    return this.knoraApiConnection.v2.ontologyCache.getOntology(ontoIri).pipe(  // ToDo: Use Cache
+      map((cachedata: Map<string, ReadOntology>) => {
+        const data = cachedata.get(ontoIri) as ReadOntology;
         const resInfo: ResInfo = {
           id: data.classes[resIri].id,
           comment: data.classes[resIri].comment ? data.classes[resIri].comment as string : '',
@@ -268,6 +323,26 @@ export class KnoraService {
           return {id: data.id, label: data.label, properties: this.processLemmaProperties(data)};
         }
       ));
+  }
+
+  getProjectLists(projectIri: string): Observable<Array<string>> {
+    return this.knoraApiConnection.admin.listsEndpoint.getProjectLists(projectIri).pipe(
+      map((lists: Array<ProjectLists>) => {
+        return lists.map((list: ProjectLists) => list.id);
+      })
+    );
+  }
+
+  getListNode(iri: string): Observable<ListNode> {
+    return this.knoraApiConnection.v2.listNodeCache["getItem"](iri).pipe(
+      map(data => data)
+    );
+  }
+
+  getFullList(listIri: string): Observable<FullList> {
+    return this.knoraApiConnection.admin.listsCache.getFullList(listIri).pipe(
+      map( (res: FullList) => res)
+    );
   }
 
 

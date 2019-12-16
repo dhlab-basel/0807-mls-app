@@ -1,10 +1,12 @@
 import {Component, Inject, OnInit} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef, MatDialogConfig } from "@angular/material/dialog";
-import {KnoraService} from "../../../services/knora.service";
+import {KnoraService, ListPropertyData} from "../../../services/knora.service";
 import {map} from "rxjs/operators";
 import {forkJoin} from "rxjs";
 import {ValueData} from "../string-value-edit/value-edit.component";
-import {KnoraStringVal} from "../knora-string-value/knora-string-input.component";
+import {KnoraStringVal} from "../knora-string-input/knora-string-input.component";
+import {KnoraListVal} from "../knora-list-input/knora-list-input.component";
+import {Constants} from "@knora/api";
 
 @Component({
   selector: 'app-edit-resource',
@@ -26,7 +28,7 @@ import {KnoraStringVal} from "../knora-string-value/knora-string-input.component
 })
 export class EditResourceComponent implements OnInit {
 
-  arrayItems: Array<ValueData>; //Array<{id: string, title: string, values: Array<string>, ids: Array<string>}> ;
+  arrayItems: Array<ValueData>;
 
   inData: any;
 
@@ -89,11 +91,29 @@ export class EditResourceComponent implements OnInit {
             label: tmp.label,
             cardinality: tmp.cardinality,
             values: data.resData.properties[dataIndex].values.map((value, idx) => {
-              const comment = data.resData.properties[dataIndex].comments[idx] ? data.resData.properties[dataIndex].comments[idx] as string : '';
-              return {
-                value: new KnoraStringVal(value, comment),
-                id: data.resData.properties[dataIndex].ids[idx]
-              };
+              switch (tmp.propertyType) {
+                case Constants.TextValue: {
+                  const pd = data.resData.properties[dataIndex];
+                  return {
+                    stringValue: new KnoraStringVal(value, pd.comments[idx] ||''),
+                    id: pd.ids[idx]
+                  };
+                }
+                case Constants.ListValue: {
+                  const pd = data.resData.properties[dataIndex] as ListPropertyData;
+                  return {
+                    listValue: new KnoraListVal(pd.nodeIris[idx], pd.comments[idx] || ''),
+                    id: pd.ids[idx]
+                  };
+                }
+                default: {
+                  const pd = data.resData.properties[dataIndex];
+                  return {
+                    stringValue: new KnoraStringVal(value, pd.comments[idx] || ''),
+                    id: pd.ids[idx]
+                  };
+                }
+              }
             })
           });
         } else {

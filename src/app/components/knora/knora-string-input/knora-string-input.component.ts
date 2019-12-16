@@ -15,8 +15,16 @@ export class KnoraStringVal {
   template: `
     <div [formGroup]="parts" class="knora-string-input-container">
       <table class="knora-input-table">
-        <tr><td class="knora-input-table-label-cell">{{valueLabel}}:</td><td><input class="knora-string-input-element ksie-val" formControlName="value" aria-label="Value" (input)="_handleInput()"></td></tr>
-        <tr><td class="knora-input-table-label-cell">{{commentLabel}}:</td><td><input class="knora-string-input-element ksie-com" formControlName="comment" aria-label="Comment" (input)="_handleInput()"></td></tr>
+        <tr>
+          <td class="knora-input-table-label-cell">{{valueLabel}}:</td>
+          <td>
+            <input class="knora-string-input-element ksie-val" formControlName="value" aria-label="Value" (input)="_handleInput()">
+          </td>
+        </tr>
+        <tr>
+          <td class="knora-input-table-label-cell">{{commentLabel}}:</td><td><input class="knora-string-input-element ksie-com" formControlName="comment" aria-label="Comment" (input)="_handleInput()">
+        </td>
+        </tr>
       </table>
     </div>
   `,

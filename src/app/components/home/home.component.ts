@@ -1,5 +1,6 @@
 import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
 import {Router} from '@angular/router';
+import {KnoraService} from "../../services/knora.service";
 
 @Component({
   selector: 'app-home',

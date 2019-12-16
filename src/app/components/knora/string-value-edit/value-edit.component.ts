@@ -6,9 +6,14 @@ import {
   CreateTextValueAsString,
   UpdateValue,
   CreateValue,
-  WriteValueResponse, DeleteValue, DeleteValueResponse
+  WriteValueResponse,
+  DeleteValue,
+  DeleteValueResponse,
+  Constants
 } from "@knora/api";
-import {KnoraStringVal} from "../knora-string-value/knora-string-input.component";
+
+import {KnoraStringVal} from "../knora-string-input/knora-string-input.component";
+import {KnoraListVal} from "../knora-list-input/knora-list-input.component";
 import { KnoraService } from "../../../services/knora.service";
 import {MatDialog} from "@angular/material/dialog";
 import {ConfirmDialogComponent, ConfirmDialogModel, ConfirmDialogResult} from "../confirm-dialog/confirm-dialog.component";
@@ -20,7 +25,7 @@ export interface ValueData {
   property: string;
   label: string;
   cardinality: string;
-  values: Array<{value: KnoraStringVal, id: string}>;
+  values: Array<{id: string, stringValue?: KnoraStringVal, listValue?: KnoraListVal}>;
 }
 
 @Component({
@@ -32,10 +37,14 @@ export interface ValueData {
                       appearance="outline"
                       *ngFor="let value of valueData.values; let i = index; let last = last">
         <mat-label>{{ valueData.label }}</mat-label>
-        <knora-string-input [formControlName]="valueControlTable[i]"
+        <knora-string-input *ngIf="!(valueData.propertyType == ListValue)" [formControlName]="valueControlTable[i]"
                             placeholder="StringValue"
-        [value]="value.value">
+                            [value]="value.stringValue">
         </knora-string-input>
+        <knora-list-input *ngIf="valueData.propertyType == ListValue" [formControlName]="valueControlTable[i]"
+                            placeholder="ListValue"
+                            [value]="value.listValue">
+        </knora-list-input>
         <button *ngIf="editButtonVisible[i]"
                 mat-mini-fab
                 matSuffix
@@ -95,7 +104,6 @@ export interface ValueData {
 export class ValueEditComponent implements OnInit {
   @Input()
   valueData: ValueData;
-
   inputControl: Array<FormControl>;
   inputForm: FormGroup;
   valueControlTable: Array<string>;
@@ -106,6 +114,9 @@ export class ValueEditComponent implements OnInit {
   deleteButtonVisible: Array<boolean>;
   isNew: Array<boolean>;
   addButtonVisible: boolean;
+
+  TextValue = Constants.TextValue;
+  ListValue = Constants.ListValue;
 
   constructor(private changeDetectorRef: ChangeDetectorRef,
               public dialog: MatDialog,
@@ -139,6 +150,7 @@ export class ValueEditComponent implements OnInit {
   }
 
   ngOnInit() {
+    console.log("valueData:::", this.valueData);
     for (let i = 0; i < this.valueData.values.length; i++) {
       this.inputForm.addControl('textval' + this.valueControlIndex.toString(), new FormControl({value: '', disabled: true}));
       this.valueControlTable.push('textval' + this.valueControlIndex.toString());
@@ -179,7 +191,6 @@ export class ValueEditComponent implements OnInit {
     this.cancelButtonVisible[index] = false;
     this.setAddButtonVisibility();
     this.setDeleteButtonVisibility(index);
-    console.log(this.inputForm.value[this.valueControlTable[index]]);
 
     if (this.valueData.values[index].id) { // update value
       const updateTextVal = new UpdateTextValueAsString();
@@ -311,7 +322,16 @@ export class ValueEditComponent implements OnInit {
     this.saveButtonVisible.push(true);
     this.cancelButtonVisible.push(true);
     this.deleteButtonVisible.push(false);
-    this.valueData.values.push({value: new KnoraStringVal('', ''), id: ''});
+    switch (this.valueData.propertyType) {
+      case Constants.TextValue: {
+        this.valueData.values.push({stringValue: new KnoraStringVal('', ''), id: ''});
+        break;
+      }
+      case Constants.ListValue: {
+        this.valueData.values.push({listValue: new KnoraListVal('', ''), id: ''});
+        break;
+      }
+    }
     this.addButtonVisible = false;
     this.isNew.push(true);
   }

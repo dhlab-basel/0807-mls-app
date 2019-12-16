@@ -37,9 +37,11 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { EditResourceComponent } from './components/knora/edit-resource/edit-resource.component';
 import { ValueEditComponent } from './components/knora/string-value-edit/value-edit.component';
 import { TheprojectComponent } from './components/theproject/theproject.component';
-import { KnoraStringInputComponent } from './components/knora/knora-string-value/knora-string-input.component';
+import { KnoraStringInputComponent } from './components/knora/knora-string-input/knora-string-input.component';
+import { KnoraListInputComponent} from "./components/knora/knora-list-input/knora-list-input.component";
 import { MatFormFieldControl } from "@angular/material/form-field";
 import { ConfirmDialogComponent } from './components/knora/confirm-dialog/confirm-dialog.component';
+import {MatSelectModule} from "@angular/material/select";
 
 export function initializeApp(appInitService: AppInitService) {
   return (): Promise<any> => {
@@ -68,6 +70,8 @@ export function initializeApp(appInitService: AppInitService) {
     TheprojectComponent,
     KnoraStringInputComponent,
     ConfirmDialogComponent,
+    KnoraStringInputComponent,
+    KnoraListInputComponent,
   ],
   entryComponents: [
     LoginComponent,
@@ -97,6 +101,7 @@ export function initializeApp(appInitService: AppInitService) {
     MatDialogModule,
     FormsModule,
     ReactiveFormsModule,
+    MatSelectModule,
   ],
   providers: [
     AppInitService,
