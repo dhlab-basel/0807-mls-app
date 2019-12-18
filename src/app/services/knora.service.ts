@@ -14,18 +14,14 @@ import {
   ReadListValue,
   Constants,
   ReadTextValueAsString,
-  FullList,
-  ProjectLists, FullListResponse, ListNode
+  ListAdminCache, ListResponse, ListNodeV2
 } from "@knora/api";
 
 import {AppInitService} from '../app-init.service';
-import {Observable, of} from "rxjs";
+import {BehaviorSubject, Observable, of} from "rxjs";
 import {catchError, map} from 'rxjs/operators';
 import {GravsearchTemplatesService} from "./gravsearch-templates.service";
-//import {FullList, ProjectLists} from "../../../.yalc/@knora/api/src/models/admin/lists";
-//import {FullList, ProjectLists} from "@knora/api";
 
-const __file__ = "knora.services.ts";
 
 /**
  * Data structures for properties from a resource (instance)
@@ -35,7 +31,8 @@ export class PropertyData {
               public label: string,
               public values: Array<string>,
               public ids: Array<string>,
-              public comments: Array<string | undefined>) {}
+              public comments: Array<string | undefined>,
+              public permissions: Array<string>) {}
 }
 
 export class ListPropertyData extends PropertyData {
@@ -46,8 +43,9 @@ export class ListPropertyData extends PropertyData {
               nodeIris: Array<string>,
               values: Array<string>,
               ids: Array<string>,
-              comments: Array<string | undefined>) {
-    super(propname, label, values, ids, comments);
+              comments: Array<string | undefined>,
+              permissions: Array<string>) {
+    super(propname, label, values, ids, comments, permissions);
     this.nodeIris = nodeIris;
   }
 }
@@ -58,12 +56,14 @@ export class ListPropertyData extends PropertyData {
 export interface ResourceData {
   id: string; /** Id (iri) of the resource */
   label: string; /** Label of the resource */
+  permission: string; /** permission of the current user */
   properties: Array<PropertyData>; /** Array of properties with associated value(s) */
 }
 
 export interface LemmaData {
   id: string;
   label: string;
+  permission: string; /** permission of the current user */
   properties: {[index: string]: {label: string, values: Array<string>}};
 }
 
@@ -99,6 +99,11 @@ export class KnoraService {
   mlsOntology: string;
   loggedin: boolean;
   useremail: string;
+  listAdminCache: ListAdminCache;
+
+  // @ts-ignore
+  private loggedinSubject = new BehaviorSubject<boolean>(false);
+  public loggedinObs = this.loggedinSubject.asObservable();
 
   // this.appInitService.getSettings().server
   constructor(
@@ -108,16 +113,16 @@ export class KnoraService {
     const protocol = this.appInitService.getSettings().protocol;
     const servername = this.appInitService.getSettings().servername;
     const port = this.appInitService.getSettings().port;
-    const config = new KnoraApiConfig('http', servername, port, undefined, undefined, true);
+    const config = new KnoraApiConfig(protocol, servername, port, undefined, undefined, true);
     this.knoraApiConnection = new KnoraApiConnection(config);
     this.mlsOntology = appInitService.getSettings().ontologyPrefix + '/ontology/0807/mls/v2#';
     this.loggedin = false;
     this.useremail = '';
+    this.listAdminCache = new ListAdminCache(this.knoraApiConnection.admin);
   }
 
   private processResourceProperties(data: ReadResource): Array<PropertyData> {
     const propdata: Array<PropertyData> = [];
-    console.log('DATA FROM ReadResource:', data);
     for (const prop in data.properties) {
       if (data.properties.hasOwnProperty(prop)) {
         switch (data.getValues(prop)[0].type) {
@@ -127,7 +132,8 @@ export class KnoraService {
             const values: Array<string> = vals.map(v => v.text);
             const ids: Array<string> = vals.map(v => v.id);
             const comments: Array<string | undefined> = vals.map(v => v.valueHasComment);
-            propdata.push(new PropertyData(prop, label, values, ids, comments));
+            const permissions: Array<string> = vals.map(v => v.userHasPermission);
+            propdata.push(new PropertyData(prop, label, values, ids, comments, permissions));
             break;
           }
           case Constants.ListValue: {
@@ -137,7 +143,19 @@ export class KnoraService {
             const nodeIris: Array<string> = vals.map(v => v.listNode);
             const ids: Array<string> = vals.map(v => v.id);
             const comments: Array<string | undefined> = vals.map(v => v.valueHasComment);
-            propdata.push(new ListPropertyData(prop, label, nodeIris, values, ids, comments));
+            const permissions: Array<string> = vals.map(v => v.userHasPermission);
+            propdata.push(new ListPropertyData(prop, label, nodeIris, values, ids, comments, permissions));
+            break;
+          }
+          case Constants.LinkValue: {
+            const vals = data.getValuesAs(prop, ReadLinkValue);
+            const label: string = vals[0].propertyLabel || '?';
+            const values: Array<string> = vals.map(v => v.linkedResourceIri);
+            //const nodeIris: Array<string> = vals.map(v => v.listNode);
+            const ids: Array<string> = vals.map(v => v.id);
+            const comments: Array<string | undefined> = vals.map(v => v.valueHasComment);
+            const permissions: Array<string> = vals.map(v => v.userHasPermission);
+            propdata.push(new PropertyData(prop, label, values, ids, comments, permissions));
             break;
           }
           default: {
@@ -146,7 +164,8 @@ export class KnoraService {
             const values: Array<string> = vals.map(v => v.text);
             const ids: Array<string> = vals.map(v => v.id);
             const comments: Array<string | undefined> = vals.map(v => v.valueHasComment);
-            propdata.push(new PropertyData(prop, label, values, ids, comments));
+            const permissions: Array<string> = vals.map(v => v.userHasPermission);
+            propdata.push(new PropertyData(prop, label, values, ids, comments, permissions));
           }
         }
       }
@@ -201,6 +220,7 @@ export class KnoraService {
             const apiResponse = response as ApiResponseData<LoginResponse>;
             this.loggedin = true;
             this.useremail = email;
+            this.loggedinSubject.next(true);
             return {success: true, token: apiResponse.body.token, user: email};
           } else {
             return {success: false, token: response, user: '-'};
@@ -218,6 +238,7 @@ export class KnoraService {
           const apiResponse = response as ApiResponseData<LogoutResponse>;
           this.loggedin = false;
           this.useremail = '';
+          this.loggedinSubject.next(false);
           return apiResponse.body.message;
         } else {
           return response;
@@ -278,10 +299,10 @@ export class KnoraService {
   getResource(iri: string): Observable<ResourceData> {
     return this.knoraApiConnection.v2.res.getResource(iri).pipe(
       map((data: ReadResource) => {
-        console.log('RESOURCE_DATA:', data);
         return {
           id: data.id,
           label: data.label,
+          permission: data.userHasPermission,
           properties: this.processResourceProperties(data)};
       }
     ));
@@ -320,28 +341,20 @@ export class KnoraService {
   getLemma(iri: string): Observable<LemmaData> {
     return this.knoraApiConnection.v2.res.getResource(iri).pipe(
       map((data: ReadResource) => {
-          return {id: data.id, label: data.label, properties: this.processLemmaProperties(data)};
+          return {id: data.id, label: data.label, permission: data.userHasPermission, properties: this.processLemmaProperties(data)};
         }
       ));
   }
 
-  getProjectLists(projectIri: string): Observable<Array<string>> {
-    return this.knoraApiConnection.admin.listsEndpoint.getProjectLists(projectIri).pipe(
-      map((lists: Array<ProjectLists>) => {
-        return lists.map((list: ProjectLists) => list.id);
-      })
-    );
-  }
-
-  getListNode(iri: string): Observable<ListNode> {
+  getListNode(iri: string): Observable<ListNodeV2> {
     return this.knoraApiConnection.v2.listNodeCache["getItem"](iri).pipe(
       map(data => data)
     );
   }
 
-  getFullList(listIri: string): Observable<FullList> {
-    return this.knoraApiConnection.admin.listsCache.getFullList(listIri).pipe(
-      map( (res: FullList) => res)
+  getList(listIri: string): Observable<ListResponse> {
+    return this.listAdminCache.getList(listIri).pipe(
+      map( (res: ListResponse) => res)
     );
   }
 

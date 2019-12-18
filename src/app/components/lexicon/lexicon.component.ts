@@ -24,7 +24,7 @@ import {EditResourceComponent} from "../knora/edit-resource/edit-resource.compon
           <tr mat-header-row *matHeaderRowDef="columnsToDisplay"></tr>
           <tr mat-row *matRowDef="let row; columns: columnsToDisplay;" ></tr>
       </table>
-      <mat-card-actions *ngIf="knoraService.loggedin">
+      <mat-card-actions *ngIf="knoraService.loggedin && (lexicon.permission === 'CR' || lexicon.permission === 'D' || lexicon.permission === 'M')">
         <button mat-raised-button (click)="openEditDialog()">edit</button>
       </mat-card-actions>
 
@@ -43,7 +43,8 @@ export class LexiconComponent implements OnInit {
   lexicon: ResourceData = {
     id: '',
     label: '',
-    properties: [{propname: '', label: '', values: [''], ids: [''], comments: ['']}]
+    permission: '',
+    properties: [{propname: '', label: '', values: [], ids: [], comments: [], permissions: []}]
   };
   columnsToDisplay: Array<string> = ['KEY', 'VALUE'];
   lexiconTitle: string = '';
@@ -70,7 +71,6 @@ export class LexiconComponent implements OnInit {
   getLexicon() {
     this.route.params.subscribe(params => {
       if  (params.hasOwnProperty('iri')) {
-        console.log(params.iri);
         this.lexiconIri = params.iri;
       }
       this.knoraService.getResource(this.lexiconIri).subscribe(data => {

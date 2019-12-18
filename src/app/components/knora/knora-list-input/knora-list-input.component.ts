@@ -6,7 +6,7 @@ import {Observable, Subject} from "rxjs";
 import {coerceBooleanProperty} from "@angular/cdk/coercion";
 import {KnoraService} from "../../../services/knora.service";
 import {concat} from "rxjs";
-import {FullList, ListInfo, FullListNode} from "@knora/api";
+import {ListNode, ListResponse} from "@knora/api";
 
 
 // tslint:disable-next-line:component-class-suffix
@@ -164,11 +164,12 @@ export class KnoraListInputComponent
     if (!this.commentLabel) { this.commentLabel = 'Comment'; }
     if (this.value) {
       this.knoraService.getListNode(this.value.nodeIri).subscribe( node => {
-        this.knoraService.getFullList(node.hasRootNode || '').subscribe(
-          (fulllist: FullList) => {
-            this.dispNodes = fulllist.children.map(
-              (nd: FullListNode) => {
-                return {id: nd.id, label: nd.name || 'NAME'};
+        this.knoraService.getList(node.hasRootNode || '').subscribe(
+          (res: ListResponse) => {
+            this.dispNodes = res.list.children.map(
+              (nd: ListNode) => {
+                const gaga = nd.labels.filter( l => l.language === 'de' || l.language === undefined);
+                return {id: nd.id, label: gaga[0].value || 'NAME'};
               }
             );
           });

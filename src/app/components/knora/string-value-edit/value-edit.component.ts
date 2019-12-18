@@ -9,7 +9,7 @@ import {
   WriteValueResponse,
   DeleteValue,
   DeleteValueResponse,
-  Constants
+  Constants, UpdateListValue
 } from "@knora/api";
 
 import {KnoraStringVal} from "../knora-string-input/knora-string-input.component";
@@ -25,7 +25,8 @@ export interface ValueData {
   property: string;
   label: string;
   cardinality: string;
-  values: Array<{id: string, stringValue?: KnoraStringVal, listValue?: KnoraListVal}>;
+  permission: string;
+  values: Array<{id: string, permission: string, stringValue?: KnoraStringVal, listValue?: KnoraListVal}>;
 }
 
 @Component({
@@ -150,19 +151,25 @@ export class ValueEditComponent implements OnInit {
   }
 
   ngOnInit() {
-    console.log("valueData:::", this.valueData);
     for (let i = 0; i < this.valueData.values.length; i++) {
       this.inputForm.addControl('textval' + this.valueControlIndex.toString(), new FormControl({value: '', disabled: true}));
       this.valueControlTable.push('textval' + this.valueControlIndex.toString());
       this.valueControlIndex++;
 
-      this.editButtonVisible.push(true);
+      this.editButtonVisible.push(
+        this.valueData.values[i].permission === 'CR' ||
+        this.valueData.values[i].permission === 'D' ||
+        this.valueData.values[i].permission === 'M'
+      );
       this.saveButtonVisible.push(false);
       this.cancelButtonVisible.push(false);
       if ((this.valueData.values.length > 0) && ((this.valueData.cardinality === '0-n') || (this.valueData.cardinality === '0-1'))) {
-        this.deleteButtonVisible.push(true);
+        this.deleteButtonVisible.push(
+          this.valueData.values[i].permission === 'CR' ||
+          this.valueData.values[i].permission === 'D'
+        );
       } else {
-        this.deleteButtonVisible.push(false);
+        this.deleteButtonVisible.push(false); // Cardinality doesn't allow deleting
       }
 
       this.setAddButtonVisibility();
@@ -193,11 +200,39 @@ export class ValueEditComponent implements OnInit {
     this.setDeleteButtonVisibility(index);
 
     if (this.valueData.values[index].id) { // update value
-      const updateTextVal = new UpdateTextValueAsString();
-      updateTextVal.id = this.valueData.values[index].id;
-      updateTextVal.text = this.inputForm.controls[this.valueControlTable[index]].value.value;
-      if (this.inputForm.controls[this.valueControlTable[index]].value.comment) {
-        updateTextVal.valueHasComment = this.inputForm.controls[this.valueControlTable[index]].value.comment;
+      let newval: UpdateValue;
+      switch (this.valueData.propertyType) {
+        case Constants.TextValue: {
+          const updateTextVal = new UpdateTextValueAsString();
+          updateTextVal.id = this.valueData.values[index].id;
+          updateTextVal.text = this.inputForm.controls[this.valueControlTable[index]].value.value;
+          if (this.inputForm.controls[this.valueControlTable[index]].value.comment) {
+            updateTextVal.valueHasComment = this.inputForm.controls[this.valueControlTable[index]].value.comment;
+          }
+          newval = updateTextVal;
+          break;
+        }
+        case Constants.ListValue: {
+          const updateListVal = new UpdateListValue();
+          updateListVal.id = this.valueData.values[index].id;
+          updateListVal.listNode = this.inputForm.controls[this.valueControlTable[index]].value.nodeIri;
+          if (this.inputForm.controls[this.valueControlTable[index]].value.comment) {
+            updateListVal.valueHasComment = this.inputForm.controls[this.valueControlTable[index]].value.comment;
+          }
+          newval = updateListVal;
+          break;
+        }
+        default: {
+          const updateTextVal = new UpdateTextValueAsString();
+          updateTextVal.id = this.valueData.values[index].id;
+          updateTextVal.text = this.inputForm.controls[this.valueControlTable[index]].value.value;
+          if (this.inputForm.controls[this.valueControlTable[index]].value.comment) {
+            updateTextVal.valueHasComment = this.inputForm.controls[this.valueControlTable[index]].value.comment;
+          }
+          newval = updateTextVal;
+          break;
+          // ToDo: good handling of default case!!!
+        }
       }
 
       const updateResource = new UpdateResource<UpdateValue>();
@@ -205,7 +240,7 @@ export class ValueEditComponent implements OnInit {
       updateResource.type = this.valueData.resourceType;
       updateResource.property = this.valueData.property;
 
-      updateResource.value = updateTextVal;
+      updateResource.value = newval;
       this.knoraService.knoraApiConnection.v2.values.updateValue(updateResource).subscribe(res => console.log('RESULT:', res));
     } else { // create value
       const createTextVal = new CreateTextValueAsString();
@@ -298,6 +333,7 @@ export class ValueEditComponent implements OnInit {
           this.saveButtonVisible[i] = this.saveButtonVisible[i + 1];
           this.cancelButtonVisible[i] = this.cancelButtonVisible[i + 1];
           this.deleteButtonVisible[i] = this.deleteButtonVisible[i + 1];
+
           this.isNew[i] = this.isNew[i + 1];
         }
         this.valueData.values.pop();
@@ -306,6 +342,14 @@ export class ValueEditComponent implements OnInit {
         this.cancelButtonVisible.pop();
         this.valueControlTable.pop();
         this.isNew.pop();
+        // re-adjust the delete button visibility
+        /*
+        if ((this.valueData.values.length > 0) && ((this.valueData.cardinality === '0-n') || (this.valueData.cardinality === '0-1'))) {
+          this.deleteButtonVisible[i] = this.valueData.values[i].permission === 'CR' || this.valueData.values[i].permission === 'D';
+        } else {
+          this.deleteButtonVisible.push(false); // Cardinality doesn't allow deleting
+        }
+         */
       }
     });
   }
@@ -324,11 +368,11 @@ export class ValueEditComponent implements OnInit {
     this.deleteButtonVisible.push(false);
     switch (this.valueData.propertyType) {
       case Constants.TextValue: {
-        this.valueData.values.push({stringValue: new KnoraStringVal('', ''), id: ''});
+        this.valueData.values.push({id: '', permission: '', stringValue: new KnoraStringVal('', '')});
         break;
       }
       case Constants.ListValue: {
-        this.valueData.values.push({listValue: new KnoraListVal('', ''), id: ''});
+        this.valueData.values.push({id: '', permission: '', listValue: new KnoraListVal('', '')});
         break;
       }
     }

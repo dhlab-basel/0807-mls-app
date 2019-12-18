@@ -1,6 +1,7 @@
 
 <mat-toolbar>
-  <button mat-button  (click)="openLoginDialog()">
+  <!-- <button mat-button  (click)="openLoginDialog()"> -->
+  <button mat-button>
     <img src="../assets/mls-toolbar-logo.png" style="max-height: 64px;">
   </button>
   <a mat-button *ngIf="knoraService.loggedin" (click)="logout()">{{ knoraService.useremail }}</a>

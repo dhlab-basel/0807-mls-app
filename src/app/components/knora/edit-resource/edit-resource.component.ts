@@ -90,27 +90,31 @@ export class EditResourceComponent implements OnInit {
             property: tmp.id,
             label: tmp.label,
             cardinality: tmp.cardinality,
+            permission: data.resData.permission,
             values: data.resData.properties[dataIndex].values.map((value, idx) => {
               switch (tmp.propertyType) {
                 case Constants.TextValue: {
                   const pd = data.resData.properties[dataIndex];
                   return {
-                    stringValue: new KnoraStringVal(value, pd.comments[idx] ||''),
-                    id: pd.ids[idx]
+                    id: pd.ids[idx],
+                    permission: pd.permissions[idx],
+                    stringValue: new KnoraStringVal(value, pd.comments[idx] || ''),
                   };
                 }
                 case Constants.ListValue: {
                   const pd = data.resData.properties[dataIndex] as ListPropertyData;
                   return {
+                    id: pd.ids[idx],
+                    permission: pd.permissions[idx],
                     listValue: new KnoraListVal(pd.nodeIris[idx], pd.comments[idx] || ''),
-                    id: pd.ids[idx]
                   };
                 }
                 default: {
                   const pd = data.resData.properties[dataIndex];
                   return {
+                    id: pd.ids[idx],
+                    permission: pd.permissions[idx],
                     stringValue: new KnoraStringVal(value, pd.comments[idx] || ''),
-                    id: pd.ids[idx]
                   };
                 }
               }
@@ -124,6 +128,7 @@ export class EditResourceComponent implements OnInit {
             property: tmp.id,
             label: tmp.label,
             cardinality: tmp.cardinality,
+            permission: '',
             values: [],
           });
         }

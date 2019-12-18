@@ -1,9 +1,10 @@
-import { Component, OnChanges, OnInit, SimpleChanges} from '@angular/core';
+import { Component, OnChanges, OnInit, OnDestroy, SimpleChanges} from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import {KnoraService, ResourceData, LemmaData} from "../../services/knora.service";
 import {MatDialog, MatDialogConfig} from "@angular/material/dialog";
 import {LoginComponent} from "../login/login.component";
 import {EditResourceComponent} from "../knora/edit-resource/edit-resource.component";
+import {Subscription} from "rxjs";
 
 
 @Component({
@@ -33,7 +34,7 @@ import {EditResourceComponent} from "../knora/edit-resource/edit-resource.compon
       <div *ngIf="lemma.properties[hasGnd]">
         {{lemma.properties[hasGnd].label}}: <a href="http://d-nb.info/gnd/{{ lemma.properties[hasGnd].values[0] }}">{{ lemma.properties[hasGnd].values[0] }}</a>
       </div>
-      <mat-card-actions *ngIf="knoraService.loggedin">
+      <mat-card-actions *ngIf="knoraService.loggedin && showEdit">
         <button mat-raised-button (click)="openEditDialog()">edit</button>
       </mat-card-actions>
     </mat-card>
@@ -52,10 +53,14 @@ import {EditResourceComponent} from "../knora/edit-resource/edit-resource.compon
   ]
 })
 
-export class LemmaComponent implements OnInit {
+export class LemmaComponent implements OnInit, OnDestroy {
   lemmaIri: string;
   lemma: LemmaData;
+  private editPermissionSet: Set<string>;
+  private showEdit: boolean = false;
+  private loggedin: Subscription;
   columnsToDisplay: Array<string> = ['KEY', 'VALUE'];
+
   hasLemmaDescription = this.knoraService.mlsOntology + 'hasLemmaDescription';
   hasLemmaComment = this.knoraService.mlsOntology + 'hasLemmaComment';
   hasDeceasedValue = this.knoraService.mlsOntology + 'hasDeceasedValue';
@@ -73,20 +78,17 @@ export class LemmaComponent implements OnInit {
   hasPseudonym = this.knoraService.mlsOntology + 'hasPseudonym';
 
 
-
-
   constructor(private route: ActivatedRoute,
               public dialog: MatDialog,
               private knoraService: KnoraService) {
-    this.lemma = {id: '', label: '', properties: {}};
+    this.lemma = {id: '', label: '', permission: '', properties: {}};
+    this.editPermissionSet = new Set<string>(['M', 'D', 'CR']);
   }
 
   getLemma() {
     this.route.params.subscribe(params => {
       this.lemmaIri = params.iri;
       this.knoraService.getLemma(params.iri).subscribe((data) => {
-        console.log(data);
-        console.log('LOGGEDIN: ', this.knoraService.loggedin);
         this.lemma = data;
       });
     });
@@ -108,5 +110,18 @@ export class LemmaComponent implements OnInit {
 
   ngOnInit() {
     this.getLemma();
+    this.loggedin = this.knoraService.loggedinObs.subscribe((l: boolean) => {
+      if (l) {
+        this.showEdit = this.editPermissionSet.has(this.lemma.permission);
+      } else {
+        this.showEdit = false;
+      }
+      console.log('+++++++++++> LOGIN (l): ', l);
+      console.log('+++++++++++> LOGIN (lemma): ', this.lemma);
+    });
+  }
+
+  ngOnDestroy() {
+    this.loggedin.unsubscribe();
   }
 }
