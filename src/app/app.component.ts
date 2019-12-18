@@ -18,7 +18,7 @@ export class AppComponent {
   loggedin = false;
 
   constructor(public dialog: MatDialog,
-              private knoraService: KnoraService) {}
+              public knoraService: KnoraService) {}
 
   openLoginDialog(): void {
     const loginConfig = new MatDialogConfig();

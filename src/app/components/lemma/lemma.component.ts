@@ -57,7 +57,7 @@ export class LemmaComponent implements OnInit, OnDestroy {
   lemmaIri: string;
   lemma: LemmaData;
   private editPermissionSet: Set<string>;
-  private showEdit: boolean = false;
+  public showEdit: boolean = false;
   private loggedin: Subscription;
   columnsToDisplay: Array<string> = ['KEY', 'VALUE'];
 
@@ -78,9 +78,9 @@ export class LemmaComponent implements OnInit, OnDestroy {
   hasPseudonym = this.knoraService.mlsOntology + 'hasPseudonym';
 
 
-  constructor(private route: ActivatedRoute,
+  constructor(public route: ActivatedRoute,
               public dialog: MatDialog,
-              private knoraService: KnoraService) {
+              public knoraService: KnoraService) {
     this.lemma = {id: '', label: '', permission: '', properties: {}};
     this.editPermissionSet = new Set<string>(['M', 'D', 'CR']);
   }

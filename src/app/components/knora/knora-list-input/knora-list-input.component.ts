@@ -74,8 +74,8 @@ export class KnoraListInputComponent
   id = `knora-list-input-${KnoraListInputComponent.nextId++}`;
   describedBy = '';
 
-  private dispNodes: Array<DispNode>;
-  private selected: string;
+  public dispNodes: Array<DispNode>;
+  public selected: string;
 
   private _placeholder: string;
   private _required = false;

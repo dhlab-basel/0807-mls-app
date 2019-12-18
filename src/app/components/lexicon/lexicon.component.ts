@@ -66,7 +66,7 @@ export class LexiconComponent implements OnInit {
 
   constructor(private route: ActivatedRoute,
               public dialog: MatDialog,
-              private knoraService: KnoraService) {}
+              public knoraService: KnoraService) {}
 
   getLexicon() {
     this.route.params.subscribe(params => {
