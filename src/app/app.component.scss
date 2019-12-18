@@ -3,3 +3,22 @@
      Every toolbar row uses a flexbox row layout. */
   flex: 1 1 auto;
 }
+
+.mat-toolbar {
+  background-color: white;
+  border-bottom-color: grey;
+  border-bottom-width: 1px;
+  border-bottom-style: solid;
+  height: 65px;
+}
+
+footer {
+  margin-left: 10px;
+  margin-right: 10px;
+  margin-top: 5px;
+  text-align: center;
+}
+
+.clickable {
+  cursor: pointer;
+}

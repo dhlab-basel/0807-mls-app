@@ -1,4 +1,7 @@
 {
-  "server": "http://0.0.0.0:3333",
-  "ontologyPrefix": "http://0.0.0.0:3333"
+  "protocol": "https",
+  "server": "https://api.dasch.swiss:443",
+  "ontologyPrefix": "http://api.dasch.swiss",
+  "servername": "api.dasch.swiss",
+  "port": 443
 }

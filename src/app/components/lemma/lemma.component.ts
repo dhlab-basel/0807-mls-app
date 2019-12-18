@@ -1,32 +1,42 @@
-import { Component, OnChanges, OnInit, SimpleChanges} from '@angular/core';
+import { Component, OnChanges, OnInit, OnDestroy, SimpleChanges} from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { KnoraResource, KnoraValue } from 'knora-jsonld-simplify';
-import { KnoraApiService } from '../../services/knora-api.service';
-import { Observable } from 'rxjs';
-import { map, mergeMap, concatMap, take} from 'rxjs/operators';
+import {KnoraService, ResourceData, LemmaData} from "../../services/knora.service";
+import {MatDialog, MatDialogConfig} from "@angular/material/dialog";
+import {LoginComponent} from "../login/login.component";
+import {EditResourceComponent} from "../knora/edit-resource/edit-resource.component";
+import {Subscription} from "rxjs";
 
 
 @Component({
   selector: 'app-lemma',
   template: `
     <mat-card>
-        <mat-card-title>
-            {{ lemmaTitle }}
-        </mat-card-title>
-        <table mat-table [dataSource]="lemma" class="mat-elevation-z8">
-            <ng-container matColumnDef="KEY">
-                <th mat-header-cell *matHeaderCellDef> Feld </th>
-                <td mat-cell *matCellDef="let element"> {{element.label}}: </td>
-            </ng-container>
-            <ng-container matColumnDef="VALUE">
-                <th mat-header-cell *matHeaderCellDef> Wert </th>
-                <td mat-cell *matCellDef="let element">
-                    <div *ngFor="let val of element.values">{{ val }}</div>
-                </td>
-            </ng-container>
-            <tr mat-header-row *matHeaderRowDef="columnsToDisplay"></tr>
-            <tr mat-row *matRowDef="let row; columns: columnsToDisplay;"></tr>
-        </table>
+      <mat-card-title>
+        {{ lemma.label }} <span *ngIf="lemma.properties[hasDeceasedValue] && (lemma.properties[hasDeceasedValue].values[0] == 'Ja')">†</span>
+      </mat-card-title>
+      <div  *ngIf="lemma.properties[hasVariants]">
+        {{ lemma.properties[hasVariants].label }}:
+        <span *ngFor="let val of lemma.properties[hasVariants].values">{{ val }}</span>
+      </div>
+      <div *ngIf="lemma.properties[hasPseudonym]">
+        {{ lemma.properties[hasPseudonym].label }}:
+        <span *ngFor="let val of lemma.properties[hasPseudonym].values">{{ val }}</span>
+      </div>
+      <div>
+        <span *ngIf="lemma.properties[hasStartDateInfo]">{{ lemma.properties[hasStartDateInfo].values[0] }}</span>
+        <span *ngIf="lemma.properties[hasStartDate]"> {{ lemma.properties[hasStartDate].values[0] }}</span>
+        <span *ngIf="lemma.properties[hasEndDateInfo]">, {{ lemma.properties[hasEndDateInfo].values[0] }}</span>
+        <span *ngIf="lemma.properties[hasEndDate]"> {{ lemma.properties[hasEndDate].values[0] }}</span>
+      </div>
+      <div *ngIf="lemma.properties[hasViaf]">
+        {{lemma.properties[hasViaf].label}}: <a href="http://viaf.org/viaf/{{ lemma.properties[hasViaf].values[0] }}">{{ lemma.properties[hasViaf].values[0] }}</a>
+      </div>
+      <div *ngIf="lemma.properties[hasGnd]">
+        {{lemma.properties[hasGnd].label}}: <a href="http://d-nb.info/gnd/{{ lemma.properties[hasGnd].values[0] }}">{{ lemma.properties[hasGnd].values[0] }}</a>
+      </div>
+      <mat-card-actions *ngIf="knoraService.loggedin && showEdit">
+        <button mat-raised-button (click)="openEditDialog()">edit</button>
+      </mat-card-actions>
     </mat-card>
     <mat-card>
         <mat-card-title>
@@ -43,57 +53,75 @@ import { map, mergeMap, concatMap, take} from 'rxjs/operators';
   ]
 })
 
-export class LemmaComponent implements OnInit {
+export class LemmaComponent implements OnInit, OnDestroy {
   lemmaIri: string;
-  lemma: Array<{[index: string]: string}> = [];
-  lemmaTitle: string = '';
+  lemma: LemmaData;
+  private editPermissionSet: Set<string>;
+  public showEdit: boolean = false;
+  private loggedin: Subscription;
   columnsToDisplay: Array<string> = ['KEY', 'VALUE'];
-  labeltable: {[index: string]: string} = {
-    'mls:hasLemmaText': 'Lemma',
-    'mls:hasVariants': 'Varianten',
-    'mls:hasPseudonym': 'Pseudnyme',
-    'mls:hasStartDate': 'Von',
-    'mls:hasStartDateInfo': 'Info zu Beginn',
-    'mls:hasEndDate': 'Bis',
-    'mls:hasEndDateInfo': 'Info zu Ende',
-    'mls:hasCentury': 'Jahrhundert',
-    'mls:hasFamilyName': 'Nachname',
-    'mls:hasGivenName': 'Vorname',
-    'mls:hasDeceasedValue': 'Gestorben',
-    'mls:hasLemmaType': 'Lamma-Typ',
-    'mls:hasSex': 'Geschlecht',
-    'mls:hasRelevanceValue': 'Relevant',
-    'mls:hasLemmaDescription': 'Beschreibung',
-    'mls:hasLemmaComment': 'Kommentar',
-    'mls:hasGnd': 'GND',
-    'mls:hasViaf': 'VIAF',
 
-  };
+  hasLemmaDescription = this.knoraService.mlsOntology + 'hasLemmaDescription';
+  hasLemmaComment = this.knoraService.mlsOntology + 'hasLemmaComment';
+  hasDeceasedValue = this.knoraService.mlsOntology + 'hasDeceasedValue';
+  hasEndDate = this.knoraService.mlsOntology + 'hasEndDate';
+  hasEndDateInfo = this.knoraService.mlsOntology + 'hasEndDateInfo';
+  hasFamilyName = this.knoraService.mlsOntology + 'hasFamilyName';
+  hasGivenName = this.knoraService.mlsOntology + 'hasGivenName';
+  hasLemmaText = this.knoraService.mlsOntology + 'hasLemmaText';
+  hasLemmaType = this.knoraService.mlsOntology + 'hasLemmaType';
+  hasStartDate = this.knoraService.mlsOntology + 'hasStartDate';
+  hasStartDateInfo = this.knoraService.mlsOntology + 'hasStartDateInfo';
+  hasViaf = this.knoraService.mlsOntology + 'hasViaf';
+  hasGnd = this.knoraService.mlsOntology + 'hasGnd'
+  hasVariants = this.knoraService.mlsOntology + 'hasVariants';
+  hasPseudonym = this.knoraService.mlsOntology + 'hasPseudonym';
 
-  constructor(private route: ActivatedRoute,
-              private knoraApiService: KnoraApiService) {}
+
+  constructor(public route: ActivatedRoute,
+              public dialog: MatDialog,
+              public knoraService: KnoraService) {
+    this.lemma = {id: '', label: '', permission: '', properties: {}};
+    this.editPermissionSet = new Set<string>(['M', 'D', 'CR']);
+  }
 
   getLemma() {
     this.route.params.subscribe(params => {
       this.lemmaIri = params.iri;
-      this.knoraApiService.getResource(params.iri, this.labeltable).subscribe((data) => {
-        console.log(data);
-        const lemmadata: Array<{label: string, values: string}> = [];
-        for (const propname in data) {
-          if (data.hasOwnProperty(propname)) {
-            if (propname === 'mls:hasLemmaText') {
-              this.lemmaTitle = data[propname].propvalues[0];
-            }
-            lemmadata.push({label: data[propname].proplabel, values: data[propname].propvalues});
-          }
-        }
-        this.lemma = lemmadata;
+      this.knoraService.getLemma(params.iri).subscribe((data) => {
+        this.lemma = data;
       });
+    });
+  }
+
+  openEditDialog() {
+    this.route.params.subscribe(params => {
+      const editConfig = new MatDialogConfig();
+      editConfig.autoFocus = true;
+      editConfig.width = "800px";
+      editConfig.data = {
+        resIri: params.iri,
+        resClassIri: this.knoraService.mlsOntology + 'Lemma'
+      };
+      const dialogRef = this.dialog.open(EditResourceComponent, editConfig);
     });
 
   }
 
   ngOnInit() {
     this.getLemma();
+    this.loggedin = this.knoraService.loggedinObs.subscribe((l: boolean) => {
+      if (l) {
+        this.showEdit = this.editPermissionSet.has(this.lemma.permission);
+      } else {
+        this.showEdit = false;
+      }
+      console.log('+++++++++++> LOGIN (l): ', l);
+      console.log('+++++++++++> LOGIN (lemma): ', this.lemma);
+    });
+  }
+
+  ngOnDestroy() {
+    this.loggedin.unsubscribe();
   }
 }

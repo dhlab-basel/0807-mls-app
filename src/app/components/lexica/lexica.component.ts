@@ -1,34 +1,38 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
-import { GravsearchTemplatesService} from '../../services//gravsearch-templates.service';
-import { KnoraJsonldSimplify, KnoraResource, KnoraValue } from 'knora-jsonld-simplify';
-import { KnoraApiService} from '../../services/knora-api.service';
-import { map } from 'rxjs/operators';
 import { ActivatedRoute, Router } from '@angular/router';
+import {KnoraService} from "../../services/knora.service";
 
 @Component({
   selector: 'app-lexica',
   template: `
     <mat-card>
         <mat-card-title>
-            Lexika
+          Für das MLS ausgewertete Lexika
         </mat-card-title>
+        <mat-card-subtitle>
+          Das Musiklexikon der Schweiz greift auf eine Vielzahl bereits bestehender
+          (teilweise gemeinfreier) Lexika zurück. Eine Liste dieser Lexika sehen Sie hier
+          aufgelistet. Es ist möglich die Lexika einzeln aufzurufen und separat zu durchsuchen.
+          Jedoch sind nicht alle Lexika in gleicher Detailtiefe erfasst. Einige sind in
+          Volltexten verfügbar, andere nur als Stichwortliste einsehbar
+        </mat-card-subtitle>
         <mat-card-content>
             <mat-progress-bar mode="indeterminate" *ngIf="showProgbar"></mat-progress-bar>
             <table mat-table [dataSource]="lexica">
                 <ng-container matColumnDef="lexicon_shortname">
                     <th mat-header-cell *matHeaderCellDef> Kürzel </th>
-                    <td mat-cell *matCellDef="let element"> {{element.lexicon_shortname}} </td>
+                    <td mat-cell *matCellDef="let element"> {{element[1]}} </td>
                 </ng-container>
                 <ng-container matColumnDef="lexicon_citation">
                     <th mat-header-cell *matHeaderCellDef> Zitierform </th>
-                    <td mat-cell *matCellDef="let element"> {{element.lexicon_citation}} </td>
+                    <td mat-cell *matCellDef="let element"> {{element[2]}} </td>
                 </ng-container>
                 <ng-container matColumnDef="lexicon_year">
                     <th mat-header-cell *matHeaderCellDef> Jahr </th>
-                    <td mat-cell *matCellDef="let element"> {{element.lexicon_year}} </td>
+                    <td mat-cell *matCellDef="let element"> {{element[3]}} </td>
                 </ng-container>
                 <tr mat-header-row *matHeaderRowDef="columnsToDisplay"></tr>
-                <tr mat-row *matRowDef="let row; columns: columnsToDisplay;" (click)="lexiconSelected(row)"></tr>
+                <tr mat-row *matRowDef="let row; columns: columnsToDisplay;" (click)="lexiconSelected(row)" class="clickable"></tr>
             </table>
             
             <mat-paginator *ngIf="nLexica > 25" [length]="nLexica"
@@ -52,7 +56,7 @@ export class LexicaComponent implements OnInit {
   @ViewChild('searchField', {static: false})
   searchField: ElementRef;
 
-  lexica: Array<{[index: string]: string}> = [];
+  lexica: Array<Array<string>> = [];
   startchar: string;
   page: number;
   nLexica: number;
@@ -60,7 +64,7 @@ export class LexicaComponent implements OnInit {
   showProgbar = false;
   searchterm: string;
 
-  constructor(private knoraApiService: KnoraApiService,
+  constructor(private knoraService: KnoraService,
               private activatedRoute: ActivatedRoute,
               private elementRef: ElementRef,
               private router: Router) {
@@ -75,9 +79,9 @@ export class LexicaComponent implements OnInit {
   }
 
   lexiconSelected(event): void {
-    const url = '/lemmata' + encodeURIComponent(event.lexicon_iri);
+    const url = '/lemmata';
     this.router.navigate(['/lemmata'], {
-      queryParams: {lexicon_iri: event.lexicon_iri}
+      queryParams: {lexicon_iri: event[0]}
     }).then(e => {
       if (e) {
         console.log("Navigation is successful!");
@@ -104,37 +108,27 @@ export class LexicaComponent implements OnInit {
     this.showProgbar = true;
     this.lexica = [];
 
-    const params_cnt = {
+    const paramsCnt = {
       page: '0',
       start: this.startchar
     };
-    this.knoraApiService.gravsearchQueryCount('lexica_query', params_cnt)
-      .subscribe(n => (this.nLexica = Number(n)));
+    this.knoraService.gravsearchQueryCount('lexica_query', paramsCnt).subscribe(
+      n => this.nLexica = n
+    );
     const params = {
       page: String(this.page),
       start: this.startchar
     };
-    this.knoraApiService.gravsearchQuery('lexica_query', params)
-      .subscribe((data: Array<KnoraResource>) => {
-        this.lexica = data.map((x) => {
-          const lexiconCitation = x ? x.getValue('mls:hasCitationForm') : undefined;
-          const lexiconYear = x ? x.getValue('mls:hasYear') : undefined;
-          const lexiconShortname = x ? x.getValue('mls:hasShortname') : undefined;
-          const lexiconComment = x ? x.getValue('mls:hasLexiconComment') : undefined;
-          const lexiconWeblink = x ? x.getValue('mls:hasLexiconWeblink') : undefined;
-          const lexiconLibrary = x ? x.getValue('mls:hasLibrary') : undefined;
-          const lexiconIri = x ? x.iri : undefined;
-          this.showProgbar = false;
-          return {
-            lexicon_citation: lexiconCitation ? lexiconCitation.strval : '?',
-            lexicon_year: lexiconYear ? lexiconYear.strval : '?',
-            lexicon_shortname: lexiconShortname ? lexiconShortname.strval : '?',
-            lexicon_comment: lexiconComment ? lexiconComment.strval : '?',
-            lexicon_weblink: lexiconWeblink ? lexiconWeblink.strval : '?',
-            lexicon_library: lexiconLibrary ? lexiconLibrary.strval : '?',
-            lexicon_iri: lexiconIri ? lexiconIri : 'http://NULL'
-          };
-        });
+    const fields: Array<string> = [
+      'id',
+      this.knoraService.mlsOntology + 'hasShortname',
+      this.knoraService.mlsOntology + 'hasCitationForm',
+      this.knoraService.mlsOntology + 'hasYear'
+    ];
+    this.knoraService.gravsearchQuery('lexica_query', params, fields)
+      .subscribe(data => {
+        this.lexica = data;
+        this.showProgbar = false;
       });
   }
 

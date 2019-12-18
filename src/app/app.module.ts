@@ -8,7 +8,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { LemmataComponent } from './components/lemmata/lemmata.component';
 import { HomeComponent } from './components/home/home.component';
 import { LexicaComponent } from './components/lexica/lexica.component';
-import {MatButtonToggleModule, MatExpansionModule, MatGridListModule, MatToolbarModule} from '@angular/material';
+import { MatButtonToggleModule, MatExpansionModule, MatGridListModule, MatToolbarModule} from '@angular/material';
 import { MatButtonModule } from '@angular/material';
 import { MatIconModule } from '@angular/material';
 import { MatCardModule } from '@angular/material';
@@ -31,6 +31,17 @@ import { BackButtonDirective } from './directives/back-button.directive';
 import { AboutComponent } from './components/about/about.component';
 import { NewsItemsComponent } from './components/news-items/news-items.component';
 import { DatePipe } from '@angular/common';
+import { LoginComponent } from './components/login/login.component';
+import { MatDialogModule } from '@angular/material/dialog';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { EditResourceComponent } from './components/knora/edit-resource/edit-resource.component';
+import { ValueEditComponent } from './components/knora/string-value-edit/value-edit.component';
+import { TheprojectComponent } from './components/theproject/theproject.component';
+import { KnoraStringInputComponent } from './components/knora/knora-string-input/knora-string-input.component';
+import { KnoraListInputComponent} from "./components/knora/knora-list-input/knora-list-input.component";
+import { MatFormFieldControl } from "@angular/material/form-field";
+import { ConfirmDialogComponent } from './components/knora/confirm-dialog/confirm-dialog.component';
+import {MatSelectModule} from "@angular/material/select";
 
 export function initializeApp(appInitService: AppInitService) {
   return (): Promise<any> => {
@@ -52,7 +63,20 @@ export function initializeApp(appInitService: AppInitService) {
     InfoComponent,
     BackButtonDirective,
     AboutComponent,
-    NewsItemsComponent
+    NewsItemsComponent,
+    LoginComponent,
+    EditResourceComponent,
+    ValueEditComponent,
+    TheprojectComponent,
+    KnoraStringInputComponent,
+    ConfirmDialogComponent,
+    KnoraStringInputComponent,
+    KnoraListInputComponent,
+  ],
+  entryComponents: [
+    LoginComponent,
+    EditResourceComponent,
+    ConfirmDialogComponent,
   ],
   imports: [
     BrowserModule,
@@ -74,15 +98,21 @@ export function initializeApp(appInitService: AppInitService) {
     MatExpansionModule,
     MatGridListModule,
     MatGridListModule,
+    MatDialogModule,
+    FormsModule,
+    ReactiveFormsModule,
+    MatSelectModule,
   ],
   providers: [
     AppInitService,
     {
       provide: APP_INITIALIZER, useFactory: initializeApp, deps: [AppInitService], multi: true
     },
+    {provide: MatFormFieldControl, useExisting: KnoraStringInputComponent},
     SparqlPrep,
     DatePipe
   ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
+

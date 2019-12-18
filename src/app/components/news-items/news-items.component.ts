@@ -1,33 +1,37 @@
 import { Component, OnInit } from '@angular/core';
-import { KnoraApiService } from '../../services/knora-api.service';
-import { KnoraResource, KnoraStillImageFileValue } from 'knora-jsonld-simplify/dist';
 import { DatePipe } from '@angular/common';
+import {KnoraService} from "../../services/knora.service";
+import {Constants} from "@knora/api/src/models/v2/Constants";
 
 
 @Component({
   selector: 'app-news-items',
   template: `
-    <mat-grid-list cols="6" rowHeight="1:2">
+    <mat-grid-list cols="6" rowHeight="1:1.5">
         <mat-grid-tile *ngFor="let x of items">
             <mat-card>
                 <mat-card-title>
-                {{x.itemTitle}}
+                {{x[1]}}
                 </mat-card-title>
-                <img mat-card-image src="{{x.itemImage}}"/>
+                <img class="newimg" mat-card-image src="{{x[3]}}"/>
                 <mat-card-content>
-                    <p>{{x.itemText}}</p>
+                    <p>{{x[2]}}</p>
                 </mat-card-content>
             </mat-card>
         </mat-grid-tile>
     </mat-grid-list>
   `,
-  styles: []
+  styles: [
+    '.mat-grid-list {margin-left: 50px; margin-right: 50px;}',
+    '.mat-card-title {font-size: 12pt;}',
+    '.newimg {max-width: 150px; max-height: 150px;}'
+  ]
 })
 export class NewsItemsComponent implements OnInit {
   today: string;
-  items: Array<{[index: string]: string}> = [];
+  items: Array<Array<string>> = [];
 
-  constructor(private knoraApiService: KnoraApiService,
+  constructor(private knoraService: KnoraService,
               private datePipe: DatePipe) {
     const myDate = new Date();
     this.today = 'GREGORIAN:' + this.datePipe.transform(myDate, 'yyyy-MM-dd');
@@ -37,20 +41,19 @@ export class NewsItemsComponent implements OnInit {
     const params =  {
       today: this.today
     };
-    this.knoraApiService.gravsearchQuery('newsitem_search', params)
-      .subscribe((data: Array<KnoraResource>) => {
-        this.items = data.map((x) => {
-          const itemTitle = x ? x.getValue('mls:hasNewsTitle') : undefined;
-          const itemImage = x ? x.getValue('knora-api:hasStillImageFileValue') : undefined;
-          const itemText = x ? x.getValue('mls:hasNewsText') : undefined;
-          return {
-            itemTitle: itemTitle ? itemTitle.strval : '-',
-            itemImage: itemImage ? itemImage.strval : 'XXX',
-            itemText: itemText ? itemText.strval : '?'
-          };
-        });
+    const fields: Array<string> = [
+      'id',
+      this.knoraService.mlsOntology + 'hasNewsTitle',
+      this.knoraService.mlsOntology + 'hasNewsText',
+      Constants.KnoraApiV2 + Constants.Delimiter + 'hasStillImageFileValue'
+    ];
+
+    this.knoraService.gravsearchQuery('newsitem_search', params, fields).subscribe(
+      (data) => {
         console.log(data);
-      });
+        this.items = data;
+      }
+    );
   }
 
   ngOnInit() {

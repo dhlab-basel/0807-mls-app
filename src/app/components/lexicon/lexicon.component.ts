@@ -1,6 +1,8 @@
 import {Component, Input, OnInit} from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { KnoraApiService } from '../../services/knora-api.service';
+import {KnoraService, ResourceData} from "../../services/knora.service";
+import {MatDialog, MatDialogConfig} from "@angular/material/dialog";
+import {EditResourceComponent} from "../knora/edit-resource/edit-resource.component";
 
 @Component({
   selector: 'app-lexicon',
@@ -8,7 +10,7 @@ import { KnoraApiService } from '../../services/knora-api.service';
       <h2>
           {{ lexiconTitle }}
       </h2>
-      <table mat-table [dataSource]="lexicon" class="mat-elevation-z8">
+      <table mat-table [dataSource]="lexicon.properties" class="mat-elevation-z8">
           <ng-container matColumnDef="KEY">
               <th mat-header-cell *matHeaderCellDef> Feld </th>
               <td mat-cell *matCellDef="let element"> {{element.label}}: </td>
@@ -22,6 +24,10 @@ import { KnoraApiService } from '../../services/knora-api.service';
           <tr mat-header-row *matHeaderRowDef="columnsToDisplay"></tr>
           <tr mat-row *matRowDef="let row; columns: columnsToDisplay;" ></tr>
       </table>
+      <mat-card-actions *ngIf="knoraService.loggedin && (lexicon.permission === 'CR' || lexicon.permission === 'D' || lexicon.permission === 'M')">
+        <button mat-raised-button (click)="openEditDialog()">edit</button>
+      </mat-card-actions>
+
   `,
   styles: [
     'td.mat-cell {padding-left: 10px; padding-right:20px;}',
@@ -33,41 +39,73 @@ export class LexiconComponent implements OnInit {
   @Input()
   lexiconIri: string;
 
-  lexicon: Array<{[index: string]: string}> = [];
+  //lexicon: Array<{[index: string]: string}> = [];
+  lexicon: ResourceData = {
+    id: '',
+    label: '',
+    permission: '',
+    properties: [{propname: '', label: '', values: [], ids: [], comments: [], permissions: []}]
+  };
   columnsToDisplay: Array<string> = ['KEY', 'VALUE'];
   lexiconTitle: string = '';
+  //
+  // array of fields to be displayed
+  //
+  fields: Array<string> = [
+    this.knoraService.mlsOntology + 'hasShortname',
+    this.knoraService.mlsOntology + 'hasCitationForm',
+    this.knoraService.mlsOntology + 'hasLexiconWeblink',
+    this.knoraService.mlsOntology + 'hasLibrary',
+    this.knoraService.mlsOntology + 'hasYear',
+    this.knoraService.mlsOntology + 'hasMedia1',
+    this.knoraService.mlsOntology + 'hasMedia2',
+    this.knoraService.mlsOntology + 'hasMedia3',
+    this.knoraService.mlsOntology + 'hasMedia4'
+  ];
 
-  labeltable: {[index: string]: string} = {
-    'mls:hasShortname': 'Name',
-    'mls:hasCitationForm': 'Zitierform',
-    'mls:hasYear': 'Jahr',
-    'mls:hasLexiconComment': 'Kommentar',
-    'mls:hasLexiconWeblink': 'Weblink',
-    'mls:hasLibrary': 'Bibliothek',
-  };
 
   constructor(private route: ActivatedRoute,
-              private knoraApiService: KnoraApiService) {}
+              public dialog: MatDialog,
+              public knoraService: KnoraService) {}
 
   getLexicon() {
     this.route.params.subscribe(params => {
       if  (params.hasOwnProperty('iri')) {
-        console.log(params.iri);
         this.lexiconIri = params.iri;
       }
-      this.knoraApiService.getResource(this.lexiconIri, this.labeltable).subscribe((data) => {
-        const lexicondata: Array<{ label: string, values: string }> = [];
-        for (const propname in data) {
-          if (data.hasOwnProperty(propname)) {
-            if (propname === 'mls:hasShortname') {
-              this.lexiconTitle = data[propname].propvalues[0];
-            }
-            lexicondata.push({label: data[propname].proplabel, values: data[propname].propvalues});
+      this.knoraService.getResource(this.lexiconIri).subscribe(data => {
+        const properties = data.properties;
+        const filtered_properties = properties.filter((ele) => this.fields.indexOf(ele.propname) !== -1);
+        data.properties = filtered_properties;
+        let i = 0;
+        let idx: number = -1;
+        for (const ele of data.properties) {
+          if (ele.label === 'Kürzel') {
+            this.lexiconTitle = ele.values[0];
+            idx = i;
           }
+          i++;
         }
-        this.lexicon = lexicondata;
+        if ((idx >= 0) && (idx < data.properties.length)) {
+          data.properties.splice(idx, 1);
+        }
+        this.lexicon = data;
       });
     });
+  }
+
+  openEditDialog() {
+    this.route.params.subscribe(params => {
+      const editConfig = new MatDialogConfig();
+      editConfig.autoFocus = true;
+      editConfig.width = "800px";
+      editConfig.data = {
+        resIri: this.lexiconIri,
+        resClassIri: this.knoraService.mlsOntology + 'Lexicon'
+      };
+      const dialogRef = this.dialog.open(EditResourceComponent, editConfig);
+    });
+
   }
 
   ngOnInit() {

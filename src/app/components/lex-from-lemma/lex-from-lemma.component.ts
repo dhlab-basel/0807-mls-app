@@ -1,8 +1,8 @@
 import {Component, Input, OnInit} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
-import {KnoraApiService} from '../../services/knora-api.service';
-import {KnoraResource} from 'knora-jsonld-simplify/dist';
 import { Router} from '@angular/router';
+import {KnoraService} from "../../services/knora.service";
+import {Constants} from "@knora/api/src/models/v2/Constants";
 
 @Component({
   selector: 'app-lex-from-lemma',
@@ -10,18 +10,18 @@ import { Router} from '@angular/router';
     <table mat-table [dataSource]="lexica">
         <ng-container matColumnDef="lexicon_shortname">
             <th mat-header-cell *matHeaderCellDef> Kürzel </th>
-            <td mat-cell *matCellDef="let element"> {{element.lexicon_shortname}} </td>
+            <td mat-cell *matCellDef="let element"> {{element[1]}} </td>
         </ng-container>
         <ng-container matColumnDef="lexicon_citation">
             <th mat-header-cell *matHeaderCellDef> Zitierform </th>
-            <td mat-cell *matCellDef="let element"> {{element.lexicon_citation}} </td>
+            <td mat-cell *matCellDef="let element"> {{element[2]}} </td>
         </ng-container>
         <ng-container matColumnDef="lexicon_year">
             <th mat-header-cell *matHeaderCellDef> Jahr </th>
-            <td mat-cell *matCellDef="let element"> {{element.lexicon_year}} </td>
+            <td mat-cell *matCellDef="let element"> {{element[3]}} </td>
         </ng-container>
         <tr mat-header-row *matHeaderRowDef="columnsToDisplay"></tr>
-        <tr mat-row *matRowDef="let row; columns: columnsToDisplay;" (click)="articleSelected(row)"></tr>
+        <tr mat-row *matRowDef="let row; columns: columnsToDisplay;" (click)="articleSelected(row)" class="clickable"></tr>
     </table>
   `,
   styles: [
@@ -36,17 +36,16 @@ export class LexFromLemmaComponent implements OnInit {
   lexiconIri: string;
   @Input()
   lemmaIri: string;
-  lexica: Array<{[index: string]: string}> = [];
+  lexica: Array<Array<string>> = [];
   columnsToDisplay: Array<string> = ['lexicon_shortname', 'lexicon_citation', 'lexicon_year'];
 
   constructor(private route: ActivatedRoute,
-              private knoraApiService: KnoraApiService,
+              private knoraService: KnoraService,
               private router: Router) {
-
   }
 
   articleSelected(event) {
-    const url = 'article/' + encodeURIComponent(event.article_iri);
+    const url = 'article/' + encodeURIComponent(event[4]);
     this.router.navigateByUrl(url).then(e => {
       if (e) {
         console.log("Navigation is successful!");
@@ -60,23 +59,18 @@ export class LexFromLemmaComponent implements OnInit {
     const param = {
       lemma_iri: this.lemmaIri
     };
-    this.knoraApiService.gravsearchQuery('lexica_from_lemma_query', param)
-      .subscribe((data: Array<KnoraResource>) => {
-        console.log(data);
-        this.lexica = data.map((x) => {
-          const lexiconCitation = x ? x.getValue('mls:hasCitationForm') : undefined;
-          const lexiconYear = x ? x.getValue('mls:hasYear') : undefined;
-          const lexiconShortname = x ? x.getValue('mls:hasShortname') : undefined;
-          const article = x ? x.getResource('hasIncomingLinks') : undefined;
-          return {
-            lexicon_citation: lexiconCitation ? lexiconCitation.strval : '?',
-            lexicon_year: lexiconYear ? lexiconYear.strval : '?',
-            lexicon_shortname: lexiconShortname ? lexiconShortname.strval : '?',
-            article_iri: article ? article.iri : 'http://NULL'
-          };
-        });
-
-      });
+    const fields: Array<string> = [
+      'id',
+      this.knoraService.mlsOntology + 'hasShortname',
+      this.knoraService.mlsOntology + 'hasCitationForm',
+      this.knoraService.mlsOntology + 'hasYear',
+      Constants.KnoraApiV2 + Constants.Delimiter + 'hasIncomingLinkValue'
+    ];
+    this.knoraService.gravsearchQuery('lexica_from_lemma_query', param, fields).subscribe(
+      (data) => {
+        this.lexica = data;
+      }
+    );
   }
 
   ngOnInit() {

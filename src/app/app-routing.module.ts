@@ -8,6 +8,7 @@ import { LexiconComponent } from './components/lexicon/lexicon.component';
 import { ArticleComponent } from './components/article/article.component';
 import { InfoComponent } from './components/info/info.component';
 import { AboutComponent } from './components/about/about.component';
+import { TheprojectComponent } from "./components/theproject/theproject.component";
 
 const routes: Routes = [{
   path: 'home',
@@ -33,6 +34,9 @@ const routes: Routes = [{
 }, {
   path: 'about',
   component: AboutComponent
+}, {
+  path: 'theproject',
+  component: TheprojectComponent
 }, {
   path: '**',
   redirectTo: '/home'

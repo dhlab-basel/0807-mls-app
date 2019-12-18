@@ -1,11 +1,16 @@
-<!--The content below is only a placeholder and can be replaced.-->
+
 <mat-toolbar>
-  <img src="../assets/mls-toolbar-logo.png" style="max-height: 64px;">
+  <!-- <button mat-button  (click)="openLoginDialog()"> -->
+  <button mat-button>
+    <img src="../assets/mls-toolbar-logo.png" style="max-height: 64px;">
+  </button>
+  <a mat-button *ngIf="knoraService.loggedin" (click)="logout()">{{ knoraService.useremail }}</a>
   <span class="fill-remaining-space"></span>
-  <mat-icon appBackButton>arrow_back</mat-icon>
-  <a mat-button routerLink="lexica">Lexika</a>
-  <a mat-button routerLink="lemmata">Lemmata</a>
-  <a mat-button routerLink="info">Projekt</a>
+  <mat-icon appBackButton class="clickable">arrow_back</mat-icon>
+  <a mat-button routerLink="lexica">Quellen (Lexika)</a>
+  <a mat-button routerLink="lemmata">Stichworte</a>
+  <a mat-button routerLink="info">Das MLS</a>
+  <a mat-button routerLink="theproject">Das Projekt</a>
   <a mat-button routerLink="about">Über uns</a>
   <a mat-icon-button routerLink="home"><mat-icon>home</mat-icon></a>
 </mat-toolbar>
@@ -13,3 +18,17 @@
 <router-outlet>
 
 </router-outlet>
+<footer>
+  <a href="https://www.smg-ssm.ch/smg-ssm/">
+    <img src="../assets/musikforschendegesellschaft-logo.png" style="max-height: 40px; padding-right: 30px;"/>
+  </a>
+  <a href="https://www.musikrat.ch">
+    <img src="../assets/logo-musikrat.png" style="max-height: 50px; padding-right: 30px;"/>
+  </a>
+  <a href="https://www.unibe.ch">
+    <img src="../assets/Unibe_Logo_16pt_RGB_201807_o_R_l.png" style="max-height: 50px; padding-right: 30px;"/>
+  </a>
+  <a  href="https://sagw.ch/sagw/">
+    <img src="../assets/logo-sagw.png" style="max-height: 50px;"/>
+  </a>
+</footer>
