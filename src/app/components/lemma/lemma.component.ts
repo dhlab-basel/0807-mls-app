@@ -29,12 +29,12 @@ import {Subscription} from "rxjs";
         <span *ngIf="lemma.properties[hasEndDate]"> {{ lemma.properties[hasEndDate].values[0] }}</span>
       </div>
       <div *ngIf="lemma.properties[hasViaf]">
-        {{lemma.properties[hasViaf].label}}: <a href="http://viaf.org/viaf/{{ lemma.properties[hasViaf].values[0] }}">{{ lemma.properties[hasViaf].values[0] }}</a>
+        {{lemma.properties[hasViaf].label}}: <a href="http://viaf.org/viaf/{{ lemma.properties[hasViaf].values[0] }}" target="_blank">{{ lemma.properties[hasViaf].values[0] }}</a>
       </div>
       <div *ngIf="lemma.properties[hasGnd]">
-        {{lemma.properties[hasGnd].label}}: <a href="http://d-nb.info/gnd/{{ lemma.properties[hasGnd].values[0] }}">{{ lemma.properties[hasGnd].values[0] }}</a>
+        {{lemma.properties[hasGnd].label}}: <a href="http://d-nb.info/gnd/{{ lemma.properties[hasGnd].values[0] }}" target="_blank">{{ lemma.properties[hasGnd].values[0] }}</a>
       </div>
-      <mat-card-actions *ngIf="knoraService.loggedin && showEdit">
+      <mat-card-actions *ngIf="allowEdit">
         <button mat-raised-button (click)="openEditDialog()">edit</button>
       </mat-card-actions>
     </mat-card>
@@ -53,13 +53,11 @@ import {Subscription} from "rxjs";
   ]
 })
 
-export class LemmaComponent implements OnInit, OnDestroy {
+export class LemmaComponent implements OnInit {
   lemmaIri: string;
   lemma: LemmaData;
   private editPermissionSet: Set<string>;
-  public showEdit: boolean = false;
-  private loggedin: Subscription;
-  columnsToDisplay: Array<string> = ['KEY', 'VALUE'];
+  private allowEdit: boolean;
 
   hasLemmaDescription = this.knoraService.mlsOntology + 'hasLemmaDescription';
   hasLemmaComment = this.knoraService.mlsOntology + 'hasLemmaComment';
@@ -73,7 +71,7 @@ export class LemmaComponent implements OnInit, OnDestroy {
   hasStartDate = this.knoraService.mlsOntology + 'hasStartDate';
   hasStartDateInfo = this.knoraService.mlsOntology + 'hasStartDateInfo';
   hasViaf = this.knoraService.mlsOntology + 'hasViaf';
-  hasGnd = this.knoraService.mlsOntology + 'hasGnd'
+  hasGnd = this.knoraService.mlsOntology + 'hasGnd';
   hasVariants = this.knoraService.mlsOntology + 'hasVariants';
   hasPseudonym = this.knoraService.mlsOntology + 'hasPseudonym';
 
@@ -83,6 +81,7 @@ export class LemmaComponent implements OnInit, OnDestroy {
               public knoraService: KnoraService) {
     this.lemma = {id: '', label: '', permission: '', properties: {}};
     this.editPermissionSet = new Set<string>(['M', 'D', 'CR']);
+    this.allowEdit = false;
   }
 
   getLemma() {
@@ -90,6 +89,12 @@ export class LemmaComponent implements OnInit, OnDestroy {
       this.lemmaIri = params.iri;
       this.knoraService.getLemma(params.iri).subscribe((data) => {
         this.lemma = data;
+        if (this.editPermissionSet.has(this.lemma.permission) && this.knoraService.loggedin) {
+          this.allowEdit = true;
+        }
+        else {
+          this.allowEdit = false;
+        }
       });
     });
   }
@@ -110,18 +115,6 @@ export class LemmaComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.getLemma();
-    this.loggedin = this.knoraService.loggedinObs.subscribe((l: boolean) => {
-      if (l) {
-        this.showEdit = this.editPermissionSet.has(this.lemma.permission);
-      } else {
-        this.showEdit = false;
-      }
-      console.log('+++++++++++> LOGIN (l): ', l);
-      console.log('+++++++++++> LOGIN (lemma): ', this.lemma);
-    });
   }
 
-  ngOnDestroy() {
-    this.loggedin.unsubscribe();
-  }
 }

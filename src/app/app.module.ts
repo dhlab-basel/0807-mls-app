@@ -35,13 +35,16 @@ import { LoginComponent } from './components/login/login.component';
 import { MatDialogModule } from '@angular/material/dialog';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { EditResourceComponent } from './components/knora/edit-resource/edit-resource.component';
-import { ValueEditComponent } from './components/knora/string-value-edit/value-edit.component';
+import { ValueEditComponent } from './components/knora/value-edit/value-edit.component';
 import { TheprojectComponent } from './components/theproject/theproject.component';
 import { KnoraStringInputComponent } from './components/knora/knora-string-input/knora-string-input.component';
 import { KnoraListInputComponent} from "./components/knora/knora-list-input/knora-list-input.component";
 import { MatFormFieldControl } from "@angular/material/form-field";
 import { ConfirmDialogComponent } from './components/knora/confirm-dialog/confirm-dialog.component';
 import {MatSelectModule} from "@angular/material/select";
+import {MatTooltipModule} from "@angular/material/tooltip";
+import { KnoraLinkInputComponent } from './components/knora/knora-link-input/knora-link-input.component';
+import {MatAutocompleteModule} from "@angular/material/autocomplete";
 
 export function initializeApp(appInitService: AppInitService) {
   return (): Promise<any> => {
@@ -72,6 +75,7 @@ export function initializeApp(appInitService: AppInitService) {
     ConfirmDialogComponent,
     KnoraStringInputComponent,
     KnoraListInputComponent,
+    KnoraLinkInputComponent,
   ],
   entryComponents: [
     LoginComponent,
@@ -94,6 +98,7 @@ export function initializeApp(appInitService: AppInitService) {
     MatFormFieldModule,
     MatMenuModule,
     MatButtonToggleModule,
+    MatTooltipModule,
     HttpClientModule,
     MatExpansionModule,
     MatGridListModule,
@@ -102,6 +107,7 @@ export function initializeApp(appInitService: AppInitService) {
     FormsModule,
     ReactiveFormsModule,
     MatSelectModule,
+    MatAutocompleteModule
   ],
   providers: [
     AppInitService,

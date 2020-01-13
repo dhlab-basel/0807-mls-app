@@ -14,13 +14,14 @@ import {
   ReadListValue,
   Constants,
   ReadTextValueAsString,
-  ListAdminCache, ListResponse, ListNodeV2
+  ListAdminCache, ListResponse, ListNodeV2, ApiResponseError
 } from "@knora/api";
 
 import {AppInitService} from '../app-init.service';
-import {BehaviorSubject, Observable, of} from "rxjs";
+import {Observable, of} from "rxjs";
 import {catchError, map} from 'rxjs/operators';
 import {GravsearchTemplatesService} from "./gravsearch-templates.service";
+import {PropertyBindingType} from "@angular/compiler";
 
 
 /**
@@ -49,6 +50,23 @@ export class ListPropertyData extends PropertyData {
     this.nodeIris = nodeIris;
   }
 }
+
+export class LinkPropertyData extends PropertyData {
+  public resourceIris: Array<string>;
+  public resourceLabels: Array<string>;
+
+  constructor(propname: string,
+              label: string,
+              resourceIris: Array<string>,
+              values: Array<string>,
+              ids: Array<string>,
+              comments: Array<string | undefined>,
+              permissions: Array<string>) {
+    super(propname, label, values, ids, comments, permissions);
+    this.resourceIris = resourceIris;
+  }
+}
+
 
 /**
  *  Data structure for representing a resource (instance)
@@ -101,11 +119,6 @@ export class KnoraService {
   useremail: string;
   listAdminCache: ListAdminCache;
 
-  // @ts-ignore
-  private loggedinSubject = new BehaviorSubject<boolean>(false);
-  public loggedinObs = this.loggedinSubject.asObservable();
-
-  // this.appInitService.getSettings().server
   constructor(
     private appInitService: AppInitService,
     private queryTemplates: GravsearchTemplatesService
@@ -150,12 +163,12 @@ export class KnoraService {
           case Constants.LinkValue: {
             const vals = data.getValuesAs(prop, ReadLinkValue);
             const label: string = vals[0].propertyLabel || '?';
-            const values: Array<string> = vals.map(v => v.linkedResourceIri);
-            //const nodeIris: Array<string> = vals.map(v => v.listNode);
+            const values: Array<string> = vals.map(v => v.linkedResource && v.linkedResource.label || '?');
+            const resourceIris: Array<string> = vals.map(v => v.linkedResourceIri);
             const ids: Array<string> = vals.map(v => v.id);
             const comments: Array<string | undefined> = vals.map(v => v.valueHasComment);
             const permissions: Array<string> = vals.map(v => v.userHasPermission);
-            propdata.push(new PropertyData(prop, label, values, ids, comments, permissions));
+            propdata.push(new LinkPropertyData(prop, label, resourceIris, values, ids, comments, permissions));
             break;
           }
           default: {
@@ -220,7 +233,6 @@ export class KnoraService {
             const apiResponse = response as ApiResponseData<LoginResponse>;
             this.loggedin = true;
             this.useremail = email;
-            this.loggedinSubject.next(true);
             return {success: true, token: apiResponse.body.token, user: email};
           } else {
             return {success: false, token: response, user: '-'};
@@ -238,7 +250,6 @@ export class KnoraService {
           const apiResponse = response as ApiResponseData<LogoutResponse>;
           this.loggedin = false;
           this.useremail = '';
-          this.loggedinSubject.next(false);
           return apiResponse.body.message;
         } else {
           return response;
@@ -299,6 +310,7 @@ export class KnoraService {
   getResource(iri: string): Observable<ResourceData> {
     return this.knoraApiConnection.v2.res.getResource(iri).pipe(
       map((data: ReadResource) => {
+        console.log('GET_RESOURCE:', data);
         return {
           id: data.id,
           label: data.label,
@@ -358,5 +370,19 @@ export class KnoraService {
     );
   }
 
+  getResourcesByLabel(val: string): Observable<Array<{ id: string; label: string }>> {
+    return this.knoraApiConnection.v2.search.doSearchByLabel(val).pipe(
+      map((data: Array<ReadResource> | ApiResponseError) => {
+        if (data instanceof ApiResponseError) {
+          return [];
+        } else {
+          const items: Array<{id: string, label: string}> = data.map((item: ReadResource) => {
+            return {id: item.id, label: item.label};
+          });
+          return items;
+        }
+      }),
+    );
+  }
 
 }

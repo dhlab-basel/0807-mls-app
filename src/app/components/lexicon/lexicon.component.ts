@@ -24,7 +24,7 @@ import {EditResourceComponent} from "../knora/edit-resource/edit-resource.compon
           <tr mat-header-row *matHeaderRowDef="columnsToDisplay"></tr>
           <tr mat-row *matRowDef="let row; columns: columnsToDisplay;" ></tr>
       </table>
-      <mat-card-actions *ngIf="knoraService.loggedin && (lexicon.permission === 'CR' || lexicon.permission === 'D' || lexicon.permission === 'M')">
+      <mat-card-actions *ngIf="knoraService.loggedin">
         <button mat-raised-button (click)="openEditDialog()">edit</button>
       </mat-card-actions>
 

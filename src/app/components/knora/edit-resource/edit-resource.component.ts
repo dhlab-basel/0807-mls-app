@@ -1,11 +1,12 @@
 import {Component, Inject, OnInit} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef, MatDialogConfig } from "@angular/material/dialog";
-import {KnoraService, ListPropertyData} from "../../../services/knora.service";
+import {KnoraService, LinkPropertyData, ListPropertyData} from "../../../services/knora.service";
 import {map} from "rxjs/operators";
 import {forkJoin} from "rxjs";
-import {ValueData} from "../string-value-edit/value-edit.component";
+import {ValueData} from "../value-edit/value-edit.component";
 import {KnoraStringVal} from "../knora-string-input/knora-string-input.component";
 import {KnoraListVal} from "../knora-list-input/knora-list-input.component";
+import {KnoraLinkVal} from "../knora-link-input/knora-link-input.component";
 import {Constants} from "@knora/api";
 
 @Component({
@@ -107,6 +108,15 @@ export class EditResourceComponent implements OnInit {
                     id: pd.ids[idx],
                     permission: pd.permissions[idx],
                     listValue: new KnoraListVal(pd.nodeIris[idx], pd.comments[idx] || ''),
+                  };
+                }
+                case Constants.LinkValue: {
+                  const pd = data.resData.properties[dataIndex] as LinkPropertyData;
+                  console.log('PDPDPDPDPDPDPDPD : ', pd);
+                  return {
+                    id: pd.ids[idx],
+                    permission: pd.permissions[idx],
+                    linkValue: new KnoraLinkVal(value, pd.resourceIris[idx], pd.comments[idx] || ''),
                   };
                 }
                 default: {
