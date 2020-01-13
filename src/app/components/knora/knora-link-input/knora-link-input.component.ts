@@ -3,60 +3,64 @@ import {MatFormFieldControl} from "@angular/material/form-field";
 import {ControlValueAccessor, FormBuilder, FormGroup, NgControl} from "@angular/forms";
 import {FocusMonitor} from "@angular/cdk/a11y";
 import {Observable, Subject} from "rxjs";
+import {catchError, map} from 'rxjs/operators';
 import {coerceBooleanProperty} from "@angular/cdk/coercion";
 import {KnoraService} from "../../../services/knora.service";
-import {concat} from "rxjs";
-import {ListNode, ListResponse} from "@knora/api";
-
+import {ReadResource} from "@knora/api";
 
 // tslint:disable-next-line:component-class-suffix
-export class KnoraListVal {
-  constructor(public nodeIri: string, public comment: string) {}
+export class KnoraLinkVal {
+  constructor(public label: string, public resourceIri: string, public comment: string) {}
 }
 
-interface DispNode {
-  id: string;
-  label: string;
-  children?: Array<DispNode>;
+export class SearchResultItem {
+  constructor(public resourceIri: string, public label: string) {}
 }
 
 @Component({
-  selector: 'knora-list-input',
+  selector: 'knora-link-input',
   template: `
     <div [formGroup]="parts" class="knora-string-input-container">
       <table class="knora-input-table">
         <tr>
           <td class="knora-input-table-label-cell">{{valueLabel}}:</td>
           <td>
-            <mat-select class="knora-list-input-element klie-val"
-                        formControlName="nodeIri"
-                        aria-label="Value"
-                        (selectionChange)="_handleInput()">
-              <mat-option *ngFor="let dispNode of dispNodes" [value]="dispNode.id">{{dispNode.label}}</mat-option>
-            </mat-select>
+            <input [matAutocomplete]="auto"
+                   class="knora-link-input-element klnkie-val"
+                   formControlName="label"
+                   aria-label="Value"
+                   (input)="_handleLinkInput()">
+            <input style="width: 100%" formControlName="resourceIri">
+            <mat-autocomplete #auto="matAutocomplete" (optionSelected)="_optionSelected($event.option.value)">
+              <mat-option *ngFor="let option of options" [value]="option.label">
+                {{ option.label }}
+              </mat-option>
+            </mat-autocomplete>
           </td>
         </tr>
         <tr>
           <td class="knora-input-table-label-cell">{{commentLabel}}:</td>
           <td>
-            <input class="knora-list-input-element klie-com" formControlName="comment" aria-label="Comment" (input)="_handleInput()">
-          </td>
+            <input class="knora-link-input-element klnkie-com" formControlName="comment" aria-label="Comment" (input)="_handleInput()">
+        </td>
         </tr>
       </table>
     </div>
   `,
-  providers: [{provide: MatFormFieldControl, useExisting: KnoraListInputComponent}],
+  providers: [{provide: MatFormFieldControl, useExisting: KnoraLinkInputComponent}],
   styles: [
+    //'.knora-string-input-container { display: flex; }',
     '.knora-input-table {width: 100%;}',
     '.knora-input-table-label-cell {float: right;}',
-    '.knora-list-input-element { width: 100%; background: none; padding: 2px; outline: none; font: inherit; text-align: left; }',
+    '.knora-link-input-element { width: 100%; background: none; padding: 2px; outline: none; font: inherit; text-align: left; }',
     '.example-tel-input-spacer { opacity: 0; transition: opacity 200ms; }',
     ':host.example-floating .example-tel-input-spacer { opacity: 1; }',
     '.bg {background-color: lightgrey;}'
   ]
 })
-export class KnoraListInputComponent
-  implements ControlValueAccessor, MatFormFieldControl<KnoraListVal>, OnDestroy, OnInit {
+
+export class KnoraLinkInputComponent
+  implements ControlValueAccessor, MatFormFieldControl<KnoraLinkVal>, OnDestroy, OnInit {
 
   @Input()
   valueLabel: string;
@@ -70,12 +74,11 @@ export class KnoraListInputComponent
   stateChanges = new Subject<void>();
   focused = false;
   errorState = false;
-  controlType = 'knora-list-input';
-  id = `knora-list-input-${KnoraListInputComponent.nextId++}`;
+  controlType = 'knora-link-input';
+  id = `knora-link-input-${KnoraLinkInputComponent.nextId++}`;
   describedBy = '';
 
-  public dispNodes: Array<DispNode>;
-  public selected: string;
+  options: Array<{id: string, label: string}> = [];
 
   private _placeholder: string;
   private _required = false;
@@ -85,8 +88,8 @@ export class KnoraListInputComponent
   onTouched = () => {};
 
   get empty() {
-    const {value: {nodeIri, comment}} = this.parts;
-    return !nodeIri && !comment;
+    const {value: {label, resourceIri, comment}} = this.parts;
+    return !label && !resourceIri && !comment;
   }
 
   get shouldLabelFloat() {
@@ -122,26 +125,25 @@ export class KnoraListInputComponent
   }
 
   @Input()
-  get value(): KnoraListVal | null {
-    const {value: {nodeIri, comment}} = this.parts;
-    return new KnoraListVal(nodeIri, comment);
+  get value(): KnoraLinkVal | null {
+    const {value: {label, resourceIri, comment}} = this.parts;
+    return new KnoraLinkVal(label, resourceIri, comment);
   }
-  set value(knoraVal: KnoraListVal | null) {
-    console.log('SETTING VALUE....');
-    const {nodeIri, comment} = knoraVal || new KnoraListVal('', '');
-    this.parts.setValue({nodeIri, comment});
-    this.selected = nodeIri;
+  set value(knoraVal: KnoraLinkVal | null) {
+    const {label, resourceIri, comment} = knoraVal || new KnoraLinkVal('', '', '');
+    this.parts.setValue({label, resourceIri, comment});
     this.stateChanges.next();
   }
 
   constructor(formBuilder: FormBuilder,
-              private knoraService: KnoraService,
               private _focusMonitor: FocusMonitor,
               private _elementRef: ElementRef<HTMLElement>,
-              @Optional() @Self() public ngControl: NgControl) {
-    this.dispNodes = [];
+              @Optional() @Self() public ngControl: NgControl,
+              public knoraService: KnoraService) {
+
     this.parts = formBuilder.group({
-      nodeIri: '',
+      label: '',
+      resourceIri: '',
       comment: ''
     });
 
@@ -156,25 +158,14 @@ export class KnoraListInputComponent
     if (this.ngControl != null) {
       this.ngControl.valueAccessor = this;
     }
-
   }
 
   ngOnInit() {
     if (!this.valueLabel) { this.valueLabel = 'Value'; }
     if (!this.commentLabel) { this.commentLabel = 'Comment'; }
-    if (this.value) {
-      this.knoraService.getListNode(this.value.nodeIri).subscribe( node => {
-        this.knoraService.getList(node.hasRootNode || '').subscribe(
-          (res: ListResponse) => {
-            this.dispNodes = res.list.children.map(
-              (nd: ListNode) => {
-                const gaga = nd.labels.filter( l => l.language === 'de' || l.language === undefined);
-                return {id: nd.id, label: gaga[0].value || 'NAME'};
-              }
-            );
-          });
-      });
-    }
+    this.parts.valueChanges.pipe(
+      map(data => console.log(data))
+    );
   }
 
   ngOnDestroy() {
@@ -193,12 +184,11 @@ export class KnoraListInputComponent
     }
   }
 
-  writeValue(knoraVal: KnoraListVal | null): void {
+  writeValue(knoraVal: KnoraLinkVal | null): void {
     this.value = knoraVal;
   }
 
   registerOnChange(fn: any): void {
-    console.log('registerOnChange', fn);
     this.onChange = fn;
   }
 
@@ -210,17 +200,50 @@ export class KnoraListInputComponent
     this.disabled = isDisabled;
     if (isDisabled) {
       // tslint:disable-next-line:no-non-null-assertion
-      this._elementRef.nativeElement.querySelector('.klie-val')!.classList.remove('bg');
-      this._elementRef.nativeElement.querySelector('.klie-com')!.classList.remove('bg');
+      this._elementRef.nativeElement.querySelector('.klnkie-val')!.classList.remove('bg');
+      this._elementRef.nativeElement.querySelector('.klnkie-com')!.classList.remove('bg');
     } else {
       // tslint:disable-next-line:no-non-null-assertion
-      this._elementRef.nativeElement.querySelector('.klie-val')!.classList.add('bg');
-      this._elementRef.nativeElement.querySelector('.klie-com')!.classList.add('bg');
+      this._elementRef.nativeElement.querySelector('.klnkie-val')!.classList.add('bg');
+      this._elementRef.nativeElement.querySelector('.klnkie-com')!.classList.add('bg');
     }
+    console.log('setDisabledState');
+  }
+
+  _handleLinkInput(): void {
+    this.knoraService.getResourcesByLabel(this.parts.value.label).subscribe(
+      res => {
+        console.log('_handleLinkInput:', res);
+        this.options = res;
+        this.parts.value.label = res[0].label;
+        this.parts.value.resourceIri = res[0].id;
+        this.onChange(this.parts.value);
+      }
+    );
+  }
+
+  _optionSelected(val): void {
+    this.knoraService.getResourcesByLabel(val).subscribe(
+      res => {
+        console.log('_optionSelected:', this.parts.value.comment);
+        this.value = new KnoraLinkVal(res[0].label, res[0].id, this.parts.value.comment);
+      }
+    );
   }
 
   _handleInput(): void {
+    console.log('_handleInput:');
     this.onChange(this.parts.value);
   }
+  /*
+  lookupResource(value: string): Observable<SearchResultItem[]> {
+    return this.knoraService.getResourcesByLabel(value).pipe(
+      map( (data: ReadResource) => new SearchResultItem(data.id, data.label || '??'))
+    );
+  }
+*/
 
 }
+
+
+

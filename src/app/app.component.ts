@@ -1,9 +1,10 @@
-import { Component } from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import { MatDialog, MatDialogConfig } from "@angular/material/dialog";
 import { MatButton } from "@angular/material/button";
 import { LoginComponent, LoginData } from "./components/login/login.component";
 import { KnoraService } from "./services/knora.service";
 import { catchError } from "rxjs/operators";
+import {ActivatedRoute} from "@angular/router";
 
 @Component({
   selector: 'app-root',
@@ -20,12 +21,12 @@ export class AppComponent {
   constructor(public dialog: MatDialog,
               public knoraService: KnoraService) {}
 
-  openLoginDialog(): void {
+  private openLoginDialog(): void {
     const loginConfig = new MatDialogConfig();
     loginConfig.autoFocus = true;
     loginConfig.data = {
-      email: 'EMAIL',
-      password: 'GAGA'
+      email: '',
+      password: ''
     };
 
     const dialogRef = this.dialog.open(LoginComponent, loginConfig);
@@ -33,7 +34,6 @@ export class AppComponent {
     dialogRef.afterClosed().subscribe(
       data => {
         this.knoraService.login(data.email, data.password).subscribe(data => {
-          console.log('LOGIN: ', data);
           if (!data.success) {
             this.openLoginDialog();
           } else {
@@ -44,11 +44,19 @@ export class AppComponent {
       });
   }
 
-  logout(): void {
+  private logout(): void {
     this.knoraService.logout().subscribe(data => {
-      console.log('LOGOUT: ', data);
       this.loggedin = false;
     });
   }
+
+  account(): void {
+    if (this.loggedin) {
+      this.logout();
+    } else {
+      this.openLoginDialog();
+    }
+  }
 }
+
 

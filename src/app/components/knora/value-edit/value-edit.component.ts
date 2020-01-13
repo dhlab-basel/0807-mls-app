@@ -9,12 +9,13 @@ import {
   WriteValueResponse,
   DeleteValue,
   DeleteValueResponse,
-  Constants, UpdateListValue
+  Constants, UpdateListValue, UpdateLinkValue
 } from "@knora/api";
 
 import {KnoraStringVal} from "../knora-string-input/knora-string-input.component";
 import {KnoraListVal} from "../knora-list-input/knora-list-input.component";
-import { KnoraService } from "../../../services/knora.service";
+import {KnoraLinkVal} from "../knora-link-input/knora-link-input.component";
+import {KnoraService} from "../../../services/knora.service";
 import {MatDialog} from "@angular/material/dialog";
 import {ConfirmDialogComponent, ConfirmDialogModel, ConfirmDialogResult} from "../confirm-dialog/confirm-dialog.component";
 
@@ -26,7 +27,13 @@ export interface ValueData {
   label: string;
   cardinality: string;
   permission: string;
-  values: Array<{id: string, permission: string, stringValue?: KnoraStringVal, listValue?: KnoraListVal}>;
+  values: Array<{
+    id: string,
+    permission: string,
+    stringValue?: KnoraStringVal,
+    listValue?: KnoraListVal,
+    linkValue?: KnoraLinkVal
+  }>;
 }
 
 @Component({
@@ -38,7 +45,7 @@ export interface ValueData {
                       appearance="outline"
                       *ngFor="let value of valueData.values; let i = index; let last = last">
         <mat-label>{{ valueData.label }}</mat-label>
-        <knora-string-input *ngIf="!(valueData.propertyType == ListValue)" [formControlName]="valueControlTable[i]"
+        <knora-string-input *ngIf="valueData.propertyType == TextValue" [formControlName]="valueControlTable[i]"
                             placeholder="StringValue"
                             [value]="value.stringValue">
         </knora-string-input>
@@ -46,6 +53,10 @@ export interface ValueData {
                             placeholder="ListValue"
                             [value]="value.listValue">
         </knora-list-input>
+        <knora-link-input *ngIf="valueData.propertyType == LinkValue" [formControlName]="valueControlTable[i]"
+                          placeholder="LinkValue"
+                          [value]="value.linkValue">
+        </knora-link-input>
         <button *ngIf="editButtonVisible[i]"
                 mat-mini-fab
                 matSuffix
@@ -118,6 +129,7 @@ export class ValueEditComponent implements OnInit {
 
   TextValue = Constants.TextValue;
   ListValue = Constants.ListValue;
+  LinkValue = Constants.LinkValue;
 
   constructor(private changeDetectorRef: ChangeDetectorRef,
               public dialog: MatDialog,
@@ -222,6 +234,17 @@ export class ValueEditComponent implements OnInit {
           newval = updateListVal;
           break;
         }
+        case Constants.LinkValue: {
+          console.log("================>", this.inputForm.controls[this.valueControlTable[index]].value);
+          const updateLinkVal = new UpdateLinkValue();
+          updateLinkVal.id = this.valueData.values[index].id;
+          updateLinkVal.linkedResourceIri = this.inputForm.controls[this.valueControlTable[index]].value.resourceIri;
+          if (this.inputForm.controls[this.valueControlTable[index]].value.comment) {
+            updateLinkVal.valueHasComment = this.inputForm.controls[this.valueControlTable[index]].value.comment;
+          }
+          newval = updateLinkVal;
+          break;
+        }
         default: {
           const updateTextVal = new UpdateTextValueAsString();
           updateTextVal.id = this.valueData.values[index].id;
@@ -241,6 +264,7 @@ export class ValueEditComponent implements OnInit {
       updateResource.property = this.valueData.property;
 
       updateResource.value = newval;
+      console.log(newval);
       this.knoraService.knoraApiConnection.v2.values.updateValue(updateResource).subscribe(res => console.log('RESULT:', res));
     } else { // create value
       const createTextVal = new CreateTextValueAsString();
@@ -373,6 +397,10 @@ export class ValueEditComponent implements OnInit {
       }
       case Constants.ListValue: {
         this.valueData.values.push({id: '', permission: '', listValue: new KnoraListVal('', '')});
+        break;
+      }
+      case Constants.LinkValue: {
+        this.valueData.values.push({id: '', permission: '', linkValue: new KnoraLinkVal('', '', '')});
         break;
       }
     }
