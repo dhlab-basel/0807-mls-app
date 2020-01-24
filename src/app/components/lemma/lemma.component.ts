@@ -5,6 +5,7 @@ import {MatDialog, MatDialogConfig} from "@angular/material/dialog";
 import {LoginComponent} from "../login/login.component";
 import {EditResourceComponent} from "../knora/edit-resource/edit-resource.component";
 import {Subscription} from "rxjs";
+import {CreateResourceComponent} from "../knora/create-resource/create-resource/create-resource.component";
 
 
 @Component({
@@ -36,6 +37,7 @@ import {Subscription} from "rxjs";
       </div>
       <mat-card-actions *ngIf="allowEdit">
         <button mat-raised-button (click)="openEditDialog()">edit</button>
+        <button mat-raised-button (click)="openCreateDialog()">create</button>
       </mat-card-actions>
     </mat-card>
     <mat-card>
@@ -109,6 +111,19 @@ export class LemmaComponent implements OnInit {
         resClassIri: this.knoraService.mlsOntology + 'Lemma'
       };
       const dialogRef = this.dialog.open(EditResourceComponent, editConfig);
+    });
+
+  }
+
+  openCreateDialog() {
+    this.route.params.subscribe(params => {
+      const createConfig = new MatDialogConfig();
+      createConfig.autoFocus = true;
+      createConfig.width = "800px";
+      createConfig.data = {
+        resClassIri: this.knoraService.mlsOntology + 'Lemma'
+      };
+      const dialogRef = this.dialog.open(CreateResourceComponent, createConfig);
     });
 
   }

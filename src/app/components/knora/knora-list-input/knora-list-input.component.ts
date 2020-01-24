@@ -12,6 +12,8 @@ import {ListNode, ListResponse} from "@knora/api";
 // tslint:disable-next-line:component-class-suffix
 export class KnoraListVal {
   constructor(public nodeIri: string, public comment: string) {}
+
+  empty(): boolean { return this.nodeIri === '' }
 }
 
 interface DispNode {
@@ -63,6 +65,9 @@ export class KnoraListInputComponent
 
   @Input()
   commentLabel: string;
+
+  @Input()
+  listIri: string;
 
   static nextId = 0;
 
@@ -127,7 +132,6 @@ export class KnoraListInputComponent
     return new KnoraListVal(nodeIri, comment);
   }
   set value(knoraVal: KnoraListVal | null) {
-    console.log('SETTING VALUE....');
     const {nodeIri, comment} = knoraVal || new KnoraListVal('', '');
     this.parts.setValue({nodeIri, comment});
     this.selected = nodeIri;
@@ -162,7 +166,7 @@ export class KnoraListInputComponent
   ngOnInit() {
     if (!this.valueLabel) { this.valueLabel = 'Value'; }
     if (!this.commentLabel) { this.commentLabel = 'Comment'; }
-    if (this.value) {
+    if (this.value && !this.value.empty()) {
       this.knoraService.getListNode(this.value.nodeIri).subscribe( node => {
         this.knoraService.getList(node.hasRootNode || '').subscribe(
           (res: ListResponse) => {
@@ -174,6 +178,16 @@ export class KnoraListInputComponent
             );
           });
       });
+    } else {
+      this.knoraService.getList(this.listIri || '').subscribe(
+        (res: ListResponse) => {
+          this.dispNodes = res.list.children.map(
+            (nd: ListNode) => {
+              const gaga = nd.labels.filter( l => l.language === 'de' || l.language === undefined);
+              return {id: nd.id, label: gaga[0].value || 'NAME'};
+            }
+          );
+        });
     }
   }
 

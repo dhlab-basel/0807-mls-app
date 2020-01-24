@@ -4,6 +4,7 @@ import { SparqlPrep} from '../classes/sparql-prep';
 @Injectable({
   providedIn: 'root'
 })
+/*        ?relval knora-api:listValueAsListNode <http://rdfh.ch/lists/0807/npzA9IfDR12kZXo7oNKMxA> . */
 
 export class GravsearchTemplatesService {
 
@@ -35,6 +36,7 @@ export class GravsearchTemplatesService {
         {{ #endif }}
         ?lemma a knora-api:Resource .
         ?lemma a mls:Lemma .
+        ?lemma mls:hasRelevanceValue ?relval .
         ?lemma mls:hasLemmaText ?text .
         ?lemma mls:hasFamilyName ?fname .
         {{ #if lexicon_iri }}
@@ -47,6 +49,7 @@ export class GravsearchTemplatesService {
         OPTIONAL { ?lemma mls:hasGivenName ?gname . }
         OPTIONAL { ?lemma mls:hasStartDate ?startdate . }
         OPTIONAL { ?lemma mls:hasEndDate ?enddate . }
+        FILTER (?relval = "Ja"^^knora-api:ListNode) .
         FILTER regex(?text, "^{{ start }}", "i")
     }
     ORDER BY ASC(?text)

@@ -37,7 +37,7 @@ export interface ValueData {
 }
 
 @Component({
-  selector: 'app-string-value-edit',
+  selector: 'knora-value-edit',
   template: `
     <form [formGroup]="inputForm">
       <hr/>
@@ -116,6 +116,7 @@ export interface ValueData {
 export class ValueEditComponent implements OnInit {
   @Input()
   valueData: ValueData;
+
   inputControl: Array<FormControl>;
   inputForm: FormGroup;
   valueControlTable: Array<string>;
@@ -235,7 +236,6 @@ export class ValueEditComponent implements OnInit {
           break;
         }
         case Constants.LinkValue: {
-          console.log("================>", this.inputForm.controls[this.valueControlTable[index]].value);
           const updateLinkVal = new UpdateLinkValue();
           updateLinkVal.id = this.valueData.values[index].id;
           updateLinkVal.linkedResourceIri = this.inputForm.controls[this.valueControlTable[index]].value.resourceIri;

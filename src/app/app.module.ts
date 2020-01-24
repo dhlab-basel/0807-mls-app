@@ -45,6 +45,7 @@ import {MatSelectModule} from "@angular/material/select";
 import {MatTooltipModule} from "@angular/material/tooltip";
 import { KnoraLinkInputComponent } from './components/knora/knora-link-input/knora-link-input.component';
 import {MatAutocompleteModule} from "@angular/material/autocomplete";
+import { CreateResourceComponent } from './components/knora/create-resource/create-resource/create-resource.component';
 
 export function initializeApp(appInitService: AppInitService) {
   return (): Promise<any> => {
@@ -76,10 +77,12 @@ export function initializeApp(appInitService: AppInitService) {
     KnoraStringInputComponent,
     KnoraListInputComponent,
     KnoraLinkInputComponent,
+    CreateResourceComponent,
   ],
   entryComponents: [
     LoginComponent,
     EditResourceComponent,
+    CreateResourceComponent,
     ConfirmDialogComponent,
   ],
   imports: [

@@ -15,14 +15,14 @@ import {Constants} from "@knora/api";
     <h1 mat-dialog-title>Edit</h1>
     <mat-dialog-content>
       <div *ngFor="let arrayItem of arrayItems; let i=index">
-        <app-string-value-edit
-                [valueData]="arrayItem">
-        </app-string-value-edit>
+        <knora-value-edit
+          [valueData]="arrayItem">
+        </knora-value-edit>
         <mat-divider></mat-divider>
       </div>
     </mat-dialog-content>
     <mat-dialog-actions>
-       <button class="mat-raised-button mat-primary" (click)="close()">Close</button>
+      <button class="mat-raised-button mat-primary" (click)="close()">Close</button>
     </mat-dialog-actions>
   `,
   styles: []

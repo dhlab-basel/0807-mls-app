@@ -10,11 +10,17 @@ import {KnoraService} from "../../services/knora.service";
           Für das MLS ausgewertete Lexika
         </mat-card-title>
         <mat-card-subtitle>
-          Das Musiklexikon der Schweiz greift auf eine Vielzahl bereits bestehender
+          <p>Das Musiklexikon der Schweiz greift auf eine Vielzahl bereits bestehender
           (teilweise gemeinfreier) Lexika zurück. Eine Liste dieser Lexika sehen Sie hier
           aufgelistet. Es ist möglich die Lexika einzeln aufzurufen und separat zu durchsuchen.
           Jedoch sind nicht alle Lexika in gleicher Detailtiefe erfasst. Einige sind in
-          Volltexten verfügbar, andere nur als Stichwortliste einsehbar
+            Volltexten verfügbar, andere nur als Stichwortliste einsehbar.</p>
+          Legende:<br/>
+          * = digitalisiertes Lexikon<br/>
+          ° = Online Lexikon<br/>
+          / = gedrucktes Lexikon, es wird nur die Liste der Stichworte mitgeteilt<br/>
+          - = Stichwortliste<br/>
+
         </mat-card-subtitle>
         <mat-card-content>
             <mat-progress-bar mode="indeterminate" *ngIf="showProgbar"></mat-progress-bar>
@@ -34,7 +40,7 @@ import {KnoraService} from "../../services/knora.service";
                 <tr mat-header-row *matHeaderRowDef="columnsToDisplay"></tr>
                 <tr mat-row *matRowDef="let row; columns: columnsToDisplay;" (click)="lexiconSelected(row)" class="clickable"></tr>
             </table>
-            
+
             <mat-paginator *ngIf="nLexica > 25" [length]="nLexica"
                            [pageIndex]="page"
                            [pageSize]="25"

@@ -19,7 +19,7 @@ import {
 
 import {AppInitService} from '../app-init.service';
 import {Observable, of} from "rxjs";
-import {catchError, map} from 'rxjs/operators';
+import {catchError, finalize, map, take, tap} from 'rxjs/operators';
 import {GravsearchTemplatesService} from "./gravsearch-templates.service";
 import {PropertyBindingType} from "@angular/compiler";
 
@@ -264,8 +264,10 @@ export class KnoraService {
   }
 
   getResinfo(ontoIri: string, resIri: string): Observable<ResInfo> {
+    console.log('=====> getResinfo(1)', ontoIri, resIri);
     return this.knoraApiConnection.v2.ontologyCache.getOntology(ontoIri).pipe(  // ToDo: Use Cache
       map((cachedata: Map<string, ReadOntology>) => {
+        console.log('=====> getResinfo(2)', cachedata);
         const data = cachedata.get(ontoIri) as ReadOntology;
         const resInfo: ResInfo = {
           id: data.classes[resIri].id,
@@ -302,9 +304,8 @@ export class KnoraService {
           resInfo.properties[prop.propertyIndex] = propInfo;
         }
         return resInfo;
-      })
+      }, catchError(error => {console.log(error); return error;}))
     );
-
   }
 
   getResource(iri: string): Observable<ResourceData> {
@@ -334,6 +335,7 @@ export class KnoraService {
     const query = this.queryTemplates[queryname](params);
     return this.knoraApiConnection.v2.search.doExtendedSearch(query).pipe(
       map((data: Array<ReadResource>) => {
+        console.log('^^^^^^^^^', data);
         return this.processSearchResult(data, fields);
       }));
   }
@@ -353,6 +355,7 @@ export class KnoraService {
   getLemma(iri: string): Observable<LemmaData> {
     return this.knoraApiConnection.v2.res.getResource(iri).pipe(
       map((data: ReadResource) => {
+        console.log('=*=*=*=*=', data);
           return {id: data.id, label: data.label, permission: data.userHasPermission, properties: this.processLemmaProperties(data)};
         }
       ));

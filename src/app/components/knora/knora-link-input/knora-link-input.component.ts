@@ -223,25 +223,18 @@ export class KnoraLinkInputComponent
   }
 
   _optionSelected(val): void {
-    this.knoraService.getResourcesByLabel(val).subscribe(
-      res => {
-        console.log('_optionSelected:', this.parts.value.comment);
-        this.value = new KnoraLinkVal(res[0].label, res[0].id, this.parts.value.comment);
-      }
-    );
+    console.log('_optionSelected(1):', val);
+    const res = this.options.filter(tmp => tmp.label === val);
+    if (res.length !== 1) {
+      console.log('BIG ERROR...');
+    }
+    this.value = new KnoraLinkVal(res[0].label, res[0].id, this.parts.value.comment);
   }
 
   _handleInput(): void {
     console.log('_handleInput:');
     this.onChange(this.parts.value);
   }
-  /*
-  lookupResource(value: string): Observable<SearchResultItem[]> {
-    return this.knoraService.getResourcesByLabel(value).pipe(
-      map( (data: ReadResource) => new SearchResultItem(data.id, data.label || '??'))
-    );
-  }
-*/
 
 }
 
