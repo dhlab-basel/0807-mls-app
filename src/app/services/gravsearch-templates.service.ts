@@ -5,7 +5,8 @@ import { SparqlPrep} from '../classes/sparql-prep';
   providedIn: 'root'
 })
 /*        ?relval knora-api:listValueAsListNode <http://rdfh.ch/lists/0807/npzA9IfDR12kZXo7oNKMxA> . */
-
+/*        FILTER (?relval = "Ja"^^knora-api:ListNode) . */
+/*         ?lemma mls:hasRelevanceValue ?relval . */
 export class GravsearchTemplatesService {
 
   constructor(private sparqlPrep: SparqlPrep) { }
