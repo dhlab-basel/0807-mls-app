@@ -59,7 +59,7 @@ export class LemmaComponent implements OnInit {
   lemmaIri: string;
   lemma: LemmaData;
   private editPermissionSet: Set<string>;
-  private allowEdit: boolean;
+  public allowEdit: boolean;
 
   hasLemmaDescription = this.knoraService.mlsOntology + 'hasLemmaDescription';
   hasLemmaComment = this.knoraService.mlsOntology + 'hasLemmaComment';
