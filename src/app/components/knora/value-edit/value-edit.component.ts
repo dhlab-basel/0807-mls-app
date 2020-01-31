@@ -45,10 +45,10 @@ export interface ValueData {
                       appearance="outline"
                       *ngFor="let value of valueData.values; let i = index; let last = last">
         <mat-label>{{ valueData.label }}</mat-label>
-        <knora-string-input *ngIf="valueData.propertyType == TextValue" [formControlName]="valueControlTable[i]"
+        <knora-text-input *ngIf="valueData.propertyType == TextValue" [formControlName]="valueControlTable[i]"
                             placeholder="StringValue"
                             [value]="value.stringValue">
-        </knora-string-input>
+        </knora-text-input>
         <knora-list-input *ngIf="valueData.propertyType == ListValue" [formControlName]="valueControlTable[i]"
                             placeholder="ListValue"
                             [value]="value.listValue">
