@@ -1,7 +1,11 @@
 
 <mat-toolbar>
   <button mat-button routerLink="home">
-    <img src="../assets/mls-toolbar-logo.png" style="max-height: 64px;">
+    <img src="../assets/mls-toolbar-logo.png" style="max-height: 64px;" matTooltip="Musiklexikon der Schweiz
+Dictionnaire de la musique en Suisse
+Dizionario della musica in Svizzera
+Dictionary of Music in Switzerland
+">
   </button>
   <a mat-button *ngIf="knoraService.loggedin" (click)="logout()">{{ knoraService.useremail }}</a>
   <span class="fill-remaining-space"></span>
@@ -20,7 +24,7 @@
 </router-outlet>
 <footer>
   <a href="https://www.smg-ssm.ch/smg-ssm/">
-    <img src="../assets/musikforschendegesellschaft-logo.png" style="max-height: 40px; padding-right: 30px;"/>
+    <img src="../assets/musikforschendegesellschaft-logo.png" style="max-height: 40px; padding-right: 30px;" matTooltip="Info about the action"/>
   </a>
   <a href="https://www.musikrat.ch">
     <img src="../assets/logo-musikrat.png" style="max-height: 50px; padding-right: 30px;"/>

@@ -22,3 +22,7 @@ footer {
 .clickable {
   cursor: pointer;
 }
+
+::ng-deep .mat-tooltip  {
+  white-space: pre-line    !important;
+}

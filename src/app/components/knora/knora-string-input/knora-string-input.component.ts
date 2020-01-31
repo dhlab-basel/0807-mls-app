@@ -22,7 +22,9 @@ export class KnoraStringVal {
           </td>
         </tr>
         <tr>
-          <td class="knora-input-table-label-cell">{{commentLabel}}:</td><td><input class="knora-string-input-element ksie-com" formControlName="comment" aria-label="Comment" (input)="_handleInput()">
+          <td class="knora-input-table-label-cell">{{commentLabel}}:</td>
+          <td>
+            <input class="knora-string-input-element ksie-com" formControlName="comment" aria-label="Comment" (input)="_handleInput()">
         </td>
         </tr>
       </table>
