@@ -40,7 +40,34 @@ import { Component, OnInit } from '@angular/core';
         </mat-card-content>
       </mat-card>
 
-      <mat-card>
+     <mat-card>
+       <mat-card-title>Bisherige Miterabeiter_innen</mat-card-title>
+       <mat-card-content>
+         <ul>
+           <li>Henry Hope</li>
+           <li>Martin Pensa</li>
+           <li>Nemanja Radivojevic</li>
+           <li>Eleni Ralli</li>
+           <li>Stefano Kunz</li>
+           <li>Viviane Sonderegger</li>
+           <li>Florence Weber</li>
+         </ul>
+       </mat-card-content>
+     </mat-card>
+
+     <mat-card>
+       <mat-card-title>Probeartikel</mat-card-title>
+       <mat-card-content>
+         <ul>
+           <li>Irène Minder-Jeanneret</li>
+           <li>Marco Jorio</li>
+           <li>Cristina Urchueguía </li>
+           <li>Beatrice Wolf-Furrer</li>
+         </ul>
+       </mat-card-content>
+     </mat-card>
+
+     <mat-card>
         <mat-card-title>Spenden</mat-card-title>
         <mat-card-content>
           Schweiz. Musikforschende Gesellschaft (SMG)<br/>
