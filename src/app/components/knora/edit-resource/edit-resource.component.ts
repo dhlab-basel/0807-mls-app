@@ -46,14 +46,15 @@ export class EditResourceComponent implements OnInit {
     const resinfoObs = this.knoraService.getResinfo(this.knoraService.mlsOntology.slice(0, -1), this.inData.resClassIri).pipe(map(
       data => {
         console.log('RAW RESINFO: ', data);
-        const items: Array<{id: string, label: string, cardinality: string, propertyType?: string}> = [];
+        const items: Array<{id: string, label: string, cardinality: string, propertyType?: string, guiElement?: string}> = [];
         for (const p in data.properties) {
           if (data.properties.hasOwnProperty(p)) {
             items.push({
               id: p,
               label: data.properties[p].label ? data.properties[p].label as string : '?',
               cardinality: data.properties[p].cardinality,
-              propertyType: data.properties[p].objectType
+              propertyType: data.properties[p].objectType,
+              guiElement: data.properties[p].guiElement
             });
           }
         }
@@ -88,6 +89,7 @@ export class EditResourceComponent implements OnInit {
             resourceType: this.resourceType,
             resourceId: this.resourceId,
             propertyType: tmp.propertyType,
+            guiElement: tmp.guiElement,
             property: tmp.id,
             label: tmp.label,
             cardinality: tmp.cardinality,

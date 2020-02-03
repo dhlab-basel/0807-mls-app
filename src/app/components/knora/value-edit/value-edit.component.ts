@@ -23,6 +23,7 @@ export interface ValueData {
   resourceType: string;
   resourceId: string;
   propertyType?: string;
+  guiElement?: string;
   property: string;
   label: string;
   cardinality: string;
@@ -45,7 +46,11 @@ export interface ValueData {
                       appearance="outline"
                       *ngFor="let value of valueData.values; let i = index; let last = last">
         <mat-label>{{ valueData.label }}</mat-label>
-        <knora-text-input *ngIf="valueData.propertyType == TextValue" [formControlName]="valueControlTable[i]"
+        <knora-string-input *ngIf="valueData.propertyType == TextValue && valueData.guiElement == GuiSimpleText" [formControlName]="valueControlTable[i]"
+                          placeholder="StringValue"
+                          [value]="value.stringValue">
+        </knora-string-input>
+        <knora-text-input *ngIf="valueData.propertyType == TextValue && valueData.guiElement == GuiTextarea" [formControlName]="valueControlTable[i]"
                             placeholder="StringValue"
                             [value]="value.stringValue">
         </knora-text-input>
@@ -131,6 +136,11 @@ export class ValueEditComponent implements OnInit {
   TextValue = Constants.TextValue;
   ListValue = Constants.ListValue;
   LinkValue = Constants.LinkValue;
+
+  GuiSimpleText = "http://api.knora.org/ontology/salsah-gui/v2#SimpleText";
+  GuiTextarea = "http://api.knora.org/ontology/salsah-gui/v2#Textarea";
+
+
 
   constructor(private changeDetectorRef: ChangeDetectorRef,
               public dialog: MatDialog,
