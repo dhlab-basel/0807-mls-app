@@ -10,10 +10,8 @@ import { Component, OnInit } from '@angular/core';
       <mat-card>
         <mat-card-title>Auftragnehmerin</mat-card-title>
         <mat-card-content>
-          Schweizerische Musikforschende Gesellschaft (SMG), Steuerungsgruppe unter dem Vorsitz von
-          Prof. Dr. Cristina Urchueguía (Universität Bern; Zentralpräsidentin SMG)<br/>
           Schweizerische Musikforschende Gesellschaft<br/>
-          Prof. Dr. Cristina Urchueguía (Vorsitz)<br/>
+          Prof. Dr. Cristina Urchueguía (Zentralpräsidentin)<br/>
           Institut für Musikwissenschaft<br/>
           Mittelstrasse 43<br/>
           3012 Bern<br/>
@@ -28,11 +26,10 @@ import { Component, OnInit } from '@angular/core';
         <mat-card-title>Steuerungsgruppe</mat-card-title>
         <mat-card-content>
           <ul>
-            <li>Prof. Dr. Cristina Urchueguía (Universität Bern, Vorsitz)</li>
+            <li>Prof. Dr. Cristina Urchueguía (Vorsitz)</li>
             <li>Dr. Caiti Hauck-Silva</li>
             <li>Dr. Marco Jorio</li>
             <li>Dr. Moritz Kelber</li>
-            <li>Stefano Kunz</li>
             <li>Dr. Irène Minder-Jeanneret</li>
             <li>Pio Pellizzari</li>
             <li>Prof. Dr. Stefanie Stadler</li>

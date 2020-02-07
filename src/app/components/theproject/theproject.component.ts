@@ -7,7 +7,7 @@ import { Component, OnInit } from '@angular/core';
       <mat-card-title>Wir brauchen Sie!</mat-card-title>
       <mat-card-content>
         Das MLS ist für Produktion, Trägerschaft und Finanzierung auf zahlreiche Mitarbeiterinnen und Mitarbeiter angewiesen.
-        Haben Sie Lust, mitzu¬machen oder mitzufinanzieren?<br>
+        Haben Sie Lust, mitzumachen oder mitzufinanzieren?<br>
         Kontaktadresse: <a href="mailto:info@smg-ssm.ch?subject=MLS">info@smg-ssm.ch (Betreff: MLS)</a>
       </mat-card-content>
     </mat-card>
@@ -32,22 +32,22 @@ import { Component, OnInit } from '@angular/core';
       <mat-card-content>
         <mat-grid-list cols="6" rowHeight>
           <mat-grid-tile>
-            <img mat-card-image src="../assets/logo-sagw.svg" class="fit"/>
+            <img mat-card-image src="../assets/logo-sagw.svg" class="fit" style="padding: 100px;"/>
           </mat-grid-tile>
           <mat-grid-tile>
-            <img mat-card-image src="../assets/DaSCH_Logo_RGB.png" class="fit"/>
+            <img mat-card-image src="../assets/DaSCH_Logo_RGB.png" class="fit" style="padding: 100px;"/>
           </mat-grid-tile>
           <mat-grid-tile>
-            <img mat-card-image src="../assets/Unibe_Logo_16pt_RGB_201807_o_R_l.png" class="fit"/>
+            <img mat-card-image src="../assets/Unibe_Logo_16pt_RGB_201807_o_R_l.png" class="fit" style="padding: 100px;"/>
           </mat-grid-tile>
           <mat-grid-tile>
-            <img mat-card-image src="../assets/metagrid_logo-250@2x.png" class="fit"/>
+            <img mat-card-image src="../assets/metagrid_logo-250@2x.png" class="fit" style="padding: 100px;"/>
           </mat-grid-tile>
           <mat-grid-tile>
-            <img mat-card-image src="../assets/histhub.svg" class="fit"/>
+            <img mat-card-image src="../assets/histhub.svg" class="fit" style="padding: 100px;"/>
           </mat-grid-tile>
           <mat-grid-tile>
-            <img mat-card-image src="../assets/Suisa_Logo.svg.png" class="fit"/>
+            <img mat-card-image src="../assets/Suisa_Logo.svg.png" class="fit" style="padding: 100px;"/>
           </mat-grid-tile>
         </mat-grid-list>
         <p>Logo Design: Margrit Hänni</p>
