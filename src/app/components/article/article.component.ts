@@ -5,7 +5,7 @@ import {KnoraService} from "../../services/knora.service";
 @Component({
   selector: 'app-article',
   template: `
-    <mat-card>
+    <mat-card class="maxw">
         <mat-card-title>
             Artikel
         </mat-card-title>
@@ -26,7 +26,9 @@ import {KnoraService} from "../../services/knora.service";
 
     </mat-card>
    `,
-  styles: []
+  styles: [
+    '.maxw { max-width: 500px; }'
+  ]
 })
 export class ArticleComponent implements OnInit {
   articleIri: string;
