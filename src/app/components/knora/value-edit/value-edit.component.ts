@@ -54,6 +54,10 @@ export interface ValueData {
                             placeholder="StringValue"
                             [value]="value.stringValue">
         </knora-text-input>
+        <knora-text-input *ngIf="valueData.propertyType == TextValue && valueData.guiElement === undefined" [formControlName]="valueControlTable[i]"
+                          placeholder="StringValue"
+                          [value]="value.stringValue">
+        </knora-text-input>
         <knora-list-input *ngIf="valueData.propertyType == ListValue" [formControlName]="valueControlTable[i]"
                             placeholder="ListValue"
                             [value]="value.listValue">
@@ -392,6 +396,7 @@ export class ValueEditComponent implements OnInit {
     //
     // prepare next control
     //
+    console.log("---> addField()");
     this.inputForm.addControl('textval' + this.valueControlIndex.toString(), new FormControl({value: '', disabled: false}));
     this.valueControlTable.push('textval' + this.valueControlIndex.toString());
     this.valueControlIndex++;
@@ -402,20 +407,24 @@ export class ValueEditComponent implements OnInit {
     this.deleteButtonVisible.push(false);
     switch (this.valueData.propertyType) {
       case Constants.TextValue: {
+        console.log('case Constants.TextValue:');
         this.valueData.values.push({id: '', permission: '', stringValue: new KnoraStringVal('', '')});
         break;
       }
       case Constants.ListValue: {
+        console.log('case Constants.ListValue:');
         this.valueData.values.push({id: '', permission: '', listValue: new KnoraListVal('', '')});
         break;
       }
       case Constants.LinkValue: {
+        console.log('case Constants.LinkValue:');
         this.valueData.values.push({id: '', permission: '', linkValue: new KnoraLinkVal('', '', '')});
         break;
       }
     }
     this.addButtonVisible = false;
     this.isNew.push(true);
+    console.log(this.valueData);
   }
 
 }

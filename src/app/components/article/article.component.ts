@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
-import {KnoraService} from "../../services/knora.service";
+import {KnoraService, ResourceData} from "../../services/knora.service";
+import {MatDialog, MatDialogConfig} from "@angular/material/dialog";
+import {EditResourceComponent} from "../knora/edit-resource/edit-resource.component";
 
 @Component({
   selector: 'app-article',
@@ -25,9 +27,13 @@ import {KnoraService} from "../../services/knora.service";
         </table>
 
     </mat-card>
-   `,
+    <mat-card-actions *ngIf="knoraService.loggedin">
+      <button mat-raised-button (click)="openEditDialog()">edit</button>
+    </mat-card-actions>
+  `,
   styles: [
-    '.maxw { max-width: 500px; }'
+    '.maxw { max-width: 500px; }',
+    '.clickable {cursor: pointer;}'
   ]
 })
 export class ArticleComponent implements OnInit {
@@ -35,6 +41,7 @@ export class ArticleComponent implements OnInit {
   article: {[index: string]: string} = {};
 
   constructor(private route: ActivatedRoute,
+              public dialog: MatDialog,
               private knoraService: KnoraService) {
 
   }
@@ -75,6 +82,20 @@ export class ArticleComponent implements OnInit {
         this.article = articledata;
       });
     });
+  }
+
+  openEditDialog() {
+    this.route.params.subscribe(params => {
+      const editConfig = new MatDialogConfig();
+      editConfig.autoFocus = true;
+      editConfig.width = '800px';
+      editConfig.data = {
+        resIri: this.articleIri,
+        resClassIri: this.knoraService.mlsOntology + 'Article'
+      };
+      const dialogRef = this.dialog.open(EditResourceComponent, editConfig);
+    });
+
   }
 
   ngOnInit() {

@@ -45,13 +45,14 @@ export class KnoraTextVal {
 export class KnoraTextInputComponent
   implements ControlValueAccessor, MatFormFieldControl<KnoraTextVal>, OnDestroy, OnInit {
 
+  static nextId = 0;
+
   @Input()
   valueLabel: string;
 
   @Input()
   commentLabel: string;
 
-  static nextId = 0;
 
   parts: FormGroup;
   stateChanges = new Subject<void>();
