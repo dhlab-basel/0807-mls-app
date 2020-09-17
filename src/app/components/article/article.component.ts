@@ -42,7 +42,7 @@ export class ArticleComponent implements OnInit {
 
   constructor(private route: ActivatedRoute,
               public dialog: MatDialog,
-              private knoraService: KnoraService) {
+              public knoraService: KnoraService) {
 
   }
 
