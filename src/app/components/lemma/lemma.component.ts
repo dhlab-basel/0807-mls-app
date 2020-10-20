@@ -7,7 +7,6 @@ import {EditResourceComponent} from "../knora/edit-resource/edit-resource.compon
 import {Subscription} from "rxjs";
 import {CreateResourceComponent} from "../knora/create-resource/create-resource/create-resource.component";
 
-
 @Component({
   selector: 'app-lemma',
   template: `
@@ -35,6 +34,7 @@ import {CreateResourceComponent} from "../knora/create-resource/create-resource/
       <div *ngIf="lemma.properties[hasGnd]">
         {{lemma.properties[hasGnd].label}}: <a href="http://d-nb.info/gnd/{{ lemma.properties[hasGnd].values[0] }}" target="_blank">{{ lemma.properties[hasGnd].values[0] }}</a>
       </div>
+      <div style="padding-top: 10px;">ARK-ID: {{lemma.arkUrl}}</div>
       <mat-card-actions *ngIf="allowEdit">
         <button mat-raised-button (click)="openEditDialog()">edit</button>
         <button mat-raised-button (click)="openCreateDialog()">create</button>
@@ -81,7 +81,7 @@ export class LemmaComponent implements OnInit {
   constructor(public route: ActivatedRoute,
               public dialog: MatDialog,
               public knoraService: KnoraService) {
-    this.lemma = {id: '', label: '', permission: '', properties: {}};
+    this.lemma = {id: '', label: '', permission: '', arkUrl: '', properties: {}};
     this.editPermissionSet = new Set<string>(['M', 'D', 'CR']);
     this.allowEdit = false;
   }
@@ -99,6 +99,10 @@ export class LemmaComponent implements OnInit {
         }
       });
     });
+  }
+
+  getArk(): string {
+    return this.lemma.arkUrl;
   }
 
   openEditDialog() {

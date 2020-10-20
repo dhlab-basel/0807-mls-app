@@ -30,7 +30,7 @@ import { Component, OnInit } from '@angular/core';
         Kooperationspartner
       </mat-card-title>
       <mat-card-content>
-        <mat-grid-list cols="6" rowHeight>
+        <mat-grid-list cols="4" rowHeight>
           <mat-grid-tile>
             <img mat-card-image src="../assets/logo-sagw.svg" class="fit" style="padding: 100px;"/>
           </mat-grid-tile>
@@ -48,6 +48,12 @@ import { Component, OnInit } from '@angular/core';
           </mat-grid-tile>
           <mat-grid-tile>
             <img mat-card-image src="../assets/Suisa_Logo.svg.png" class="fit" style="padding: 100px;"/>
+          </mat-grid-tile>
+          <mat-grid-tile>
+            <img mat-card-image src="../assets/logo fonoteca_NEW original.png" class="fit" style="padding: 100px;"/>
+          </mat-grid-tile>
+          <mat-grid-tile>
+            <img mat-card-image src="../assets/EDI_NB_df_CMYK_pos_hoch.png" class="fit" style="padding: 100px;"/>
           </mat-grid-tile>
         </mat-grid-list>
         <p>Logo Design: Margrit Hänni</p>

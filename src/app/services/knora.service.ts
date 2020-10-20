@@ -82,6 +82,7 @@ export interface LemmaData {
   id: string;
   label: string;
   permission: string; /** permission of the current user */
+  arkUrl: string;
   properties: {[index: string]: {label: string, values: Array<string>}};
 }
 
@@ -356,7 +357,12 @@ export class KnoraService {
     return this.knoraApiConnection.v2.res.getResource(iri).pipe(
       map((data: ReadResource) => {
         console.log('=*=*=*=*=', data);
-          return {id: data.id, label: data.label, permission: data.userHasPermission, properties: this.processLemmaProperties(data)};
+          return {
+            id: data.id,
+            label: data.label,
+            permission: data.userHasPermission,
+            arkUrl: data.arkUrl,
+            properties: this.processLemmaProperties(data)};
         }
       ));
   }
