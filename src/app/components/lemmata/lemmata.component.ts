@@ -1,14 +1,14 @@
-import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { ElementRef, ViewChild } from '@angular/core';
 import { Router} from '@angular/router';
-import {KnoraService} from "../../services/knora.service";
+import {KnoraService} from '../../services/knora.service';
 
 @Component({
   selector: 'app-lemmata',
   template: `
-    <mat-card *ngIf="lexicon_iri">
-        <app-lexicon [lexiconIri]="lexicon_iri"></app-lexicon>
+    <mat-card *ngIf="lexiconIri">
+      <app-lexicon [lexiconIri]="lexiconIri"></app-lexicon>
     </mat-card>
     <mat-card>
       <mat-card-title>
@@ -28,7 +28,7 @@ import {KnoraService} from "../../services/knora.service";
                    [value]="searchterm"
                    matInput
                    type="search"
-                   placeholder="Stichwortsuche" />
+                   placeholder="Stichwortsuche"/>
             <mat-icon matSuffix class="clickable" (click)="searchEvent($event)">search</mat-icon>
             <mat-icon matSuffix class="clickable" (click)="searchCancel($event)">cancel</mat-icon>
             <mat-hint>Suche</mat-hint>
@@ -38,19 +38,20 @@ import {KnoraService} from "../../services/knora.service";
         <mat-progress-bar mode="indeterminate" *ngIf="showProgbar"></mat-progress-bar>
         <table mat-table [dataSource]="lemmata">
           <ng-container matColumnDef="lemma_text">
-            <th mat-header-cell *matHeaderCellDef> Stichwort </th>
+            <th mat-header-cell *matHeaderCellDef> Stichwort</th>
             <td mat-cell *matCellDef="let element"> {{element[1]}} </td>
           </ng-container>
           <ng-container matColumnDef="lemma_start">
-            <th mat-header-cell *matHeaderCellDef> Von </th>
+            <th mat-header-cell *matHeaderCellDef> Von</th>
             <td mat-cell *matCellDef="let element"> {{element[2]}} </td>
           </ng-container>
           <ng-container matColumnDef="lemma_end">
-            <th mat-header-cell *matHeaderCellDef> Bis </th>
+            <th mat-header-cell *matHeaderCellDef> Bis</th>
             <td mat-cell *matCellDef="let element"> {{element[3]}} </td>
           </ng-container>
           <tr mat-header-row *matHeaderRowDef="columnsToDisplay"></tr>
-          <tr mat-row *matRowDef="let row; columns: columnsToDisplay;" (click)="lemmaSelected(row)" class="clickable"></tr>
+          <tr mat-row *matRowDef="let row; columns: columnsToDisplay;" (click)="lemmaSelected(row)"
+              class="clickable"></tr>
         </table>
 
         <mat-paginator *ngIf="nLemmata > 25" [length]="nLemmata"
@@ -79,10 +80,10 @@ export class LemmataComponent implements OnInit {
   page: number;
   nLemmata: number;
   columnsToDisplay: Array<string> = ['lemma_text', 'lemma_start', 'lemma_end'];
-  showProgbar: boolean = false;
-  showAindex: boolean = true;
+  showProgbar = false;
+  showAindex = true;
   searchterm: string;
-  lexicon_iri?: string;
+  lexiconIri?: string;
 
   constructor(private knoraService: KnoraService,
               private activatedRoute: ActivatedRoute,
@@ -93,7 +94,7 @@ export class LemmataComponent implements OnInit {
     this.searchterm = '';
     this.activatedRoute.queryParams.subscribe(params => {
       this.startchar = params.hasOwnProperty('startchar') ? params.startchar : 'A';
-      this.lexicon_iri = params.hasOwnProperty('lexicon_iri') ? params.lexicon_iri : undefined;
+      this.lexiconIri = params.hasOwnProperty('lexicon_iri') ? params.lexicon_iri : undefined;
     });
   }
 
@@ -105,7 +106,7 @@ export class LemmataComponent implements OnInit {
       {
         relativeTo: this.activatedRoute,
         queryParams: {page: this.page, startchar: this.startchar},
-        queryParamsHandling: "merge", // remove to replace all query params by provided
+        queryParamsHandling: 'merge', // remove to replace all query params by provided
       });
     console.log(c);
     this.getLemmata();
@@ -118,9 +119,9 @@ export class LemmataComponent implements OnInit {
       {
         relativeTo: this.activatedRoute,
         queryParams: {page: this.page},
-        queryParamsHandling: "merge", // remove to replace all query params by provided
+        queryParamsHandling: 'merge', // remove to replace all query params by provided
       });
-    if (this.searchterm === '' && this.lexicon_iri === undefined) {
+    if (this.searchterm === '' && this.lexiconIri === undefined) {
       this.getLemmata();
     } else {
       this.searchLemmata();
@@ -129,16 +130,16 @@ export class LemmataComponent implements OnInit {
 
   lemmaSelected(event): void {
     let url: string;
-    if (this.lexicon_iri !== undefined) {
+    if (this.lexiconIri !== undefined) {
       url = 'article/' + encodeURIComponent(event[4]);
     } else {
       url = 'lemma/' + encodeURIComponent(event[0]);
     }
     this.router.navigateByUrl(url).then(e => {
       if (e) {
-        console.log("Navigation is successful!");
+        console.log('Navigation is successful!');
       } else {
-        console.log("Navigation has failed!");
+        console.log('Navigation has failed!');
       }
     });
   }
@@ -182,8 +183,8 @@ export class LemmataComponent implements OnInit {
       page: '0',
       searchterm: this.searchterm
     };
-    if (this.lexicon_iri !== undefined) {
-      paramsCnt.lexicon_iri = this.lexicon_iri;
+    if (this.lexiconIri !== undefined) {
+      paramsCnt.lexicon_iri = this.lexiconIri;
     }
     this.knoraService.gravsearchQueryCount('lemmata_search', paramsCnt).subscribe(
       n => this.nLemmata = n
@@ -193,8 +194,8 @@ export class LemmataComponent implements OnInit {
       page: String(this.page),
       searchterm: this.searchterm
     };
-    if (this.lexicon_iri !== undefined) {
-      params.lexicon_iri = this.lexicon_iri;
+    if (this.lexiconIri !== undefined) {
+      params.lexicon_iri = this.lexiconIri;
     }
 
     const fields: Array<string> = [
@@ -207,7 +208,7 @@ export class LemmataComponent implements OnInit {
     this.knoraService.gravsearchQuery('lemmata_search', params, fields)
       .subscribe(data => {
         this.lemmata = data;
-        console.log('==========>', data)
+        console.log('==========>', data);
         this.showProgbar = false;
       });
   }
@@ -234,7 +235,7 @@ export class LemmataComponent implements OnInit {
       } else if (params.hasOwnProperty('page')) {
         this.page = Number(params.hasOwnProperty('startchar'));
       }
-      if (this.searchterm !== '' || this.lexicon_iri !== undefined) {
+      if (this.searchterm !== '' || this.lexiconIri !== undefined) {
         this.page = 0;
         this.searchLemmata();
       } else {
