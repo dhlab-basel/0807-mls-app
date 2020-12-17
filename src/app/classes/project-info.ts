@@ -1,7 +1,7 @@
 import { JsonObject, JsonProperty, JsonConverter, JsonCustomConvert } from 'json2typescript';
 
 @JsonConverter
-class DescriptionConverter implements JsonCustomConvert<{[index:string]:string}> {
+class DescriptionConverter implements JsonCustomConvert<{[index: string]: string}> {
   serialize(description: {[index: string]: string}): any {
     const res: Array<{value: string, language: string}> = [];
     for (const key in description) {
@@ -13,7 +13,7 @@ class DescriptionConverter implements JsonCustomConvert<{[index:string]:string}>
   }
   deserialize(description: any): {[index: string]: string} {
     const tmp: {[index: string]: string} = {};
-    const desc = description as Array<{value: string, language: string}>
+    const desc = description as Array<{value: string, language: string}>;
     for (const d of desc) {
       tmp[d.language] = d.value;
     }
@@ -30,7 +30,7 @@ export class ProjectInfo {
   longname: string;
   //
   @JsonProperty('description', DescriptionConverter)
-  description?: {[index:string]:string};
+  description?: {[index: string]: string};
   //
   @JsonProperty('shortcode', String)
   shortcode: string = '';

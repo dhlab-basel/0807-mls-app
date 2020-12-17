@@ -1,20 +1,19 @@
-import { Component, OnChanges, OnInit, OnDestroy, SimpleChanges} from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import {KnoraService, ResourceData, LemmaData} from "../../services/knora.service";
-import {MatDialog, MatDialogConfig} from "@angular/material/dialog";
-import {LoginComponent} from "../login/login.component";
-import {EditResourceComponent} from "../knora/edit-resource/edit-resource.component";
-import {Subscription} from "rxjs";
-import {CreateResourceComponent} from "../knora/create-resource/create-resource/create-resource.component";
+import {Component, OnInit} from '@angular/core';
+import {ActivatedRoute} from '@angular/router';
+import {KnoraService, LemmaData} from '../../services/knora.service';
+import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
+import {EditResourceComponent} from '../knora/edit-resource/edit-resource.component';
+import {CreateResourceComponent} from '../knora/create-resource/create-resource/create-resource.component';
 
 @Component({
   selector: 'app-lemma',
   template: `
     <mat-card>
       <mat-card-title>
-        {{ lemma.label }} <span *ngIf="lemma.properties[hasDeceasedValue] && (lemma.properties[hasDeceasedValue].values[0] == 'Ja')">†</span>
+        {{ lemma.label }} <span
+        *ngIf="lemma.properties[hasDeceasedValue] && (lemma.properties[hasDeceasedValue].values[0] == 'Ja')">†</span>
       </mat-card-title>
-      <div  *ngIf="lemma.properties[hasVariants]">
+      <div *ngIf="lemma.properties[hasVariants]">
         {{ lemma.properties[hasVariants].label }}:
         <span *ngFor="let val of lemma.properties[hasVariants].values">{{ val }}</span>
       </div>
@@ -29,10 +28,12 @@ import {CreateResourceComponent} from "../knora/create-resource/create-resource/
         <span *ngIf="lemma.properties[hasEndDate]"> {{ lemma.properties[hasEndDate].values[0] }}</span>
       </div>
       <div *ngIf="lemma.properties[hasViaf]">
-        {{lemma.properties[hasViaf].label}}: <a href="http://viaf.org/viaf/{{ lemma.properties[hasViaf].values[0] }}" target="_blank">{{ lemma.properties[hasViaf].values[0] }}</a>
+        {{lemma.properties[hasViaf].label}}: <a href="http://viaf.org/viaf/{{ lemma.properties[hasViaf].values[0] }}"
+                                                target="_blank">{{ lemma.properties[hasViaf].values[0] }}</a>
       </div>
       <div *ngIf="lemma.properties[hasGnd]">
-        {{lemma.properties[hasGnd].label}}: <a href="http://d-nb.info/gnd/{{ lemma.properties[hasGnd].values[0] }}" target="_blank">{{ lemma.properties[hasGnd].values[0] }}</a>
+        {{lemma.properties[hasGnd].label}}: <a href="http://d-nb.info/gnd/{{ lemma.properties[hasGnd].values[0] }}"
+                                               target="_blank">{{ lemma.properties[hasGnd].values[0] }}</a>
       </div>
       <div style="padding-top: 10px;">ARK-ID: {{lemma.arkUrl}}</div>
       <mat-card-actions *ngIf="allowEdit">
@@ -41,11 +42,11 @@ import {CreateResourceComponent} from "../knora/create-resource/create-resource/
       </mat-card-actions>
     </mat-card>
     <mat-card>
-        <mat-card-title>
-            In Lexika:
-        </mat-card-title>
-        <app-lex-from-lemma [lemmaIri]="lemmaIri">
-        </app-lex-from-lemma>
+      <mat-card-title>
+        In Lexika:
+      </mat-card-title>
+      <app-lex-from-lemma [lemmaIri]="lemmaIri">
+      </app-lex-from-lemma>
     </mat-card>
   `,
   styles: [
@@ -91,12 +92,7 @@ export class LemmaComponent implements OnInit {
       this.lemmaIri = params.iri;
       this.knoraService.getLemma(params.iri).subscribe((data) => {
         this.lemma = data;
-        if (this.editPermissionSet.has(this.lemma.permission) && this.knoraService.loggedin) {
-          this.allowEdit = true;
-        }
-        else {
-          this.allowEdit = false;
-        }
+        this.allowEdit = this.editPermissionSet.has(this.lemma.permission) && this.knoraService.loggedin;
       });
     });
   }
@@ -109,7 +105,7 @@ export class LemmaComponent implements OnInit {
     this.route.params.subscribe(params => {
       const editConfig = new MatDialogConfig();
       editConfig.autoFocus = true;
-      editConfig.width = "800px";
+      editConfig.width = '800px';
       editConfig.data = {
         resIri: params.iri,
         resClassIri: this.knoraService.mlsOntology + 'Lemma'
@@ -123,7 +119,7 @@ export class LemmaComponent implements OnInit {
     this.route.params.subscribe(params => {
       const createConfig = new MatDialogConfig();
       createConfig.autoFocus = true;
-      createConfig.width = "800px";
+      createConfig.width = '800px';
       createConfig.data = {
         resClassIri: this.knoraService.mlsOntology + 'Lemma'
       };

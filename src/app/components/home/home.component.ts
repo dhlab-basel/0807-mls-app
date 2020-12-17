@@ -1,6 +1,5 @@
 import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
 import {Router} from '@angular/router';
-import {KnoraService} from "../../services/knora.service";
 
 @Component({
   selector: 'app-home',
@@ -51,7 +50,7 @@ export class HomeComponent implements OnInit {
         searchterm: this.searchField.nativeElement.value
       }
     });
-   return false;
+    return false;
   }
 
   searchCancel(event): void {

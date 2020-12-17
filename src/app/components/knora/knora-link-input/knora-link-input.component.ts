@@ -6,7 +6,6 @@ import {Observable, Subject} from "rxjs";
 import {catchError, map} from 'rxjs/operators';
 import {coerceBooleanProperty} from "@angular/cdk/coercion";
 import {KnoraService} from "../../../services/knora.service";
-import {ReadResource} from "@knora/api";
 
 // tslint:disable-next-line:component-class-suffix
 export class KnoraLinkVal {
