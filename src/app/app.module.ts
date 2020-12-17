@@ -1,13 +1,13 @@
-import { BrowserModule } from '@angular/platform-browser';
+import {BrowserModule} from '@angular/platform-browser';
 import {APP_INITIALIZER, NgModule} from '@angular/core';
 
-import { AppRoutingModule } from './app-routing.module';
-import { AppComponent } from './app.component';
-import { HttpClientModule} from '@angular/common/http';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { LemmataComponent } from './components/lemmata/lemmata.component';
-import { HomeComponent } from './components/home/home.component';
-import { LexicaComponent } from './components/lexica/lexica.component';
+import {AppRoutingModule} from './app-routing.module';
+import {AppComponent} from './app.component';
+import {HttpClientModule} from '@angular/common/http';
+import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
+import {LemmataComponent} from './components/lemmata/lemmata.component';
+import {HomeComponent} from './components/home/home.component';
+import {LexicaComponent} from './components/lexica/lexica.component';
 import {
   MatButtonToggleModule,
   MatExpansionModule,
@@ -29,29 +29,29 @@ import {
   MatTooltipModule,
   MatAutocompleteModule
 } from '@angular/material';
-import { SparqlPrep } from './classes/sparql-prep';
-import { AindexComponent } from './components/aindex/aindex.component';
-import { LemmaComponent } from './components/lemma/lemma.component';
-import { AppInitService } from './app-init.service';
-import { LexiconComponent } from './components/lexicon/lexicon.component';
-import { LexFromLemmaComponent } from './components/lex-from-lemma/lex-from-lemma.component';
-import { ArticleComponent } from './components/article/article.component';
-import { InfoComponent } from './components/info/info.component';
-import { BackButtonDirective } from './directives/back-button.directive';
-import { AboutComponent } from './components/about/about.component';
-import { NewsItemsComponent } from './components/news-items/news-items.component';
-import { DatePipe } from '@angular/common';
-import { LoginComponent } from './components/login/login.component';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { EditResourceComponent } from './components/knora/edit-resource/edit-resource.component';
-import { ValueEditComponent } from './components/knora/value-edit/value-edit.component';
-import { TheprojectComponent } from './components/theproject/theproject.component';
-import { KnoraStringInputComponent } from './components/knora/knora-string-input/knora-string-input.component';
-import { KnoraListInputComponent} from "./components/knora/knora-list-input/knora-list-input.component";
-import { ConfirmDialogComponent } from './components/knora/confirm-dialog/confirm-dialog.component';
-import { KnoraLinkInputComponent } from './components/knora/knora-link-input/knora-link-input.component';
-import { CreateResourceComponent } from './components/knora/create-resource/create-resource/create-resource.component';
-import { KnoraTextInputComponent } from './components/knora/knora-text-input/knora-text-input.component';
+import {SparqlPrep} from './classes/sparql-prep';
+import {AindexComponent} from './components/aindex/aindex.component';
+import {LemmaComponent} from './components/lemma/lemma.component';
+import {AppInitService} from './app-init.service';
+import {LexiconComponent} from './components/lexicon/lexicon.component';
+import {LexFromLemmaComponent} from './components/lex-from-lemma/lex-from-lemma.component';
+import {ArticleComponent} from './components/article/article.component';
+import {InfoComponent} from './components/info/info.component';
+import {BackButtonDirective} from './directives/back-button.directive';
+import {AboutComponent} from './components/about/about.component';
+import {NewsItemsComponent} from './components/news-items/news-items.component';
+import {DatePipe} from '@angular/common';
+import {LoginComponent} from './components/login/login.component';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+import {EditResourceComponent} from './components/knora/edit-resource/edit-resource.component';
+import {ValueEditComponent} from './components/knora/value-edit/value-edit.component';
+import {TheprojectComponent} from './components/theproject/theproject.component';
+import {KnoraStringInputComponent} from './components/knora/knora-string-input/knora-string-input.component';
+import {KnoraListInputComponent} from './components/knora/knora-list-input/knora-list-input.component';
+import {ConfirmDialogComponent} from './components/knora/confirm-dialog/confirm-dialog.component';
+import {KnoraLinkInputComponent} from './components/knora/knora-link-input/knora-link-input.component';
+import {CreateResourceComponent} from './components/knora/create-resource/create-resource/create-resource.component';
+import {KnoraTextInputComponent} from './components/knora/knora-text-input/knora-text-input.component';
 
 export function initializeApp(appInitService: AppInitService) {
   return (): Promise<any> => {
@@ -130,5 +130,6 @@ export function initializeApp(appInitService: AppInitService) {
   ],
   bootstrap: [AppComponent]
 })
-export class AppModule { }
+export class AppModule {
+}
 
