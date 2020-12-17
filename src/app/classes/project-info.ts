@@ -1,9 +1,9 @@
-import { JsonObject, JsonProperty, JsonConverter, JsonCustomConvert } from 'json2typescript';
+import {JsonObject, JsonProperty, JsonConverter, JsonCustomConvert} from 'json2typescript';
 
 @JsonConverter
-class DescriptionConverter implements JsonCustomConvert<{[index: string]: string}> {
-  serialize(description: {[index: string]: string}): any {
-    const res: Array<{value: string, language: string}> = [];
+class DescriptionConverter implements JsonCustomConvert<{ [index: string]: string }> {
+  serialize(description: { [index: string]: string }): any {
+    const res: Array<{ value: string, language: string }> = [];
     for (const key in description) {
       if (description.hasOwnProperty(key)) {
         res.push({language: key, value: description[key]});
@@ -11,9 +11,10 @@ class DescriptionConverter implements JsonCustomConvert<{[index: string]: string
     }
     return res;
   }
-  deserialize(description: any): {[index: string]: string} {
-    const tmp: {[index: string]: string} = {};
-    const desc = description as Array<{value: string, language: string}>;
+
+  deserialize(description: any): { [index: string]: string } {
+    const tmp: { [index: string]: string } = {};
+    const desc = description as Array<{ value: string, language: string }>;
     for (const d of desc) {
       tmp[d.language] = d.value;
     }
@@ -30,7 +31,7 @@ export class ProjectInfo {
   longname: string;
   //
   @JsonProperty('description', DescriptionConverter)
-  description?: {[index: string]: string};
+  description?: { [index: string]: string };
   //
   @JsonProperty('shortcode', String)
   shortcode: string = '';
@@ -40,6 +41,7 @@ export class ProjectInfo {
   //
   @JsonProperty('keywords', [String])
   keywords?: Array<string> = [];
+
   constructor() {
     this.shortname = '-';
     this.longname = '-';

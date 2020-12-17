@@ -1,29 +1,31 @@
-import { Injectable } from "@angular/core";
+import {Injectable} from '@angular/core';
+
 enum Status { COPY, INWATCH, OUTWATCH, INSIDE }
 
 @Injectable()
 export class SparqlPrep {
 
-  constructor() { }
+  constructor() {
+  }
 
-  compile(template: string, params: {[index: string]: string}) {
-    let output: string = '';
+  compile(template: string, params: { [index: string]: string }) {
+    let output = '';
     let status: Status = Status.COPY;
-    let token: string = '';
-    let skip: boolean = false;
+    let token = '';
+    let skip = false;
     for (const c of template) {
       if (status === Status.COPY) {
         if (c === '{') {
           status = Status.INWATCH;
         } else {
-          if (!skip) output += c;
+          if (!skip) { output += c; }
         }
       } else if (status === Status.INWATCH) {
         if (c === '{') {
           status = Status.INSIDE;
         } else {
           status = Status.COPY;
-          if (!skip) output += '{' + c;
+          if (!skip) { output += '{' + c; }
         }
       } else if (status === Status.INSIDE) {
         if (c === '}') {
@@ -39,11 +41,7 @@ export class SparqlPrep {
           if (token.charAt(0) === '#') {
             const parts = token.split(/\s+/);
             if (parts[0] === '#if') {
-              if (params.hasOwnProperty(parts[1])) {
-                skip = false;
-              } else {
-                skip = true;
-              }
+              skip = !params.hasOwnProperty(parts[1]);
             } else if (parts[0] === '#else') {
               skip = !skip;
             } else if (parts[0] === '#endif') {
@@ -51,8 +49,7 @@ export class SparqlPrep {
             } else {
               // issue error
             }
-          }
-          else {
+          } else {
             if (params.hasOwnProperty(token)) {
               output += params[token];
             }

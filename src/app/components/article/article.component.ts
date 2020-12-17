@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
-import {KnoraService, ResourceData} from "../../services/knora.service";
-import {MatDialog, MatDialogConfig} from "@angular/material/dialog";
-import {EditResourceComponent} from "../knora/edit-resource/edit-resource.component";
+import {KnoraService} from '../../services/knora.service';
+import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
+import {EditResourceComponent} from '../knora/edit-resource/edit-resource.component';
 
 @Component({
   selector: 'app-article',
