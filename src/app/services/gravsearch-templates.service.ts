@@ -200,7 +200,7 @@ export class GravsearchTemplatesService {
         ?newsitem mls:hasNewitemActiveDate ?date .
         FILTER(?date = "{{ today }}"^^knora-api:Date) .
         OPTIONAL { ?newsitem mls:hasNewsitemLinkToLemma ?lemma . }
-        OPTIONAL { ?newsitem mls:hasNewsitemWeblink ?weblink .}
+        OPTIONAL { ?newsitem mls:hasNewsitemWeblink ?weblink . }
     } ORDER BY ?date
     `, params);
     return result;
