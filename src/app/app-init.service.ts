@@ -1,12 +1,7 @@
 import { Injectable } from '@angular/core';
-import {ApiResponseError, KnoraApiConfig, KnoraApiConnection} from "@knora/api";
-import {map,tap} from "rxjs/operators";
-import {HttpClient, HttpClientModule} from '@angular/common/http';
-import { JsonConvert, OperationMode, ValueCheckingMode } from "json2typescript";
-import { PropertyMatchingRule } from "json2typescript/src/json2typescript/json-convert-enums";
 
 export interface IAppConfig {
-  protocol: "http" | "https";
+  protocol: 'http' | 'https';
   server: string;
   ontologyPrefix: string;
   servername: string;
@@ -18,8 +13,7 @@ export class AppInitService {
 
   static settings: IAppConfig;
 
-
-  constructor(private http: HttpClient) {
+  constructor() {
   }
 
   Init(): Promise<any> {
@@ -28,7 +22,7 @@ export class AppInitService {
       // console.log('AppInitService.init() called');
       // do your initialisation stuff here
 
-      const data = <IAppConfig>window['tempConfigStorage'];
+      const data = window['tempConfigStorage'] as IAppConfig;
       // console.log('AppInitService: json', data);
       AppInitService.settings = data;
 

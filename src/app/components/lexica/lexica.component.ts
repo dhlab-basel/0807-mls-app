@@ -1,6 +1,6 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import {KnoraService} from "../../services/knora.service";
+import {KnoraService} from '../../services/knora.service';
 
 @Component({
   selector: 'app-lexica',
@@ -90,9 +90,9 @@ export class LexicaComponent implements OnInit {
       queryParams: {lexicon_iri: event[0]}
     }).then(e => {
       if (e) {
-        console.log("Navigation is successful!");
+        console.log('Navigation is successful!');
       } else {
-        console.log("Navigation has failed!");
+        console.log('Navigation has failed!');
       }
     });
   }
@@ -104,7 +104,7 @@ export class LexicaComponent implements OnInit {
       {
         relativeTo: this.activatedRoute,
         queryParams: {page: this.page},
-        queryParamsHandling: "merge", // remove to replace all query params by provided
+        queryParamsHandling: 'merge', // remove to replace all query params by provided
       });
     this.getLexica();
   }
