@@ -1,5 +1,5 @@
 import { ChangeDetectorRef, Component, Input, OnInit} from '@angular/core';
-import { FormControl, FormGroup } from "@angular/forms";
+import { FormControl, FormGroup } from '@angular/forms';
 import {
   UpdateResource,
   UpdateTextValueAsString,
@@ -9,15 +9,16 @@ import {
   WriteValueResponse,
   DeleteValue,
   DeleteValueResponse,
-  Constants, UpdateListValue, UpdateLinkValue
-} from "@knora/api";
-
-import {KnoraStringVal} from "../knora-string-input/knora-string-input.component";
-import {KnoraListVal} from "../knora-list-input/knora-list-input.component";
-import {KnoraLinkVal} from "../knora-link-input/knora-link-input.component";
-import {KnoraService} from "../../../services/knora.service";
-import {MatDialog} from "@angular/material/dialog";
-import {ConfirmDialogComponent, ConfirmDialogModel, ConfirmDialogResult} from "../confirm-dialog/confirm-dialog.component";
+  Constants,
+  UpdateListValue,
+  UpdateLinkValue
+} from '@dasch-swiss/dsp-js';
+import {KnoraStringVal} from '../knora-string-input/knora-string-input.component';
+import {KnoraListVal} from '../knora-list-input/knora-list-input.component';
+import {KnoraLinkVal} from '../knora-link-input/knora-link-input.component';
+import {KnoraService} from '../../../services/knora.service';
+import {MatDialog} from '@angular/material/dialog';
+import {ConfirmDialogComponent, ConfirmDialogModel} from '../confirm-dialog/confirm-dialog.component';
 
 export interface ValueData {
   resourceType: string;
@@ -141,8 +142,8 @@ export class ValueEditComponent implements OnInit {
   ListValue = Constants.ListValue;
   LinkValue = Constants.LinkValue;
 
-  GuiSimpleText = "http://api.knora.org/ontology/salsah-gui/v2#SimpleText";
-  GuiTextarea = "http://api.knora.org/ontology/salsah-gui/v2#Textarea";
+  GuiSimpleText = 'http://api.knora.org/ontology/salsah-gui/v2#SimpleText';
+  GuiTextarea = 'http://api.knora.org/ontology/salsah-gui/v2#Textarea';
 
 
 
@@ -170,11 +171,7 @@ export class ValueEditComponent implements OnInit {
   }
 
   private setDeleteButtonVisibility(index: number) {
-    if ((this.valueData.values.length > 0) && ((this.valueData.cardinality === '0-n') || (this.valueData.cardinality === '0-1'))) {
-      this.deleteButtonVisible[index] = true;
-    } else {
-      this.deleteButtonVisible[index] = false;
-    }
+    this.deleteButtonVisible[index] = (this.valueData.values.length > 0) && ((this.valueData.cardinality === '0-n') || (this.valueData.cardinality === '0-1'));
   }
 
   ngOnInit() {
@@ -328,13 +325,13 @@ export class ValueEditComponent implements OnInit {
     console.log('valueData.values[index]: ', this.valueData.values[index]);
 
     const dialogData = new ConfirmDialogModel(
-      "Löschen bestätigen",
+      'Löschen bestätigen',
       'Diesen Wert löschen?',
       'Löschkommentar'
     );
 
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
-      maxWidth: "400px",
+      maxWidth: '400px',
       data: dialogData
     });
 
@@ -396,7 +393,7 @@ export class ValueEditComponent implements OnInit {
     //
     // prepare next control
     //
-    console.log("---> addField()");
+    console.log('---> addField()');
     this.inputForm.addControl('textval' + this.valueControlIndex.toString(), new FormControl({value: '', disabled: false}));
     this.valueControlTable.push('textval' + this.valueControlIndex.toString());
     this.valueControlIndex++;

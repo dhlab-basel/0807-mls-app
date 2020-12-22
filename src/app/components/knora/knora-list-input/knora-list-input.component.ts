@@ -1,19 +1,18 @@
 import {Component, ElementRef, Input, OnDestroy, OnInit, Optional, Self} from '@angular/core';
-import {MatFormFieldControl} from "@angular/material/form-field";
-import {ControlValueAccessor, FormBuilder, FormGroup, NgControl} from "@angular/forms";
-import {FocusMonitor} from "@angular/cdk/a11y";
-import {Observable, Subject} from "rxjs";
-import {coerceBooleanProperty} from "@angular/cdk/coercion";
-import {KnoraService} from "../../../services/knora.service";
-import {concat} from "rxjs";
-import {ListNode, ListResponse} from "@knora/api";
+import {MatFormFieldControl} from '@angular/material/form-field';
+import {ControlValueAccessor, FormBuilder, FormGroup, NgControl} from '@angular/forms';
+import {FocusMonitor} from '@angular/cdk/a11y';
+import {Subject} from 'rxjs';
+import {coerceBooleanProperty} from '@angular/cdk/coercion';
+import {KnoraService} from '../../../services/knora.service';
+import {ListNode, ListResponse} from '@dasch-swiss/dsp-js';
 
 
 // tslint:disable-next-line:component-class-suffix
 export class KnoraListVal {
   constructor(public nodeIri: string, public comment: string) {}
 
-  empty(): boolean { return this.nodeIri === '' }
+  empty(): boolean { return this.nodeIri === ''; }
 }
 
 interface DispNode {

@@ -1,13 +1,13 @@
 import {Component, Inject, OnInit} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef, MatDialogConfig } from "@angular/material/dialog";
-import {KnoraService, LinkPropertyData, ListPropertyData} from "../../../services/knora.service";
-import {map} from "rxjs/operators";
-import {forkJoin} from "rxjs";
-import {ValueData} from "../value-edit/value-edit.component";
-import {KnoraStringVal} from "../knora-string-input/knora-string-input.component";
-import {KnoraListVal} from "../knora-list-input/knora-list-input.component";
-import {KnoraLinkVal} from "../knora-link-input/knora-link-input.component";
-import {Constants} from "@knora/api";
+import {MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import {KnoraService, LinkPropertyData, ListPropertyData} from '../../../services/knora.service';
+import {map} from 'rxjs/operators';
+import {forkJoin} from 'rxjs';
+import {ValueData} from '../value-edit/value-edit.component';
+import {KnoraStringVal} from '../knora-string-input/knora-string-input.component';
+import {KnoraListVal} from '../knora-list-input/knora-list-input.component';
+import {KnoraLinkVal} from '../knora-link-input/knora-link-input.component';
+import {Constants} from '@dasch-swiss/dsp-js';
 
 @Component({
   selector: 'app-edit-resource',

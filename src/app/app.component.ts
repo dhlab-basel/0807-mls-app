@@ -1,10 +1,7 @@
-import {Component, OnInit} from '@angular/core';
-import { MatDialog, MatDialogConfig } from "@angular/material/dialog";
-import { MatButton } from "@angular/material/button";
-import { LoginComponent, LoginData } from "./components/login/login.component";
-import { KnoraService } from "./services/knora.service";
-import { catchError } from "rxjs/operators";
-import {ActivatedRoute} from "@angular/router";
+import {Component} from '@angular/core';
+import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { LoginComponent } from './components/login/login.component';
+import { KnoraService } from './services/knora.service';
 
 @Component({
   selector: 'app-root',

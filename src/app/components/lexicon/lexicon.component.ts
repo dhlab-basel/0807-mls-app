@@ -1,8 +1,8 @@
 import {Component, Input, OnInit} from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import {KnoraService, ResourceData} from "../../services/knora.service";
-import {MatDialog, MatDialogConfig} from "@angular/material/dialog";
-import {EditResourceComponent} from "../knora/edit-resource/edit-resource.component";
+import {KnoraService, ResourceData} from '../../services/knora.service';
+import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
+import {EditResourceComponent} from '../knora/edit-resource/edit-resource.component';
 
 @Component({
   selector: 'app-lexicon',
@@ -39,7 +39,6 @@ export class LexiconComponent implements OnInit {
   @Input()
   lexiconIri: string;
 
-  //lexicon: Array<{[index: string]: string}> = [];
   lexicon: ResourceData = {
     id: '',
     label: '',
@@ -75,10 +74,10 @@ export class LexiconComponent implements OnInit {
       }
       this.knoraService.getResource(this.lexiconIri).subscribe(data => {
         const properties = data.properties;
-        const filtered_properties = properties.filter((ele) => this.fields.indexOf(ele.propname) !== -1);
-        data.properties = filtered_properties;
+        const filteredProperties = properties.filter((ele) => this.fields.indexOf(ele.propname) !== -1);
+        data.properties = filteredProperties;
         let i = 0;
-        let idx: number = -1;
+        let idx = -1;
         for (const ele of data.properties) {
           if (ele.label === 'Kürzel') {
             this.lexiconTitle = ele.values[0];
@@ -98,7 +97,7 @@ export class LexiconComponent implements OnInit {
     this.route.params.subscribe(params => {
       const editConfig = new MatDialogConfig();
       editConfig.autoFocus = true;
-      editConfig.width = "800px";
+      editConfig.width = '800px';
       editConfig.data = {
         resIri: this.lexiconIri,
         resClassIri: this.knoraService.mlsOntology + 'Lexicon'

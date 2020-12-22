@@ -1,11 +1,11 @@
 import {Component, ElementRef, Input, OnDestroy, OnInit, Optional, Self} from '@angular/core';
-import {MatFormFieldControl} from "@angular/material/form-field";
-import {ControlValueAccessor, FormBuilder, FormGroup, NgControl} from "@angular/forms";
-import {FocusMonitor} from "@angular/cdk/a11y";
-import {Observable, Subject} from "rxjs";
-import {catchError, map} from 'rxjs/operators';
-import {coerceBooleanProperty} from "@angular/cdk/coercion";
-import {KnoraService} from "../../../services/knora.service";
+import {MatFormFieldControl} from '@angular/material/form-field';
+import {ControlValueAccessor, FormBuilder, FormGroup, NgControl} from '@angular/forms';
+import {FocusMonitor} from '@angular/cdk/a11y';
+import {Subject} from 'rxjs';
+import {map} from 'rxjs/operators';
+import {coerceBooleanProperty} from '@angular/cdk/coercion';
+import {KnoraService} from '../../../services/knora.service';
 
 // tslint:disable-next-line:component-class-suffix
 export class KnoraLinkVal {
@@ -61,13 +61,13 @@ export class SearchResultItem {
 export class KnoraLinkInputComponent
   implements ControlValueAccessor, MatFormFieldControl<KnoraLinkVal>, OnDestroy, OnInit {
 
+  static nextId = 0;
+
   @Input()
   valueLabel: string;
 
   @Input()
   commentLabel: string;
-
-  static nextId = 0;
 
   parts: FormGroup;
   stateChanges = new Subject<void>();

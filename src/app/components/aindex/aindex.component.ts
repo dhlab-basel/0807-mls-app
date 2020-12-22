@@ -1,5 +1,11 @@
-import {Component, OnInit, Input, Output, EventEmitter} from '@angular/core';
-import {ElementRef, ViewChild} from '@angular/core';
+import {
+  Component,
+  OnInit,
+  Input,
+  Output,
+  EventEmitter,
+  ElementRef,
+  ViewChild} from '@angular/core';
 
 @Component({
   selector: 'app-aindex',
@@ -18,7 +24,6 @@ import {ElementRef, ViewChild} from '@angular/core';
 
 export class AindexComponent implements OnInit {
   chars: Array<string>;
-  private selected;
 
   @ViewChild('aindexGroup', {static: false})
   private aindexGroup: ElementRef;
@@ -45,12 +50,10 @@ export class AindexComponent implements OnInit {
   }
 
   charClicked(event): void {
-    // console.log(this.aindexGroup.selected);
     this.charChange.emit(event.value);
   }
 
   ngOnInit() {
-    // this.aindexGroup.sel
   }
 
 }

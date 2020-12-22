@@ -1,8 +1,8 @@
 import {Component, Input, OnInit} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import { Router} from '@angular/router';
-import {KnoraService} from "../../services/knora.service";
-import {Constants} from "@knora/api/src/models/v2/Constants";
+import {KnoraService} from '../../services/knora.service';
+import {Constants} from '@dasch-swiss/dsp-js';
 
 @Component({
   selector: 'app-lex-from-lemma',
@@ -48,9 +48,9 @@ export class LexFromLemmaComponent implements OnInit {
     const url = 'article/' + encodeURIComponent(event[4]);
     this.router.navigateByUrl(url).then(e => {
       if (e) {
-        console.log("Navigation is successful!");
+        console.log('Navigation is successful!');
       } else {
-        console.log("Navigation has failed!");
+        console.log('Navigation has failed!');
       }
     });
   }
@@ -64,7 +64,7 @@ export class LexFromLemmaComponent implements OnInit {
       this.knoraService.mlsOntology + 'hasShortname',
       this.knoraService.mlsOntology + 'hasCitationForm',
       this.knoraService.mlsOntology + 'hasYear',
-      Constants.KnoraApiV2 + Constants.Delimiter + 'hasIncomingLinkValue'
+      Constants.KnoraApiV2 + Constants.HashDelimiter + 'hasIncomingLinkValue'
     ];
     this.knoraService.gravsearchQuery('lexica_from_lemma_query', param, fields).subscribe(
       (data) => {

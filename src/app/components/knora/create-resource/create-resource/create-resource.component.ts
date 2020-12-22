@@ -1,9 +1,8 @@
 import {Component, Inject, OnInit} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef} from "@angular/material/dialog";
-import {KnoraService, ResInfo} from "../../../../services/knora.service";
-import {Constants} from "@knora/api";
-import {map} from "rxjs/operators";
-import {FormControl, FormGroup} from "@angular/forms";
+import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
+import {KnoraService, ResInfo} from '../../../../services/knora.service';
+import {Constants} from '@dasch-swiss/dsp-js';
+import {FormControl, FormGroup} from '@angular/forms';
 
 class PropInfo {
   public id: string;
@@ -122,8 +121,8 @@ export class CreateResourceComponent implements OnInit {
             const gaga = resinfo.properties[key].guiAttributes;
             if (gaga) {
               for (const tmp of gaga) {
-                const parts = tmp.split("=");
-                if ((parts.length === 2) && (parts[0] === "hlist")) {
+                const parts = tmp.split('=');
+                if ((parts.length === 2) && (parts[0] === 'hlist')) {
                   listIri = parts[1].slice(1, -1);
                 }
               }

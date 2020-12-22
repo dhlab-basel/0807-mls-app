@@ -1,27 +1,29 @@
 import {Injectable} from '@angular/core';
 import {
+  KnoraApiConnection,
+  KnoraApiConfig,
   ApiResponseData,
   Cardinality,
-  KnoraApiConfig,
-  KnoraApiConnection,
+  ReadResource,
+  ReadResourceSequence,
+  ReadOntology,
+  ReadListValue,
   LoginResponse,
   LogoutResponse,
   ReadLinkValue,
-  ReadOntology,
-  ReadResource,
-  ResourcePropertyDefinition,
-  CountQueryResponse,
-  ReadListValue,
   Constants,
   ReadTextValueAsString,
-  ListAdminCache, ListResponse, ListNodeV2, ApiResponseError
-} from "@knora/api";
-
+  ResourcePropertyDefinition,
+  CountQueryResponse,
+  ListAdminCache,
+  ListResponse,
+  ListNodeV2,
+  ApiResponseError
+} from '@dasch-swiss/dsp-js';
 import {AppInitService} from '../app-init.service';
-import {Observable, of} from "rxjs";
-import {catchError, finalize, map, take, tap} from 'rxjs/operators';
-import {GravsearchTemplatesService} from "./gravsearch-templates.service";
-import {PropertyBindingType} from "@angular/compiler";
+import {Observable, of} from 'rxjs';
+import {catchError, map, tap} from 'rxjs/operators';
+import {GravsearchTemplatesService} from './gravsearch-templates.service';
 
 
 /**
@@ -278,11 +280,11 @@ export class KnoraService {
         };
         for (const prop of data.classes[resIri].propertiesList) {
           const propNamesParts = prop.propertyIndex.split('#');
-          if ((propNamesParts[0] === "http://api.knora.org/ontology/knora-api/v2")
-            || (propNamesParts[0] === "http://www.w3.org/2000/01/rdf-schema")) {
+          if ((propNamesParts[0] === 'http://api.knora.org/ontology/knora-api/v2')
+            || (propNamesParts[0] === 'http://www.w3.org/2000/01/rdf-schema')) {
             continue;
           }
-          let cardinalityStr: string = '';
+          let cardinalityStr = '';
           switch (prop.cardinality) {
             case Cardinality._1: cardinalityStr = '1'; break;
             case Cardinality._0_1: cardinalityStr = '0-1'; break;
@@ -305,7 +307,7 @@ export class KnoraService {
           resInfo.properties[prop.propertyIndex] = propInfo;
         }
         return resInfo;
-      }, catchError(error => {console.log(error); return error;}))
+      }, catchError(error => {console.log(error); return error; }))
     );
   }
 
@@ -334,10 +336,11 @@ export class KnoraService {
   gravsearchQuery(queryname: string, params: {[index: string]: string}, fields: Array<string>): Observable<Array<Array<string>>> {
     params.ontology = this.appInitService.getSettings().ontologyPrefix;
     const query = this.queryTemplates[queryname](params);
-    return this.knoraApiConnection.v2.search.doExtendedSearch(query).pipe(
-      map((data: Array<ReadResource>) => {
+    return this.knoraApiConnection.v2.search.doExtendedSearch(query)
+      .pipe(
+      map((data: ReadResourceSequence) => {
         console.log('^^^^^^^^^', data);
-        return this.processSearchResult(data, fields);
+        return this.processSearchResult(data.resources, fields);
       }));
   }
 
@@ -347,7 +350,7 @@ export class KnoraService {
       if (data.properties.hasOwnProperty(prop)) {
         const label: string = data.getValues(prop)[0].propertyLabel ? data.getValues(prop)[0].propertyLabel as string : '?';
         const values: Array<string> = data.getValuesAsStringArray(prop);
-        propdata[prop] = {label: label, values: values};
+        propdata[prop] = {label, values};
       }
     }
     return propdata;
@@ -357,7 +360,7 @@ export class KnoraService {
     return this.knoraApiConnection.v2.res.getResource(iri).pipe(
       map((data: ReadResource) => {
         console.log('=*=*=*=*=', data);
-          return {
+        return {
             id: data.id,
             label: data.label,
             permission: data.userHasPermission,
@@ -368,7 +371,7 @@ export class KnoraService {
   }
 
   getListNode(iri: string): Observable<ListNodeV2> {
-    return this.knoraApiConnection.v2.listNodeCache["getItem"](iri).pipe(
+    return this.knoraApiConnection.v2.listNodeCache.getNode(iri).pipe(
       map(data => data)
     );
   }
@@ -381,11 +384,11 @@ export class KnoraService {
 
   getResourcesByLabel(val: string): Observable<Array<{ id: string; label: string }>> {
     return this.knoraApiConnection.v2.search.doSearchByLabel(val).pipe(
-      map((data: Array<ReadResource> | ApiResponseError) => {
+      map((data: ReadResourceSequence | ApiResponseError) => {
         if (data instanceof ApiResponseError) {
           return [];
         } else {
-          const items: Array<{id: string, label: string}> = data.map((item: ReadResource) => {
+          const items: Array<{id: string, label: string}> = data.resources.map((item: ReadResource) => {
             return {id: item.id, label: item.label};
           });
           return items;

@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { DatePipe } from '@angular/common';
-import {KnoraService} from "../../services/knora.service";
-import {Constants} from "@knora/api/src/models/v2/Constants";
+import {KnoraService} from '../../services/knora.service';
+import {Constants} from '@dasch-swiss/dsp-js';
 
 
 @Component({
@@ -45,7 +45,7 @@ export class NewsItemsComponent implements OnInit {
       'id',
       this.knoraService.mlsOntology + 'hasNewsTitle',
       this.knoraService.mlsOntology + 'hasNewsText',
-      Constants.KnoraApiV2 + Constants.Delimiter + 'hasStillImageFileValue'
+      Constants.KnoraApiV2 + Constants.HashDelimiter + 'hasStillImageFileValue'
     ];
 
     this.knoraService.gravsearchQuery('newsitem_search', params, fields).subscribe(
