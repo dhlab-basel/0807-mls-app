@@ -35,7 +35,7 @@ import {Router} from '@angular/router';
 })
 
 export class HomeComponent implements OnInit {
-  @ViewChild('searchField', {static: false})
+  @ViewChild('searchField')
   private searchField: ElementRef;
 
   searchterm: string = '';

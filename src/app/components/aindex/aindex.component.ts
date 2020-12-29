@@ -25,7 +25,7 @@ import {
 export class AindexComponent implements OnInit {
   chars: Array<string>;
 
-  @ViewChild('aindexGroup', {static: false})
+  @ViewChild('aindexGroup')
   private aindexGroup: ElementRef;
 
   @Input()

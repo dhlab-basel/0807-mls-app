@@ -59,7 +59,7 @@ import {KnoraService} from '../../services/knora.service';
   ]
 })
 export class LexicaComponent implements OnInit {
-  @ViewChild('searchField', {static: false})
+  @ViewChild('searchField')
   searchField: ElementRef;
 
   lexica: Array<Array<string>> = [];

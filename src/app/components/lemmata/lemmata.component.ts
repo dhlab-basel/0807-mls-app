@@ -72,7 +72,7 @@ import {KnoraService} from '../../services/knora.service';
 })
 
 export class LemmataComponent implements OnInit {
-  @ViewChild('searchField', {static: false})
+  @ViewChild('searchField')
   private searchField: ElementRef;
 
   lemmata: Array<Array<string>> = [];
