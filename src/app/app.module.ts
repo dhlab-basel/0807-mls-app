@@ -8,27 +8,24 @@ import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {LemmataComponent} from './components/lemmata/lemmata.component';
 import {HomeComponent} from './components/home/home.component';
 import {LexicaComponent} from './components/lexica/lexica.component';
-import {
-  MatButtonToggleModule,
-  MatExpansionModule,
-  MatGridListModule,
-  MatToolbarModule,
-  MatButtonModule,
-  MatIconModule,
-  MatCardModule,
-  MatDividerModule,
-  MatTableModule,
-  MatPaginatorModule,
-  MatProgressBarModule,
-  MatInputModule,
-  MatFormFieldModule,
-  MatMenuModule,
-  MatDialogModule,
-  MatFormFieldControl,
-  MatSelectModule,
-  MatTooltipModule,
-  MatAutocompleteModule
-} from '@angular/material';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { MatButtonModule } from '@angular/material/button';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
+import { MatCardModule } from '@angular/material/card';
+import { MatDialogModule } from '@angular/material/dialog';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatExpansionModule } from '@angular/material/expansion';
+import { MatFormFieldModule, MatFormFieldControl } from '@angular/material/form-field';
+import { MatGridListModule } from '@angular/material/grid-list';
+import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatSelectModule } from '@angular/material/select';
+import { MatTableModule } from '@angular/material/table';
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import {SparqlPrep} from './classes/sparql-prep';
 import {AindexComponent} from './components/aindex/aindex.component';
 import {LemmaComponent} from './components/lemma/lemma.component';
