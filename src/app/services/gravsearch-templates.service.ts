@@ -105,6 +105,8 @@ export class GravsearchTemplatesService {
         }
         OPTIONAL { ?lemma mls:hasStartDate ?startdate . }
         OPTIONAL { ?lemma mls:hasEndDate ?enddate . }
+        OPTIONAL { ?lemma mls:hasFamilyName ?fname . }
+        OPTIONAL { ?lemma mls:hasGivenName ?gname . }
     }
     ORDER BY ASC(?text)
     OFFSET {{ page }}
