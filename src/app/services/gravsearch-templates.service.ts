@@ -86,7 +86,6 @@ export class GravsearchTemplatesService {
         {{ #endif }}
         ?lemma a knora-api:Resource .
         ?lemma a mls:Lemma .
-        ?lemma mls:hasLemmaText ?text .
         {{ #if lexicon_iri }}
         ?lexicon a knora-api:Resource .
         ?lexicon a mls:Lexicon .
@@ -98,6 +97,7 @@ export class GravsearchTemplatesService {
           ?lemma mls:hasPseudonym ?pseudo .
           FILTER regex(?pseudo, "{{ searchterm }}", "i") .
         } UNION {
+            ?lemma mls:hasLemmaText ?text .
             FILTER regex(?text, "{{ searchterm }}", "i") .
         } UNION {
           ?lemma mls:hasVariants ?variant .
