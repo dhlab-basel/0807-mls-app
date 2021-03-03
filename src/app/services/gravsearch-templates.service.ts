@@ -98,6 +98,7 @@ export class GravsearchTemplatesService {
           ?lemma mls:hasPseudonym ?pseudo .
           FILTER regex(?pseudo, "{{ searchterm }}", "i") .
         } UNION {
+            ?lemma mls:hasLemmaText ?text .
             FILTER regex(?text, "{{ searchterm }}", "i") .
         } UNION {
           ?lemma mls:hasVariants ?variant .
