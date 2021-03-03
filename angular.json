@@ -128,5 +128,8 @@
       }
     }
   },
-  "defaultProject": "mls-app-ng"
+  "defaultProject": "mls-app-ng",
+  "cli": {
+    "analytics": "a7cbf522-946a-42f6-956c-12320ac6830f"
+  }
 }
