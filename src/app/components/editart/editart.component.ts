@@ -1,7 +1,7 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
 import {MatCardModule} from '@angular/material/card';
 import * as ClassicEditor from '@ckeditor/ckeditor5-build-classic';
-import {KnoraService} from "../../services/knora.service";
+import {KnoraService, ArticleData} from "../../services/knora.service";
 import {KnoraLinkVal} from "../knora/knora-link-input/knora-link-input.component";
 import {CKEditorComponent} from "@ckeditor/ckeditor5-angular";
 
@@ -16,6 +16,11 @@ import {CKEditorComponent} from "@ckeditor/ckeditor5-angular";
       </mat-card-title>
       <mat-card-content>
         <form class="article-form">
+          <mat-form-field class="full-width">
+            <mat-label>Label</mat-label>
+            <input matInput placeholder="Label" [value]="label">
+          </mat-form-field>
+
           <mat-form-field class="full-width">
             <mat-label>Lemma</mat-label>
             <input matInput placeholder="Lemma" [value]="lemma">
@@ -73,7 +78,9 @@ export class EditartComponent implements OnInit {
   @ViewChild( 'editor' ) editorComponent: CKEditorComponent;
 
   public Editor = ClassicEditor;
+  data = ArticleData;
 
+  public label: string = 'a label';
   public lemma: string = 'a lemma';
   public lexicon: string = 'a lexicon';
   public article: string = 'a <em>article</em> text';
@@ -99,15 +106,18 @@ export class EditartComponent implements OnInit {
   }
 
   saveEvent(event): void {
-    const data = this.getEditor().getData();
-    console.log(data);
+    const editor = this.getEditor();
+    if (editor !== null) {
+      const data = editor.getData();
+      console.log(data);
+    }
   }
 
   cancelEvent(event): void {
-    console.log('CANCEL')
+    console.log('CANCEL');
   }
 
-
+/*
   _handleLinkInput(): void {
     this.knoraService.getResourcesByLabel(this.parts.value.label).subscribe(
       res => {
@@ -119,6 +129,7 @@ export class EditartComponent implements OnInit {
       }
     );
   }
+ */
 
   _optionSelected(val): void {
     console.log('_optionSelected(1):', val);

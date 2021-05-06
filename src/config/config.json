@@ -1,7 +1,7 @@
 {
   "protocol": "https",
-  "server": "https://api.dasch.swiss:443",
-  "ontologyPrefix": "http://api.dasch.swiss",
-  "servername": "api.dasch.swiss",
+  "server": "https://api.staging.dasch.swiss:443",
+  "ontologyPrefix": "http://api.staging.dasch.swiss",
+  "servername": "api.staging.dasch.swiss",
   "port": 443
 }

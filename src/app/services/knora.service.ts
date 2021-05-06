@@ -18,7 +18,8 @@ import {
   ListAdminCache,
   ListResponse,
   ListNodeV2,
-  ApiResponseError
+  ApiResponseError,
+  CreateResource, CreateLinkValue
 } from '@dasch-swiss/dsp-js';
 import {AppInitService} from '../app-init.service';
 import {Observable, of} from 'rxjs';
@@ -66,6 +67,20 @@ export class LinkPropertyData extends PropertyData {
               permissions: Array<string>) {
     super(propname, label, values, ids, comments, permissions);
     this.resourceIris = resourceIris;
+  }
+}
+
+export class ArticleData {
+  constructor(public label: string,
+              public lemma: string,
+              public lexicon: string,
+              public article: string,
+              public fonoteca?: string,
+              public hls?: string,
+              public oem?: string,
+              public theatre?: string,
+              public ticino?: string,
+              public web?: string) {
   }
 }
 
@@ -395,6 +410,22 @@ export class KnoraService {
         }
       }),
     );
+  }
+
+  createArticle(data: ArticleData) {
+    const createResource = new CreateResource();
+    createResource.label = data.label;
+    createResource.type = this.mlsOntology + 'article';
+    createResource.attachedToProject = 'http://rdfh.ch/projects/0807';
+
+    const lemmaVal = new CreateLinkValue();
+    lemmaVal.linkedResourceIri = data.lemma;
+
+    const props = {}
+    props[this.mlsOntology + 'hasValue'] = [
+      lemmaVal
+    ];
+
   }
 
 }
