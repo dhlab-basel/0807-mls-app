@@ -23,6 +23,8 @@
     "@angular/platform-browser-dynamic": "^10.2.4",
     "@angular/router": "^10.2.4",
     "@babel/compat-data": "7.8.0",
+    "@ckeditor/ckeditor5-angular": "^2.0.1",
+    "@ckeditor/ckeditor5-build-classic": "^27.1.0",
     "@dasch-swiss/dsp-js": "^1.0.1",
     "rxjs": "^6.5.4",
     "squirrelly": "^7.9.1",

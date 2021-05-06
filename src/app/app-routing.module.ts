@@ -9,6 +9,7 @@ import {ArticleComponent} from './components/article/article.component';
 import {InfoComponent} from './components/info/info.component';
 import {AboutComponent} from './components/about/about.component';
 import {TheprojectComponent} from './components/theproject/theproject.component';
+import {EditartComponent} from './components/editart/editart.component';
 
 const routes: Routes = [{
   path: 'home',
@@ -31,6 +32,12 @@ const routes: Routes = [{
 }, {
   path: 'article/:iri',
   component: ArticleComponent
+}, {
+  path: 'editart/:iri',
+  component: EditartComponent
+}, {
+  path: 'editart',
+  component: EditartComponent
 }, {
   path: 'about',
   component: AboutComponent
