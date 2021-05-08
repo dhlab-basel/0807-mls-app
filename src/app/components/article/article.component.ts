@@ -11,7 +11,8 @@ import {EditResourceComponent} from '../knora/edit-resource/edit-resource.compon
         <mat-card-title>
             Artikel
         </mat-card-title>
-        {{ article.arttext }}<br/>(Seite: {{ article.npages }})
+      <div [innerHTML]="article.arttext"></div>
+      (Seite: {{ article.npages }})
     </mat-card>
     <mat-card>
         <mat-card-title>

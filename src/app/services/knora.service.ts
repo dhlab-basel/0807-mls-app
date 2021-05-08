@@ -451,6 +451,13 @@ export class KnoraService {
       lexiconVal
     ];
 
+    const articleVal = new CreateTextValueAsString();
+    articleVal.text = data.article;
+    props[this.mlsOntology + 'hasArticleText'] = [
+      articleVal
+    ];
+
+    /*
     const articleVal = new CreateTextValueAsXml();
     const tmp = data.article.replace('&nbsp;', ' ');
     articleVal.xml = '<?xml version="1.0" encoding="UTF-8"?>\n<text>' + tmp + '</text>';
@@ -458,6 +465,7 @@ export class KnoraService {
     props[this.mlsOntology + 'hasArticleText'] = [
       articleVal
     ];
+     */
 
     if (data.fonoteca !== null && data.fonoteca !== undefined && data.fonoteca !== '') {
       const fonotecaVal = new CreateTextValueAsString();
@@ -499,7 +507,7 @@ export class KnoraService {
       ];
     }
 
-    if (data.web !== null && data.web !== '') {
+    if (data.web !== null && data.web !== undefined && data.web !== '') {
       const webVal = new CreateTextValueAsString();
       webVal.text = data.web;
       props[this.mlsOntology + 'hasWebLink'] = [
