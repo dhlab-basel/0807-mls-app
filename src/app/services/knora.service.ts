@@ -19,8 +19,13 @@ import {
   ListResponse,
   ListNodeV2,
   ApiResponseError,
-  CreateResource, CreateLinkValue
+  CreateResource,
+  CreateLinkValue,
+  ILabelSearchParams,
+  CreateTextValueAsXml,
+  CreateTextValueAsString
 } from '@dasch-swiss/dsp-js';
+
 import {AppInitService} from '../app-init.service';
 import {Observable, of} from 'rxjs';
 import {catchError, map, tap} from 'rxjs/operators';
@@ -70,20 +75,6 @@ export class LinkPropertyData extends PropertyData {
   }
 }
 
-export class ArticleData {
-  constructor(public label: string,
-              public lemma: string,
-              public lexicon: string,
-              public article: string,
-              public fonoteca?: string,
-              public hls?: string,
-              public oem?: string,
-              public theatre?: string,
-              public ticino?: string,
-              public web?: string) {
-  }
-}
-
 
 /**
  *  Data structure for representing a resource (instance)
@@ -125,6 +116,27 @@ export interface ResInfo {
   comment: string;
   properties: {[index: string]: ResInfoProps};
 }
+
+
+export class ArticleData {
+  constructor(
+    public label: string,
+    public lemma: string,
+    public lemmaIri: string,
+    // public lexicon: string,
+    public lexiconIri: string,
+    public article: string,
+    public fonoteca?: string,
+    public hls?: string,
+    public oem?: string,
+    public theatre?: string,
+    public ticino?: string,
+    public web?: string
+) {
+  }
+}
+
+
 
 @Injectable({
   providedIn: 'root'
@@ -397,8 +409,14 @@ export class KnoraService {
     );
   }
 
-  getResourcesByLabel(val: string): Observable<Array<{ id: string; label: string }>> {
-    return this.knoraApiConnection.v2.search.doSearchByLabel(val).pipe(
+  getResourcesByLabel(val: string, restype?: string): Observable<Array<{ id: string; label: string }>> {
+    let params: ILabelSearchParams | undefined;
+    if (restype !== undefined) {
+      params = {
+        limitToResourceClass: restype
+      };
+    }
+    return this.knoraApiConnection.v2.search.doSearchByLabel(val, 0, params).pipe(
       map((data: ReadResourceSequence | ApiResponseError) => {
         if (data instanceof ApiResponseError) {
           return [];
@@ -412,20 +430,96 @@ export class KnoraService {
     );
   }
 
-  createArticle(data: ArticleData) {
+  createArticle(data: ArticleData): Observable<ResourceData> {
+    console.log('DATA=', data);
     const createResource = new CreateResource();
     createResource.label = data.label;
-    createResource.type = this.mlsOntology + 'article';
+    createResource.type = this.mlsOntology + 'Article';
     createResource.attachedToProject = 'http://rdfh.ch/projects/0807';
 
-    const lemmaVal = new CreateLinkValue();
-    lemmaVal.linkedResourceIri = data.lemma;
+    const props = {};
 
-    const props = {}
-    props[this.mlsOntology + 'hasValue'] = [
+    const lemmaVal = new CreateLinkValue();
+    lemmaVal.linkedResourceIri = data.lemmaIri;
+    props[this.mlsOntology + 'hasALinkToLemmaValue'] = [
       lemmaVal
     ];
 
+    const lexiconVal = new CreateLinkValue();
+    lexiconVal.linkedResourceIri = data.lexiconIri;
+    props[this.mlsOntology + 'hasALinkToLexiconValue'] = [
+      lexiconVal
+    ];
+
+    const articleVal = new CreateTextValueAsXml();
+    const tmp = data.article.replace('&nbsp;', ' ');
+    articleVal.xml = '<?xml version="1.0" encoding="UTF-8"?>\n<text>' + tmp + '</text>';
+    articleVal.mapping = 'http://rdfh.ch/standoff/mappings/StandardMapping';
+    props[this.mlsOntology + 'hasArticleText'] = [
+      articleVal
+    ];
+
+    if (data.fonoteca !== null && data.fonoteca !== undefined && data.fonoteca !== '') {
+      const fonotecaVal = new CreateTextValueAsString();
+      fonotecaVal.text = data.fonoteca;
+      props[this.mlsOntology + 'hasFonotecacode'] = [
+        fonotecaVal
+      ];
+    }
+
+    if (data.hls !== null && data.hls !== undefined && data.hls !== '') {
+      const hlsVal = new CreateTextValueAsString();
+      hlsVal.text = data.hls;
+      props[this.mlsOntology + 'hasHlsCcode'] = [
+        hlsVal
+      ];
+    }
+
+    if (data.oem !== null && data.oem !== undefined && data.oem !== '') {
+      const oemVal = new CreateTextValueAsString();
+      oemVal.text = data.oem;
+      props[this.mlsOntology + 'hasOemlCode'] = [
+        oemVal
+      ];
+    }
+
+    if (data.theatre !== null && data.theatre !== undefined && data.theatre !== '') {
+      const theatreVal = new CreateTextValueAsString();
+      theatreVal.text = data.theatre;
+      props[this.mlsOntology + 'hasTheatreLexCode'] = [
+        theatreVal
+      ];
+    }
+
+    if (data.ticino !== null && data.ticino !== undefined && data.ticino !== '') {
+      const ticinoVal = new CreateTextValueAsString();
+      ticinoVal.text = data.ticino;
+      props[this.mlsOntology + 'hasTicinoLexCode'] = [
+        ticinoVal
+      ];
+    }
+
+    if (data.web !== null && data.web !== '') {
+      const webVal = new CreateTextValueAsString();
+      webVal.text = data.web;
+      props[this.mlsOntology + 'hasWebLink'] = [
+        webVal
+      ];
+    }
+
+    console.log(props);
+    createResource.properties = props;
+
+    return this.knoraApiConnection.v2.res.createResource(createResource).pipe(
+      map((res: ReadResource) => {
+          console.log('CREATE_RESOURCE:', res);
+          return {
+            id: res.id,
+            label: res.label,
+            permission: res.userHasPermission,
+            properties: this.processResourceProperties(res)};
+        }
+      ));
   }
 
 }

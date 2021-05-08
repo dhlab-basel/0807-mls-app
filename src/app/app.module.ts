@@ -51,6 +51,7 @@ import {CreateResourceComponent} from './components/knora/create-resource/create
 import {KnoraTextInputComponent} from './components/knora/knora-text-input/knora-text-input.component';
 import { EditartComponent } from './components/editart/editart.component';
 import { CKEditorModule } from '@ckeditor/ckeditor5-angular';
+import { LemmaselectComponent } from './components/lemmaselect/lemmaselect.component';
 
 export function initializeApp(appInitService: AppInitService) {
   return (): Promise<any> => {
@@ -85,6 +86,7 @@ export function initializeApp(appInitService: AppInitService) {
     CreateResourceComponent,
     KnoraTextInputComponent,
     EditartComponent,
+    LemmaselectComponent,
   ],
   entryComponents: [
     LoginComponent,
@@ -118,7 +120,7 @@ export function initializeApp(appInitService: AppInitService) {
     ReactiveFormsModule,
     MatSelectModule,
     MatAutocompleteModule,
-    CKEditorModule
+    CKEditorModule,
   ],
   providers: [
     AppInitService,
