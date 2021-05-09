@@ -519,15 +519,16 @@ export class KnoraService {
     createResource.properties = props;
 
     return this.knoraApiConnection.v2.res.createResource(createResource).pipe(
-      map((res: ReadResource) => {
-          console.log('CREATE_RESOURCE:', res);
-          return {
-            id: res.id,
-            label: res.label,
-            permission: res.userHasPermission,
-            properties: this.processResourceProperties(res)};
-        }
-      ));
+       map((res: ReadResource) => {
+        console.log('CREATE_RESOURCE:', res);
+        return {
+          id: res.id,
+          label: res.label,
+          permission: res.userHasPermission,
+          properties: this.processResourceProperties(res)
+        };
+      }),
+    );
   }
 
 }
