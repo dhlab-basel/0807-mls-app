@@ -430,8 +430,7 @@ export class KnoraService {
     );
   }
 
-  createArticle(data: ArticleData): Observable<ResourceData> {
-    console.log('DATA=', data);
+  createArticle(data: ArticleData): Observable<string> {
     const createResource = new CreateResource();
     createResource.label = data.label;
     createResource.type = this.mlsOntology + 'Article';
@@ -519,15 +518,13 @@ export class KnoraService {
     createResource.properties = props;
 
     return this.knoraApiConnection.v2.res.createResource(createResource).pipe(
-       map((res: ReadResource) => {
-        console.log('CREATE_RESOURCE:', res);
-        return {
-          id: res.id,
-          label: res.label,
-          permission: res.userHasPermission,
-          properties: this.processResourceProperties(res)
-        };
+      map((res: ReadResource) => {
+        return res.id;
       }),
+      catchError((error: ApiResponseError) => {
+        console.log('===ERROR::', error);
+        return of('error'); }
+      )
     );
   }
 

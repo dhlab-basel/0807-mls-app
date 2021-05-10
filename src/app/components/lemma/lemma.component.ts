@@ -4,6 +4,7 @@ import {KnoraService, LemmaData} from '../../services/knora.service';
 import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {EditResourceComponent} from '../knora/edit-resource/edit-resource.component';
 import {CreateResourceComponent} from '../knora/create-resource/create-resource/create-resource.component';
+import {EditartComponent} from '../editart/editart.component';
 
 @Component({
   selector: 'app-lemma',
@@ -37,8 +38,9 @@ import {CreateResourceComponent} from '../knora/create-resource/create-resource/
       </div>
       <div style="padding-top: 10px;">ARK-ID: {{lemma.arkUrl}}</div>
       <mat-card-actions *ngIf="allowEdit">
-        <button mat-raised-button (click)="openEditDialog()">edit</button>
-        <button mat-raised-button (click)="openCreateDialog()">create</button>
+        <button mat-raised-button (click)="openEditDialog()">Edit</button>
+        <button mat-raised-button (click)="openCreateDialog()">Create</button>
+        <button mat-raised-button (click)="openAddDialog()">Add article</button>
       </mat-card-actions>
     </mat-card>
     <mat-card>
@@ -48,6 +50,7 @@ import {CreateResourceComponent} from '../knora/create-resource/create-resource/
       <app-lex-from-lemma [lemmaIri]="lemmaIri">
       </app-lex-from-lemma>
     </mat-card>
+
   `,
   styles: [
     'td.mat-cell {padding-left: 10px; padding-right:20px;}',
@@ -126,6 +129,19 @@ export class LemmaComponent implements OnInit {
       const dialogRef = this.dialog.open(CreateResourceComponent, createConfig);
     });
 
+  }
+
+  openAddDialog() {
+    this.route.params.subscribe(params => {
+      const createConfig = new MatDialogConfig();
+      createConfig.autoFocus = true;
+      createConfig.width = '800px';
+      createConfig.data = {
+        lemmaIri: this.lemma.id,
+        lemmaLabel: this.lemma.label
+      };
+      const dialogRef = this.dialog.open(EditartComponent, createConfig);
+    });
   }
 
   ngOnInit() {

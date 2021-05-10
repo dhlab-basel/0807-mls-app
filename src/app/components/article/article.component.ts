@@ -3,6 +3,7 @@ import {ActivatedRoute} from '@angular/router';
 import {KnoraService} from '../../services/knora.service';
 import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {EditResourceComponent} from '../knora/edit-resource/edit-resource.component';
+import {EditartComponent} from '../editart/editart.component';
 
 @Component({
   selector: 'app-article',
@@ -91,10 +92,9 @@ export class ArticleComponent implements OnInit {
       editConfig.autoFocus = true;
       editConfig.width = '800px';
       editConfig.data = {
-        resIri: this.articleIri,
-        resClassIri: this.knoraService.mlsOntology + 'Article'
+        articleIri: this.articleIri,
       };
-      const dialogRef = this.dialog.open(EditResourceComponent, editConfig);
+      const dialogRef = this.dialog.open(EditartComponent, editConfig);
     });
 
   }
