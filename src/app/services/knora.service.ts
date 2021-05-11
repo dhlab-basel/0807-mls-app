@@ -26,7 +26,7 @@ import {
   CreateTextValueAsString,
   UpdateTextValueAsString,
   UpdateResource,
-  UpdateValue, CreateIntValue
+  UpdateValue, CreateIntValue, CreateValue, WriteValueResponse, UpdateIntValue, ReadIntValue
 } from '@dasch-swiss/dsp-js';
 
 import {AppInitService} from '../app-init.service';
@@ -45,6 +45,21 @@ export class PropertyData {
               public ids: Array<string>,
               public comments: Array<string | undefined>,
               public permissions: Array<string>) {}
+}
+
+export class IntPropertyData extends PropertyData {
+  public ivalues: Array<number>;
+
+  constructor(propname: string,
+              label: string,
+              ivalues: Array<number>,
+              ids: Array<string>,
+              comments: Array<string | undefined>,
+              permissions: Array<string>) {
+    const values = ivalues.map(x => x.toString(10));
+    super(propname, label, values, ids, comments, permissions);
+    this.ivalues = ivalues;
+  }
 }
 
 export class ListPropertyData extends PropertyData {
@@ -203,6 +218,16 @@ export class KnoraService {
             const comments: Array<string | undefined> = vals.map(v => v.valueHasComment);
             const permissions: Array<string> = vals.map(v => v.userHasPermission);
             propdata.push(new LinkPropertyData(prop, label, resourceIris, values, ids, comments, permissions));
+            break;
+          }
+          case Constants.IntValue: {
+            const vals = data.getValuesAs(prop, ReadIntValue);
+            const label: string = vals[0].propertyLabel || '?';
+            const values: Array<number> = vals.map(v => v.int);
+            const ids: Array<string> = vals.map(v => v.id);
+            const comments: Array<string | undefined> = vals.map(v => v.valueHasComment);
+            const permissions: Array<string> = vals.map(v => v.userHasPermission);
+            propdata.push(new IntPropertyData(prop, label, values, ids, comments, permissions));
             break;
           }
           default: {
@@ -530,16 +555,111 @@ export class KnoraService {
     );
   }
 
-  updateTextValue() {
-    const updateTextVal = new UpdateTextValueAsString();
-    updateTextVal.id = '';
-    updateTextVal.text = 'text without standoff updated';
-    const updateResource = new UpdateResource<UpdateValue>();
-    updateResource.id = "http://rdfh.ch/0001/a-thing";
-    updateResource.type = "http://0.0.0.0:3333/ontology/0001/anything/v2#Thing";
-    updateResource.property = "http://0.0.0.0:3333/ontology/0001/anything/v2#hasText";
-    updateResource.value = updateTextVal;
+  /**
+   * creates a new text value
+   * @param resId
+   * @param resType
+   * @param property
+   * @param text
+   */
+  createTextValue(resId: string, resType: string, property: string, text: string): Observable<string> {
+    const createTextVal = new CreateTextValueAsString();
+    createTextVal.text = text;
 
+    const createResource = new UpdateResource<CreateValue>();
+    createResource.id = resId;
+    createResource.type = resType;
+    createResource.property = property;
+    createResource.value = createTextVal;
+
+    return this.knoraApiConnection.v2.values.createValue(createResource).pipe(
+      map((res: WriteValueResponse) => {
+        console.log('createTextValue', res);
+        return 'OK';
+      }),
+      catchError((error: ApiResponseError) => {
+        console.log('createTextValue HOPPLA', error);
+        return of('error');
+      })
+    );
+  }
+
+  /**
+   * Updates a text value
+   *
+   * @param resId
+   * @param resType
+   * @param property
+   * @param text
+   */
+  updateTextValue(resId: string, resType: string, valId: string, property: string, text: string): Observable<string> {
+    const updateTextVal = new UpdateTextValueAsString();
+    updateTextVal.id = valId;
+    updateTextVal.text = text;
+
+    const updateResource = new UpdateResource<UpdateValue>();
+    updateResource.id = resId;
+    updateResource.type = resType;
+    updateResource.property = property;
+    updateResource.value = updateTextVal;
+    console.log(updateResource);
+
+    return this.knoraApiConnection.v2.values.updateValue(updateResource).pipe(
+      map((res: WriteValueResponse) => {
+        console.log('updateTextValue', res);
+        return 'OK';
+      }),
+      catchError((error: ApiResponseError) => {
+        console.log('updateTextValue HOPPLA', error);
+        return of('error');
+      })
+    );
+  }
+
+  createIntValue(resId: string, resType: string, property: string, ival: number): Observable<string> {
+    const createIntVal = new CreateIntValue();
+    createIntVal.int = ival;
+
+    const createResource = new UpdateResource<CreateValue>();
+    createResource.id = resId;
+    createResource.type = resType;
+    createResource.property = property;
+    createResource.value = createIntVal;
+
+    return this.knoraApiConnection.v2.values.createValue(createResource).pipe(
+      map((res: WriteValueResponse) => {
+        console.log('createTextValue', res);
+        return 'OK';
+      }),
+      catchError((error: ApiResponseError) => {
+        console.log('createTextValue HOPPLA', error);
+        return of('error');
+      })
+    );
+  }
+
+  updateIntValue(resId: string, resType: string, valId: string, property: string, ival: number): Observable<string> {
+    const updateIntVal = new UpdateIntValue();
+    updateIntVal.id = valId;
+    updateIntVal.int = ival;
+
+    const updateResource = new UpdateResource<UpdateValue>();
+    updateResource.id = resId;
+    updateResource.type = resType;
+    updateResource.property = property;
+    updateResource.value = updateIntVal;
+    console.log(updateResource);
+
+    return this.knoraApiConnection.v2.values.updateValue(updateResource).pipe(
+      map((res: WriteValueResponse) => {
+        console.log('updateTextValue', res);
+        return 'OK';
+      }),
+      catchError((error: ApiResponseError) => {
+        console.log('updateTextValue HOPPLA', error);
+        return of('error');
+      })
+    );
   }
 
 }

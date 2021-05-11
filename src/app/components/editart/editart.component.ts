@@ -1,7 +1,7 @@
 import {Component, Inject, Input, OnDestroy, OnInit, Optional, Self, ViewChild} from '@angular/core';
 import {MatCardModule} from '@angular/material/card';
 import * as ClassicEditor from '@ckeditor/ckeditor5-build-classic';
-import {KnoraService, ArticleData, ResourceData} from '../../services/knora.service';
+import {KnoraService, ArticleData, ResourceData, IntPropertyData} from '../../services/knora.service';
 import {CKEditorComponent} from "@ckeditor/ckeditor5-angular";
 import {ControlValueAccessor, FormBuilder, FormGroup, NgControl} from '@angular/forms';
 import {MAT_DIALOG_DATA, MatDialog, MatDialogConfig, MatDialogRef} from '@angular/material/dialog';
@@ -9,9 +9,9 @@ import {EditResourceComponent} from "../knora/edit-resource/edit-resource.compon
 import {ActivatedRoute} from "@angular/router";
 import {LemmataComponent} from "../lemmata/lemmata.component";
 import {LemmaselectComponent} from "../lemmaselect/lemmaselect.component";
-import {map} from "rxjs/operators";
+import {concatMap, map} from 'rxjs/operators';
 import {Constants, ReadResourceSequence} from '@dasch-swiss/dsp-js';
-import {Subject} from "rxjs";
+import {forkJoin, from, Observable, Subject} from 'rxjs';
 import {KnoraLinkVal} from "../knora/knora-link-input/knora-link-input.component";
 import {MatIconModule} from '@angular/material/icon';
 
@@ -210,6 +210,7 @@ export class EditartComponent implements ControlValueAccessor, OnInit {
 
   data: ArticleData = new ArticleData('', '', '', '', '');
 
+  resId: string;
   public valIds: ArticleIds = new ArticleIds();
 
   constructor(public knoraService: KnoraService,
@@ -220,6 +221,7 @@ export class EditartComponent implements ControlValueAccessor, OnInit {
               @Optional() @Self() public ngControl: NgControl) {
     this.inData = data;
     console.log('inData=', this.inData);
+    this.resId = '';
   }
 
   @Input()
@@ -244,6 +246,7 @@ export class EditartComponent implements ControlValueAccessor, OnInit {
         console.log('=====================================');
         console.log(data);
         console.log('-------------------------------------');
+        this.resId = data.id;
         this.form.controls.label.setValue(data.label);
         this.valIds.label = {id: data.label, changed: false};
         for (const ele of data.properties) {
@@ -265,12 +268,14 @@ export class EditartComponent implements ControlValueAccessor, OnInit {
               this.valIds.article = {id: ele.ids[0], changed: false};
               break;
             }
-            /*
-            case this.knoraService.mlsOntology + 'hasPages': {
-              articledata.npages = ele.values[0];
+
+            case this.knoraService.mlsOntology + 'hasNumlines': {
+              const nele: IntPropertyData = ele as IntPropertyData;
+              this.form.controls.numLines.setValue(nele.ivalues[0]);
+              this.valIds.fonoteca = {id: ele.ids[0], changed: false};
               break;
             }
-             */
+
             case this.knoraService.mlsOntology + 'hasFonotecacode': {
               this.form.controls.fonoteca.setValue(ele.values[0]);
               this.valIds.fonoteca = {id: ele.ids[0], changed: false};
@@ -426,18 +431,168 @@ export class EditartComponent implements ControlValueAccessor, OnInit {
   save() {
     console.log(this.form.value);
 
-    this.knoraService.createArticle(this.form.value).subscribe(
-      res => {
-        console.log('CREATE_RESULT:', res);
-      },
-    );
+
+    if (this.inData.articleIri === undefined) {
+      //
+      // we create a new article
+      //
+      this.knoraService.createArticle(this.form.value).subscribe(
+        res => {
+          console.log('CREATE_RESULT:', res);
+        },
+      );
+    } else {
+      //
+      // we edit an existing article, update/create only changed fields
+      //
+      const obs: Array<Observable<string>> = [];
+
+      if (this.valIds.numLines.changed) {
+        let gaga: Observable<string>;
+        if (this.valIds.numLines.id === undefined) {
+          console.log('createIntValue');
+          gaga = this.knoraService.createIntValue(
+            this.resId,
+            this.knoraService.mlsOntology + 'Article',
+            this.knoraService.mlsOntology + 'hasNumlines',
+            this.form.value.numLines);
+        } else {
+          console.log('updateIntValue');
+          gaga = this.knoraService.updateIntValue(
+            this.resId,
+            this.knoraService.mlsOntology + 'Article',
+            this.valIds.numLines.id as string,
+            this.knoraService.mlsOntology + 'hasNumlines',
+            this.form.value.numLines);
+        }
+        obs.push(gaga);
+      }
+
+      if (this.valIds.fonoteca.changed) {
+        let gaga: Observable<string>;
+        if (this.valIds.fonoteca.id === undefined) {
+          console.log('createTextValue');
+          gaga = this.knoraService.createTextValue(
+            this.resId,
+            this.knoraService.mlsOntology + 'Article',
+            this.knoraService.mlsOntology + 'hasFonotecacode',
+            this.form.value.fonoteca);
+        } else {
+          console.log('updateTextValue');
+          gaga = this.knoraService.updateTextValue(
+            this.resId,
+            this.knoraService.mlsOntology + 'Article',
+            this.valIds.fonoteca.id as string,
+            this.knoraService.mlsOntology + 'hasFonotecacode',
+            this.form.value.fonoteca);
+        }
+        obs.push(gaga);
+      }
+
+      if (this.valIds.hls.changed) {
+        let gaga: Observable<string>;
+        if (this.valIds.hls.id === undefined) {
+          gaga = this.knoraService.createTextValue(
+            this.resId,
+            this.knoraService.mlsOntology + 'Article',
+            this.knoraService.mlsOntology + 'hasHlsCcode',
+            this.form.value.hls);
+        } else {
+          gaga = this.knoraService.updateTextValue(
+            this.resId,
+            this.knoraService.mlsOntology + 'Article',
+            this.valIds.hls.id as string,
+            this.knoraService.mlsOntology + 'hasHlsCcode',
+            this.form.value.hls);
+        }
+        obs.push(gaga);
+      }
+
+      if (this.valIds.oem.changed) {
+        let gaga: Observable<string>;
+        if (this.valIds.oem.id === undefined) {
+          gaga = this.knoraService.createTextValue(
+            this.resId,
+            this.knoraService.mlsOntology + 'Article',
+            this.knoraService.mlsOntology + 'hasOemlCode',
+            this.form.value.oem);
+        } else {
+          gaga = this.knoraService.updateTextValue(
+            this.resId,
+            this.knoraService.mlsOntology + 'Article',
+            this.valIds.oem.id as string,
+            this.knoraService.mlsOntology + 'hasOemlCode',
+            this.form.value.oem);
+        }
+        obs.push(gaga);
+      }
+
+      if (this.valIds.theatre.changed) {
+        let gaga: Observable<string>;
+        if (this.valIds.theatre.id === undefined) {
+          gaga = this.knoraService.createTextValue(
+            this.resId,
+            this.knoraService.mlsOntology + 'Article',
+            this.knoraService.mlsOntology + 'hasTheaterLexCode',
+            this.form.value.theatre);
+        } else {
+          gaga = this.knoraService.updateTextValue(
+            this.resId,
+            this.knoraService.mlsOntology + 'Article',
+            this.valIds.theatre.id as string,
+            this.knoraService.mlsOntology + 'hasTheaterLexCode',
+            this.form.value.theatre);
+        }
+        obs.push(gaga);
+      }
+
+      if (this.valIds.ticino.changed) {
+        let gaga: Observable<string>;
+        if (this.valIds.ticino.id === undefined) {
+          gaga = this.knoraService.createTextValue(
+            this.resId,
+            this.knoraService.mlsOntology + 'Article',
+            this.knoraService.mlsOntology + 'hasTicinoLexCode',
+            this.form.value.ticino);
+        } else {
+          gaga = this.knoraService.updateTextValue(
+            this.resId,
+            this.knoraService.mlsOntology + 'Article',
+            this.valIds.ticino.id as string,
+            this.knoraService.mlsOntology + 'hasTicinoLexCode',
+            this.form.value.ticino);
+        }
+        obs.push(gaga);
+      }
+
+      if (this.valIds.web.changed) {
+        let gaga: Observable<string>;
+        if (this.valIds.web.id === undefined) {
+          gaga = this.knoraService.createTextValue(
+            this.resId,
+            this.knoraService.mlsOntology + 'Article',
+            this.knoraService.mlsOntology + 'hasWebLink',
+            this.form.value.web);
+        } else {
+          gaga = this.knoraService.updateTextValue(
+            this.resId,
+            this.knoraService.mlsOntology + 'Article',
+            this.valIds.web.id as string,
+            this.knoraService.mlsOntology + 'hasWebLink',
+            this.form.value.web);
+        }
+        obs.push(gaga);
+      }
+
+      forkJoin(obs).subscribe(res => {
+        console.log('forkJoin:', res);
+      });
+    }
+    this.dialogRef.close();
   }
 
   cancel() {
-    // this.dialogRef.close();
-    console.log(this.form.value);
     this.dialogRef.close();
-
   }
 
   getLexica(): void {

@@ -181,8 +181,11 @@ export class LemmataComponent implements OnInit {
 
     const paramsCnt: {[index: string]: string} = {
       page: '0',
-      searchterm: this.searchterm
+      // searchterm: this.searchterm
     };
+    if (this.searchterm !== '') {
+      paramsCnt.searchterm = this.searchterm;
+    }
     if (this.lexiconIri !== undefined) {
       paramsCnt.lexicon_iri = this.lexiconIri;
     }
@@ -192,8 +195,11 @@ export class LemmataComponent implements OnInit {
 
     const params: {[index: string]: string} = {
       page: String(this.page),
-      searchterm: this.searchterm
+      // searchterm: this.searchterm
     };
+    if (this.searchterm !== '') {
+      params.searchterm = this.searchterm;
+    }
     if (this.lexiconIri !== undefined) {
       params.lexicon_iri = this.lexiconIri;
     }
@@ -205,6 +211,7 @@ export class LemmataComponent implements OnInit {
       this.knoraService.mlsOntology + 'hasEndDate',
       'http://api.knora.org/ontology/knora-api/v2#hasIncomingLinkValue'
     ];
+    console.log('searchLemmata', params)
     this.knoraService.gravsearchQuery('lemmata_search', params, fields)
       .subscribe(data => {
         this.lemmata = data;
