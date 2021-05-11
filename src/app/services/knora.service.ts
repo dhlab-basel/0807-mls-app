@@ -23,7 +23,10 @@ import {
   CreateLinkValue,
   ILabelSearchParams,
   CreateTextValueAsXml,
-  CreateTextValueAsString
+  CreateTextValueAsString,
+  UpdateTextValueAsString,
+  UpdateResource,
+  UpdateValue, CreateIntValue
 } from '@dasch-swiss/dsp-js';
 
 import {AppInitService} from '../app-init.service';
@@ -126,6 +129,7 @@ export class ArticleData {
     // public lexicon: string,
     public lexiconIri: string,
     public article: string,
+    public numLines?: string,
     public fonoteca?: string,
     public hls?: string,
     public oem?: string,
@@ -456,15 +460,13 @@ export class KnoraService {
       articleVal
     ];
 
-    /*
-    const articleVal = new CreateTextValueAsXml();
-    const tmp = data.article.replace('&nbsp;', ' ');
-    articleVal.xml = '<?xml version="1.0" encoding="UTF-8"?>\n<text>' + tmp + '</text>';
-    articleVal.mapping = 'http://rdfh.ch/standoff/mappings/StandardMapping';
-    props[this.mlsOntology + 'hasArticleText'] = [
-      articleVal
-    ];
-     */
+    if (data.numLines !== null && data.numLines !== undefined && data.numLines !== '') {
+      const numLinesVal = new CreateIntValue();
+      numLinesVal.int = parseInt(data.numLines, 10);
+      props[this.mlsOntology + 'hasNumlines'] = [
+        numLinesVal
+      ];
+    }
 
     if (data.fonoteca !== null && data.fonoteca !== undefined && data.fonoteca !== '') {
       const fonotecaVal = new CreateTextValueAsString();
@@ -526,6 +528,18 @@ export class KnoraService {
         return of('error'); }
       )
     );
+  }
+
+  updateTextValue() {
+    const updateTextVal = new UpdateTextValueAsString();
+    updateTextVal.id = '';
+    updateTextVal.text = 'text without standoff updated';
+    const updateResource = new UpdateResource<UpdateValue>();
+    updateResource.id = "http://rdfh.ch/0001/a-thing";
+    updateResource.type = "http://0.0.0.0:3333/ontology/0001/anything/v2#Thing";
+    updateResource.property = "http://0.0.0.0:3333/ontology/0001/anything/v2#hasText";
+    updateResource.value = updateTextVal;
+
   }
 
 }

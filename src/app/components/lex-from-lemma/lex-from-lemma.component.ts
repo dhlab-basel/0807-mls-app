@@ -68,7 +68,6 @@ export class LexFromLemmaComponent implements OnInit {
     ];
     this.knoraService.gravsearchQuery('lexica_from_lemma_query', param, fields).subscribe(
       (data) => {
-        console.log("---======>>", data);
         this.lexica = data;
       }
     );

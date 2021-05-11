@@ -13,11 +13,47 @@ import {map} from "rxjs/operators";
 import {Constants, ReadResourceSequence} from '@dasch-swiss/dsp-js';
 import {Subject} from "rxjs";
 import {KnoraLinkVal} from "../knora/knora-link-input/knora-link-input.component";
-
+import {MatIconModule} from '@angular/material/icon';
 
 interface Lexica {
   iri: string;
   name: string;
+}
+
+interface ValInfo {
+  id?: string;
+  changed: boolean;
+}
+
+
+class ArticleIds {
+  public label: ValInfo;
+  public lemma: ValInfo;
+  public lexicon: ValInfo;
+  public article: ValInfo;
+  public numLines: ValInfo;
+  public fonoteca: ValInfo;
+  public hls: ValInfo;
+  public oem: ValInfo;
+  public theatre: ValInfo;
+  public ticino: ValInfo;
+  public web: ValInfo;
+
+  constructor() {
+    this.label = {id: undefined, changed: false};
+    this.lemma = {id: undefined, changed: false};
+    this.lexicon = {id: undefined, changed: false};
+    this.article = {id: undefined, changed: false};
+    this.numLines = {id: undefined, changed: false};
+    this.fonoteca = {id: undefined, changed: false};
+    this.hls = {id: undefined, changed: false};
+    this.oem = {id: undefined, changed: false};
+    this.theatre = {id: undefined, changed: false};
+    this.ticino = {id: undefined, changed: false};
+    this.web = {id: undefined, changed: false};
+
+  }
+
 }
 
 @Component({
@@ -33,8 +69,10 @@ interface Lexica {
           <input matInput required
                  class="full-width"
                  placeholder="Label"
-                 formControlName="label">
+                 formControlName="label"
+                 (input)="_handleInput('label')">
         </mat-form-field>
+        <mat-icon color="warn" *ngIf="valIds.label.changed">cached</mat-icon>
         <br/>
         <mat-form-field *ngIf="inData.lemmaIri === undefined">
           <input matInput [matAutocomplete]="auto"
@@ -43,7 +81,7 @@ interface Lexica {
                  placeholder="Lemma"
                  formControlName="lemma"
                  aria-label="Value"
-                 (input)="_handleLinkInput()">
+                 (input)="_handleLinkInput('lemma')">
           <input matInput style="width: 100%" [hidden]="true" formControlName="lemmaIri">
           <mat-autocomplete #auto="matAutocomplete" (optionSelected)="_optionSelected($event.option.value)">
             <mat-option *ngFor="let option of options" [value]="option.label">
@@ -59,59 +97,89 @@ interface Lexica {
         </mat-form-field>
         <br/>
 
-        <mat-form-field>
+        <mat-form-field *ngIf="inData.articleIri === undefined">
           <mat-select matInput required
                       placeholder="Select lexicon"
-                      formControlName="lexiconIri">
+                      formControlName="lexiconIri"
+                      (selectionChange)="_handleInput('lexicon')">
             <mat-option *ngFor="let lex of lexica" [value]="lex.iri">
               {{lex.name}}
             </mat-option>
           </mat-select>
         </mat-form-field>
+        <mat-form-field *ngIf="inData.articleIri !== undefined">
+          <input matInput
+                 placeholder="Lexicon"
+                 formControlName="lexiconIri"
+                 aria-label="Value">
+        </mat-form-field>
+        <mat-icon color="warn" *ngIf="valIds.lexicon.changed">cached</mat-icon>
         <br/>
 
         <ckeditor matInput #editor [editor]="Editor" formControlName="article"></ckeditor><br/>
 
         <mat-form-field>
           <input matInput class="full-width"
-                 placeholder="Fonoteca code"
-                 formControlName="fonoteca">
+                 type="number"
+                 placeholder="Number of lines"
+                 formControlName="numLines"
+                 (input)="_handleInput('numLines')">
         </mat-form-field>
+        <mat-icon color="warn" *ngIf="valIds.numLines.changed">cached</mat-icon>
+        <br/>
+
+        <mat-form-field>
+          <input matInput class="full-width"
+                 placeholder="Fonoteca code"
+                 formControlName="fonoteca"
+                 (input)="_handleInput('fonoteca')">
+        </mat-form-field>
+        <mat-icon color="warn" *ngIf="valIds.fonoteca.changed">cached</mat-icon>
         <br/>
 
         <mat-form-field>
           <input matInput class="full-width"
                  placeholder="HLS code"
-                 formControlName="hls">
+                 formControlName="hls"
+                 (input)="_handleInput('hls')">
         </mat-form-field>
+        <mat-icon color="warn" *ngIf="valIds.hls.changed">cached</mat-icon>
         <br/>
 
         <mat-form-field>
           <input matInput class="full-width"
                  placeholder="OEM code"
-                 formControlName="oem">
+                 formControlName="oem"
+                 (input)="_handleInput('oem')">
         </mat-form-field>
+        <mat-icon color="warn" *ngIf="valIds.oem.changed">cached</mat-icon>
         <br/>
 
         <mat-form-field>
           <input matInput class="full-width"
                  placeholder="Theatrelexicon code"
-                 formControlName="theatre">
+                 formControlName="theatre"
+                 (input)="_handleInput('theatre')">
         </mat-form-field>
+        <mat-icon color="warn" *ngIf="valIds.theatre.changed">cached</mat-icon>
         <br/>
 
         <mat-form-field>
           <input matInput class="full-width"
                  placeholder="Ticinolexcon code"
-                 formControlName="ticino">
+                 formControlName="ticino"
+                 (input)="_handleInput('ticino')">
         </mat-form-field>
+        <mat-icon color="warn" *ngIf="valIds.ticino.changed">cached</mat-icon>
         <br/>
 
         <mat-form-field>
           <input matInput class="full-width"
                  placeholder="WEB code"
-                 formControlName="web">
+                 formControlName="web"
+                 (input)="_handleInput('web')">
         </mat-form-field>
+        <mat-icon color="warn" *ngIf="valIds.web.changed">cached</mat-icon>
         <br/>
 
         <mat-dialog-actions>
@@ -136,15 +204,13 @@ export class EditartComponent implements ControlValueAccessor, OnInit {
   inData: any;
 
   public Editor = ClassicEditor;
-
   form: FormGroup;
-
   options: Array<{id: string, label: string}> = [];
-
   public lexica: Lexica[] = [];
 
-
   data: ArticleData = new ArticleData('', '', '', '', '');
+
+  public valIds: ArticleIds = new ArticleIds();
 
   constructor(public knoraService: KnoraService,
               private fb: FormBuilder,
@@ -158,12 +224,13 @@ export class EditartComponent implements ControlValueAccessor, OnInit {
 
   @Input()
   get value(): ArticleData | null {
-    const {value: {label, lemma, lemmaIri, lexiconIri, article, fonoteca, hls, oem, theatre, ticino, web}} = this.form;
-    return new ArticleData(label, lemma, lemmaIri, lexiconIri, article, fonoteca, hls, oem, theatre, ticino, web);
+    const {value: {label, lemma, lemmaIri, lexiconIri, article, numLines, fonoteca, hls, oem, theatre, ticino, web}} = this.form;
+    return new ArticleData(label, lemma, lemmaIri, lexiconIri, article, numLines, fonoteca, hls, oem, theatre, ticino, web);
   }
   set value(knoraVal: ArticleData | null) {
-    const {label, lemma, lemmaIri, lexiconIri, article, fonoteca, hls, oem, theatre, ticino, web} = knoraVal || new ArticleData('', '', '', '', '', '');
-    this.form.setValue({label, lemma, lemmaIri, lexiconIri, article, fonoteca, hls, oem, theatre, ticino, web});
+    const {label, lemma, lemmaIri, lexiconIri, article, numLines, fonoteca, hls, oem, theatre, ticino, web}
+      = knoraVal || new ArticleData('', '', '', '', '');
+    this.form.setValue({label, lemma, lemmaIri, lexiconIri, article, numLines, fonoteca, hls, oem, theatre, ticino, web});
   }
 
   ngOnInit(): void {
@@ -178,15 +245,24 @@ export class EditartComponent implements ControlValueAccessor, OnInit {
         console.log(data);
         console.log('-------------------------------------');
         this.form.controls.label.setValue(data.label);
+        this.valIds.label = {id: data.label, changed: false};
         for (const ele of data.properties) {
           switch (ele.propname) {
             case this.knoraService.mlsOntology + 'hasALinkToLemmaValue': {
               this.form.controls.lemma.setValue(ele.values[0]);
               this.form.controls.lemma.disable();
+              this.valIds.lemma = {id: ele.ids[0], changed: false};
+              break;
+            }
+            case this.knoraService.mlsOntology + 'hasALinkToLexiconValue': {
+              this.form.controls.lexiconIri.setValue(ele.values[0]);
+              this.form.controls.lexiconIri.disable();
+              this.valIds.lexicon = {id: ele.ids[0], changed: false};
               break;
             }
             case this.knoraService.mlsOntology + 'hasArticleText': {
               this.form.controls.article.setValue(ele.values[0]);
+              this.valIds.article = {id: ele.ids[0], changed: false};
               break;
             }
             /*
@@ -197,30 +273,37 @@ export class EditartComponent implements ControlValueAccessor, OnInit {
              */
             case this.knoraService.mlsOntology + 'hasFonotecacode': {
               this.form.controls.fonoteca.setValue(ele.values[0]);
+              this.valIds.fonoteca = {id: ele.ids[0], changed: false};
               break;
             }
             case this.knoraService.mlsOntology + 'hasHlsCcode': {
               this.form.controls.hls.setValue(ele.values[0]);
+              this.valIds.hls = {id: ele.ids[0], changed: false};
               break;
             }
             case this.knoraService.mlsOntology + 'hasOemlCode': {
               this.form.controls.oem.setValue(ele.values[0]);
+              this.valIds.oem = {id: ele.ids[0], changed: false};
               break;
             }
             case this.knoraService.mlsOntology + 'hasTheaterLexCode': {
               this.form.controls.theatre.setValue(ele.values[0]);
+              this.valIds.theatre = {id: ele.ids[0], changed: false};
               break;
             }
             case this.knoraService.mlsOntology + 'hasTicinoLexCode': {
               this.form.controls.ticino.setValue(ele.values[0]);
+              this.valIds.ticino = {id: ele.ids[0], changed: false};
               break;
             }
             case this.knoraService.mlsOntology + 'hasWebLink': {
               this.form.controls.web.setValue(ele.values[0]);
+              this.valIds.web = {id: ele.ids[0], changed: false};
               break;
             }
           }
         }
+        console.log('0000>', this.valIds);
       });
     }
 
@@ -228,9 +311,9 @@ export class EditartComponent implements ControlValueAccessor, OnInit {
       label: [this.data.label, []],
       lemma: [this.data.lemma, []],
       lemmaIri: [this.data.lemmaIri, []],
-      // lexicon: [this.data.lexicon, []],
       lexiconIri: [this.data.lexiconIri, []],
       article: [this.data.article, []],
+      numLines: [this.data.numLines, []],
       fonoteca: [this.data.fonoteca, []],
       hls: [this.data.hls, []],
       oem: [this.data.oem, []],
@@ -252,7 +335,7 @@ export class EditartComponent implements ControlValueAccessor, OnInit {
   onChange = (_: any) => {};
   onTouched = () => {};
 
-  _handleLinkInput(): void {
+  _handleLinkInput(what: string): void {
     console.log('this.lemma=', this.form.value.lemma);
     this.knoraService.getResourcesByLabel(this.form.value.lemma, this.knoraService.mlsOntology + 'Lemma').subscribe(
       res => {
@@ -274,10 +357,11 @@ export class EditartComponent implements ControlValueAccessor, OnInit {
     console.log('****>', res);
     this.value = new ArticleData(
       this.form.value.label,
-      res[0].label,
-      res[0].id,
+      res[0].label, // lemma
+      res[0].id,    // lemmaIri
       this.form.value.lexiconIri,
       this.form.value.article,
+      this.form.value.numLines,
       this.form.value.fonoteca,
       this.form.value.hls,
       this.form.value.oem,
@@ -285,13 +369,47 @@ export class EditartComponent implements ControlValueAccessor, OnInit {
       this.form.value.ticino,
       this.form.value.web
     );
-    /*
-    this.form.value.lemma = res[0].label;
-    this.form.value.lemmaIri = res[0].id;
-    this.data.lemma = res[0].label;
-    this.data.lemmaIri =  res[0].id;
-     */
   }
+
+  _handleInput(what: string): void {
+    this.onChange(this.form.value);
+    switch (what) {
+      case 'label':
+        this.valIds.label.changed = true;
+        break;
+      case 'lemma':
+        this.valIds.lemma.changed = true;
+        break;
+      case 'lexicon':
+        this.valIds.lexicon.changed = true;
+        break;
+      case 'article':
+        this.valIds.article.changed = true;
+        break;
+      case 'numLines':
+        this.valIds.numLines.changed = true;
+        break;
+      case 'fonoteca':
+        this.valIds.fonoteca.changed = true;
+        break;
+      case 'hls':
+        this.valIds.hls.changed = true;
+        break;
+      case 'oem':
+        this.valIds.oem.changed = true;
+        break;
+      case 'theatre':
+        this.valIds.theatre.changed = true;
+        break;
+      case 'ticino':
+        this.valIds.ticino.changed = true;
+        break;
+      case 'web':
+        this.valIds.web.changed = true;
+        break;
+    }
+  }
+
 
   writeValue(knoraVal: ArticleData | null): void {
     this.value = knoraVal;
@@ -305,8 +423,7 @@ export class EditartComponent implements ControlValueAccessor, OnInit {
     this.onTouched = fn;
   }
 
-
-   save() {
+  save() {
     console.log(this.form.value);
 
     this.knoraService.createArticle(this.form.value).subscribe(

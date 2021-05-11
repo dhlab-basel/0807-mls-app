@@ -165,13 +165,12 @@ export class GravsearchTemplatesService {
         {{ #if lexicon_iri }}
         BIND(<{{ lexicon_iri }}> AS ?lexicon)
         {{ #endif }}
-        ?article a knora-api:Resource .
+        ?lemma a mls:Lemma .
         ?article a mls:Article .
         ?article mls:hasALinkToLemma ?lemma .
-        ?lemma mls:hasLemmaText ?text .
-        ?lexicon a knora-api:Resource .
         ?lexicon a mls:Lexicon .
         ?article mls:hasALinkToLexicon ?lexicon .
+        ?lemma mls:hasLemmaText ?text .
         OPTIONAL { ?article mls:hasArticleText ?arttext . }
         OPTIONAL { ?lexicon mls:hasShortname ?shortname . }
         OPTIONAL { ?lexicon mls:hasCitationForm ?citation . }
