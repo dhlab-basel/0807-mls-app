@@ -21,6 +21,7 @@ export class AppComponent {
   private openLoginDialog(): void {
     const loginConfig = new MatDialogConfig();
     loginConfig.autoFocus = true;
+    loginConfig.disableClose = true;
     loginConfig.data = {
       email: '',
       password: ''

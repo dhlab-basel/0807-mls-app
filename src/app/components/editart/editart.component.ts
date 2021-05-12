@@ -2,17 +2,17 @@ import {Component, Inject, Input, OnDestroy, OnInit, Optional, Self, ViewChild} 
 import {MatCardModule} from '@angular/material/card';
 import * as ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import {KnoraService, ArticleData, ResourceData, IntPropertyData} from '../../services/knora.service';
-import {CKEditorComponent} from "@ckeditor/ckeditor5-angular";
+import {CKEditorComponent} from '@ckeditor/ckeditor5-angular';
 import {ControlValueAccessor, FormBuilder, FormGroup, NgControl} from '@angular/forms';
 import {MAT_DIALOG_DATA, MatDialog, MatDialogConfig, MatDialogRef} from '@angular/material/dialog';
-import {EditResourceComponent} from "../knora/edit-resource/edit-resource.component";
-import {ActivatedRoute} from "@angular/router";
-import {LemmataComponent} from "../lemmata/lemmata.component";
-import {LemmaselectComponent} from "../lemmaselect/lemmaselect.component";
+import {EditResourceComponent} from '../knora/edit-resource/edit-resource.component';
+import {ActivatedRoute} from '@angular/router';
+import {LemmataComponent} from '../lemmata/lemmata.component';
+import {LemmaselectComponent} from '../lemmaselect/lemmaselect.component';
 import {concatMap, map} from 'rxjs/operators';
-import {Constants, ReadResourceSequence} from '@dasch-swiss/dsp-js';
+import {Constants, DeleteValue, ReadResourceSequence, UpdateResource} from '@dasch-swiss/dsp-js';
 import {forkJoin, from, Observable, Subject} from 'rxjs';
-import {KnoraLinkVal} from "../knora/knora-link-input/knora-link-input.component";
+import {KnoraLinkVal} from '../knora/knora-link-input/knora-link-input.component';
 import {MatIconModule} from '@angular/material/icon';
 
 interface Lexica {
@@ -23,6 +23,7 @@ interface Lexica {
 interface ValInfo {
   id?: string;
   changed: boolean;
+  toBeDeleted: boolean;
 }
 
 
@@ -31,7 +32,7 @@ class ArticleIds {
   public lemma: ValInfo;
   public lexicon: ValInfo;
   public article: ValInfo;
-  public numLines: ValInfo;
+  public pages: ValInfo;
   public fonoteca: ValInfo;
   public hls: ValInfo;
   public oem: ValInfo;
@@ -40,17 +41,17 @@ class ArticleIds {
   public web: ValInfo;
 
   constructor() {
-    this.label = {id: undefined, changed: false};
-    this.lemma = {id: undefined, changed: false};
-    this.lexicon = {id: undefined, changed: false};
-    this.article = {id: undefined, changed: false};
-    this.numLines = {id: undefined, changed: false};
-    this.fonoteca = {id: undefined, changed: false};
-    this.hls = {id: undefined, changed: false};
-    this.oem = {id: undefined, changed: false};
-    this.theatre = {id: undefined, changed: false};
-    this.ticino = {id: undefined, changed: false};
-    this.web = {id: undefined, changed: false};
+    this.label = {id: undefined, changed: false, toBeDeleted: false};
+    this.lemma = {id: undefined, changed: false, toBeDeleted: false};
+    this.lexicon = {id: undefined, changed: false, toBeDeleted: false};
+    this.article = {id: undefined, changed: false, toBeDeleted: false};
+    this.pages = {id: undefined, changed: false, toBeDeleted: false};
+    this.fonoteca = {id: undefined, changed: false, toBeDeleted: false};
+    this.hls = {id: undefined, changed: false, toBeDeleted: false};
+    this.oem = {id: undefined, changed: false, toBeDeleted: false};
+    this.theatre = {id: undefined, changed: false, toBeDeleted: false};
+    this.ticino = {id: undefined, changed: false, toBeDeleted: false};
+    this.web = {id: undefined, changed: false, toBeDeleted: false};
 
   }
 
@@ -65,7 +66,7 @@ class ArticleIds {
         Artikel-Editor
       </mat-card-title>
       <mat-card-content [formGroup]="form">
-        <mat-form-field>
+        <mat-form-field [style.width.px]=400>
           <input matInput required
                  class="full-width"
                  placeholder="Label"
@@ -74,7 +75,7 @@ class ArticleIds {
         </mat-form-field>
         <mat-icon color="warn" *ngIf="valIds.label.changed">cached</mat-icon>
         <br/>
-        <mat-form-field *ngIf="inData.lemmaIri === undefined">
+        <mat-form-field *ngIf="inData.lemmaIri === undefined" [style.width.px]=400>
           <input matInput [matAutocomplete]="auto"
                  required
                  class="knora-link-input-element klnkie-val"
@@ -89,15 +90,16 @@ class ArticleIds {
             </mat-option>
           </mat-autocomplete>
         </mat-form-field>
-        <mat-form-field *ngIf="inData.lemmaIri !== undefined">
+        <mat-form-field *ngIf="inData.lemmaIri !== undefined" [style.width.px]=400>
           <input matInput
+                 required
                  placeholder="Lemma"
                  formControlName="lemma"
                  aria-label="Value">
         </mat-form-field>
         <br/>
 
-        <mat-form-field *ngIf="inData.articleIri === undefined">
+        <mat-form-field *ngIf="inData.articleIri === undefined" [style.width.px]=400>
           <mat-select matInput required
                       placeholder="Select lexicon"
                       formControlName="lexiconIri"
@@ -107,7 +109,7 @@ class ArticleIds {
             </mat-option>
           </mat-select>
         </mat-form-field>
-        <mat-form-field *ngIf="inData.articleIri !== undefined">
+        <mat-form-field *ngIf="inData.articleIri !== undefined" [style.width.px]=400>
           <input matInput
                  placeholder="Lexicon"
                  formControlName="lexiconIri"
@@ -116,75 +118,126 @@ class ArticleIds {
         <mat-icon color="warn" *ngIf="valIds.lexicon.changed">cached</mat-icon>
         <br/>
 
-        <ckeditor matInput #editor [editor]="Editor" formControlName="article"></ckeditor><br/>
-
-        <mat-form-field>
-          <input matInput class="full-width"
-                 type="number"
-                 placeholder="Number of lines"
-                 formControlName="numLines"
-                 (input)="_handleInput('numLines')">
-        </mat-form-field>
-        <mat-icon color="warn" *ngIf="valIds.numLines.changed">cached</mat-icon>
+        <ckeditor matInput #editor [editor]="Editor" formControlName="article" (change)="_handleInput('article')"></ckeditor>
+        <br/>
+        <mat-icon color="warn" *ngIf="valIds.article.changed">cached</mat-icon>
+        <button *ngIf="valIds.article.id !== undefined" class="mat-raised-button" (click)="_handleDelete('article')">
+          <mat-icon *ngIf="!valIds.article.toBeDeleted">delete</mat-icon>
+          <mat-icon *ngIf="valIds.article.toBeDeleted" color="warn">delete</mat-icon>
+        </button>
+        <br/>
+        <mat-divider></mat-divider>
         <br/>
 
-        <mat-form-field>
+        <mat-form-field [style.width.px]=400>
+          <input matInput class="full-width"
+                 placeholder="Pages(s)"
+                 formControlName="pages"
+                 (change)="_handleInput('pages')"
+                 (input)="_handleInput('pages')">
+        </mat-form-field>
+        &nbsp;
+        <mat-icon color="warn" *ngIf="valIds.pages.changed">cached</mat-icon>
+        &nbsp;
+        <button *ngIf="valIds.pages.id !== undefined" class="mat-raised-button" (click)="_handleDelete('pages')">
+          <mat-icon *ngIf="!valIds.pages.toBeDeleted">delete</mat-icon>
+          <mat-icon *ngIf="valIds.pages.toBeDeleted" color="warn">delete</mat-icon>
+        </button>
+        <br/>
+
+        <mat-form-field [style.width.px]=400>
           <input matInput class="full-width"
                  placeholder="Fonoteca code"
                  formControlName="fonoteca"
                  (input)="_handleInput('fonoteca')">
         </mat-form-field>
+        &nbsp;
         <mat-icon color="warn" *ngIf="valIds.fonoteca.changed">cached</mat-icon>
+        &nbsp;
+        <button *ngIf="valIds.fonoteca.id !== undefined" class="mat-raised-button" (click)="_handleDelete('fonoteca')">
+          <mat-icon *ngIf="!valIds.fonoteca.toBeDeleted">delete</mat-icon>
+          <mat-icon *ngIf="valIds.fonoteca.toBeDeleted" color="warn">delete</mat-icon>
+        </button>
         <br/>
 
-        <mat-form-field>
+        <mat-form-field [style.width.px]=400>
           <input matInput class="full-width"
                  placeholder="HLS code"
                  formControlName="hls"
                  (input)="_handleInput('hls')">
         </mat-form-field>
+        &nbsp;
         <mat-icon color="warn" *ngIf="valIds.hls.changed">cached</mat-icon>
+        &nbsp;
+        <button *ngIf="valIds.hls.id !== undefined" class="mat-raised-button" (click)="_handleDelete('hls')">
+          <mat-icon *ngIf="!valIds.hls.toBeDeleted">delete</mat-icon>
+          <mat-icon *ngIf="valIds.hls.toBeDeleted" color="warn">delete</mat-icon>
+        </button>
         <br/>
 
-        <mat-form-field>
+        <mat-form-field [style.width.px]=400>
           <input matInput class="full-width"
                  placeholder="OEM code"
                  formControlName="oem"
                  (input)="_handleInput('oem')">
         </mat-form-field>
+        &nbsp;
         <mat-icon color="warn" *ngIf="valIds.oem.changed">cached</mat-icon>
+        &nbsp;
+        <button *ngIf="valIds.oem.id !== undefined" class="mat-raised-button" (click)="_handleDelete('oem')">
+          <mat-icon *ngIf="!valIds.oem.toBeDeleted">delete</mat-icon>
+          <mat-icon *ngIf="valIds.oem.toBeDeleted" color="warn">delete</mat-icon>
+        </button>
         <br/>
 
-        <mat-form-field>
+        <mat-form-field [style.width.px]=400>
           <input matInput class="full-width"
                  placeholder="Theatrelexicon code"
                  formControlName="theatre"
                  (input)="_handleInput('theatre')">
         </mat-form-field>
+        &nbsp;
         <mat-icon color="warn" *ngIf="valIds.theatre.changed">cached</mat-icon>
+        &nbsp;
+        <button *ngIf="valIds.theatre.id !== undefined" class="mat-raised-button" (click)="_handleDelete('theatre')">
+          <mat-icon *ngIf="!valIds.theatre.toBeDeleted">delete</mat-icon>
+          <mat-icon *ngIf="valIds.theatre.toBeDeleted" color="warn">delete</mat-icon>
+        </button>
         <br/>
 
-        <mat-form-field>
+        <mat-form-field [style.width.px]=400>
           <input matInput class="full-width"
                  placeholder="Ticinolexcon code"
                  formControlName="ticino"
                  (input)="_handleInput('ticino')">
         </mat-form-field>
+        &nbsp;
         <mat-icon color="warn" *ngIf="valIds.ticino.changed">cached</mat-icon>
+        &nbsp;
+        <button *ngIf="valIds.ticino.id !== undefined" class="mat-raised-button" (click)="_handleDelete('ticino')">
+          <mat-icon *ngIf="!valIds.ticino.toBeDeleted">delete</mat-icon>
+          <mat-icon *ngIf="valIds.ticino.toBeDeleted" color="warn">delete</mat-icon>
+        </button>
         <br/>
 
-        <mat-form-field>
+        <mat-form-field [style.width.px]=400>
           <input matInput class="full-width"
                  placeholder="WEB code"
                  formControlName="web"
                  (input)="_handleInput('web')">
         </mat-form-field>
+        &nbsp;
         <mat-icon color="warn" *ngIf="valIds.web.changed">cached</mat-icon>
+        &nbsp;
+        <button *ngIf="valIds.web.id !== undefined" class="mat-raised-button" (click)="_handleDelete('web')">
+          <mat-icon *ngIf="!valIds.web.toBeDeleted">delete</mat-icon>
+          <mat-icon *ngIf="valIds.web.toBeDeleted" color="warn">delete</mat-icon>
+        </button>
         <br/>
 
         <mat-dialog-actions>
           <button class="mat-raised-button" (click)="cancel()">Cancel</button>
-          <button class="mat-raised-button mat-primary" (click)="save()">Save</button>
+          <button type="submit" class="mat-raised-button mat-primary" (click)="save()">Save</button>
         </mat-dialog-actions>
       </mat-card-content>
     </mat-card>
@@ -226,13 +279,13 @@ export class EditartComponent implements ControlValueAccessor, OnInit {
 
   @Input()
   get value(): ArticleData | null {
-    const {value: {label, lemma, lemmaIri, lexiconIri, article, numLines, fonoteca, hls, oem, theatre, ticino, web}} = this.form;
-    return new ArticleData(label, lemma, lemmaIri, lexiconIri, article, numLines, fonoteca, hls, oem, theatre, ticino, web);
+    const {value: {label, lemma, lemmaIri, lexiconIri, article, pages, fonoteca, hls, oem, theatre, ticino, web}} = this.form;
+    return new ArticleData(label, lemma, lemmaIri, lexiconIri, article, pages, fonoteca, hls, oem, theatre, ticino, web);
   }
   set value(knoraVal: ArticleData | null) {
-    const {label, lemma, lemmaIri, lexiconIri, article, numLines, fonoteca, hls, oem, theatre, ticino, web}
+    const {label, lemma, lemmaIri, lexiconIri, article, pages, fonoteca, hls, oem, theatre, ticino, web}
       = knoraVal || new ArticleData('', '', '', '', '');
-    this.form.setValue({label, lemma, lemmaIri, lexiconIri, article, numLines, fonoteca, hls, oem, theatre, ticino, web});
+    this.form.setValue({label, lemma, lemmaIri, lexiconIri, article, pages, fonoteca, hls, oem, theatre, ticino, web});
   }
 
   ngOnInit(): void {
@@ -248,67 +301,65 @@ export class EditartComponent implements ControlValueAccessor, OnInit {
         console.log('-------------------------------------');
         this.resId = data.id;
         this.form.controls.label.setValue(data.label);
-        this.valIds.label = {id: data.label, changed: false};
+        this.valIds.label = {id: data.label, changed: false, toBeDeleted: false};
         for (const ele of data.properties) {
           switch (ele.propname) {
             case this.knoraService.mlsOntology + 'hasALinkToLemmaValue': {
               this.form.controls.lemma.setValue(ele.values[0]);
               this.form.controls.lemma.disable();
-              this.valIds.lemma = {id: ele.ids[0], changed: false};
+              this.valIds.lemma = {id: ele.ids[0], changed: false, toBeDeleted: false};
               break;
             }
             case this.knoraService.mlsOntology + 'hasALinkToLexiconValue': {
               this.form.controls.lexiconIri.setValue(ele.values[0]);
               this.form.controls.lexiconIri.disable();
-              this.valIds.lexicon = {id: ele.ids[0], changed: false};
+              this.valIds.lexicon = {id: ele.ids[0], changed: false, toBeDeleted: false};
               break;
             }
             case this.knoraService.mlsOntology + 'hasArticleText': {
               this.form.controls.article.setValue(ele.values[0]);
-              this.valIds.article = {id: ele.ids[0], changed: false};
+              this.valIds.article = {id: ele.ids[0], changed: false, toBeDeleted: false};
               break;
             }
 
-            case this.knoraService.mlsOntology + 'hasNumlines': {
-              const nele: IntPropertyData = ele as IntPropertyData;
-              this.form.controls.numLines.setValue(nele.ivalues[0]);
-              this.valIds.fonoteca = {id: ele.ids[0], changed: false};
+            case this.knoraService.mlsOntology + 'hasPages': {
+              this.form.controls.pages.setValue(ele.values[0]);
+              this.valIds.pages = {id: ele.ids[0], changed: false, toBeDeleted: false};
               break;
             }
 
             case this.knoraService.mlsOntology + 'hasFonotecacode': {
               this.form.controls.fonoteca.setValue(ele.values[0]);
-              this.valIds.fonoteca = {id: ele.ids[0], changed: false};
+              this.valIds.fonoteca = {id: ele.ids[0], changed: false, toBeDeleted: false};
               break;
             }
             case this.knoraService.mlsOntology + 'hasHlsCcode': {
               this.form.controls.hls.setValue(ele.values[0]);
-              this.valIds.hls = {id: ele.ids[0], changed: false};
+              this.valIds.hls = {id: ele.ids[0], changed: false, toBeDeleted: false};
               break;
             }
             case this.knoraService.mlsOntology + 'hasOemlCode': {
               this.form.controls.oem.setValue(ele.values[0]);
-              this.valIds.oem = {id: ele.ids[0], changed: false};
+              this.valIds.oem = {id: ele.ids[0], changed: false, toBeDeleted: false};
               break;
             }
             case this.knoraService.mlsOntology + 'hasTheaterLexCode': {
               this.form.controls.theatre.setValue(ele.values[0]);
-              this.valIds.theatre = {id: ele.ids[0], changed: false};
+              this.valIds.theatre = {id: ele.ids[0], changed: false, toBeDeleted: false};
               break;
             }
             case this.knoraService.mlsOntology + 'hasTicinoLexCode': {
               this.form.controls.ticino.setValue(ele.values[0]);
-              this.valIds.ticino = {id: ele.ids[0], changed: false};
+              this.valIds.ticino = {id: ele.ids[0], changed: false, toBeDeleted: false};
               break;
             }
             case this.knoraService.mlsOntology + 'hasWebLink': {
               this.form.controls.web.setValue(ele.values[0]);
-              this.valIds.web = {id: ele.ids[0], changed: false};
+              this.valIds.web = {id: ele.ids[0], changed: false, toBeDeleted: false};
               break;
             }
           }
         }
-        console.log('0000>', this.valIds);
       });
     }
 
@@ -318,7 +369,7 @@ export class EditartComponent implements ControlValueAccessor, OnInit {
       lemmaIri: [this.data.lemmaIri, []],
       lexiconIri: [this.data.lexiconIri, []],
       article: [this.data.article, []],
-      numLines: [this.data.numLines, []],
+      pages: [this.data.pages, []],
       fonoteca: [this.data.fonoteca, []],
       hls: [this.data.hls, []],
       oem: [this.data.oem, []],
@@ -338,6 +389,7 @@ export class EditartComponent implements ControlValueAccessor, OnInit {
   }
 
   onChange = (_: any) => {};
+
   onTouched = () => {};
 
   _handleLinkInput(what: string): void {
@@ -366,7 +418,7 @@ export class EditartComponent implements ControlValueAccessor, OnInit {
       res[0].id,    // lemmaIri
       this.form.value.lexiconIri,
       this.form.value.article,
-      this.form.value.numLines,
+      this.form.value.pages,
       this.form.value.fonoteca,
       this.form.value.hls,
       this.form.value.oem,
@@ -391,8 +443,8 @@ export class EditartComponent implements ControlValueAccessor, OnInit {
       case 'article':
         this.valIds.article.changed = true;
         break;
-      case 'numLines':
-        this.valIds.numLines.changed = true;
+      case 'pages':
+        this.valIds.pages.changed = true;
         break;
       case 'fonoteca':
         this.valIds.fonoteca.changed = true;
@@ -412,6 +464,55 @@ export class EditartComponent implements ControlValueAccessor, OnInit {
       case 'web':
         this.valIds.web.changed = true;
         break;
+    }
+  }
+
+  _handleDelete(what: string): void {
+    console.log('_handleDelete=', what);
+    switch (what) {
+      case 'pages': {
+        if (this.valIds.pages.id !== undefined) {
+          this.valIds.pages.toBeDeleted = !this.valIds.pages.toBeDeleted;
+          this.valIds = this.valIds;
+        }
+        break;
+      }
+      case 'fonoteca': {
+        if (this.valIds.fonoteca.id !== undefined) {
+          this.valIds.fonoteca.toBeDeleted = !this.valIds.fonoteca.toBeDeleted;
+        }
+        break;
+      }
+      case 'hls': {
+        if (this.valIds.hls.id !== undefined) {
+          this.valIds.hls.toBeDeleted = !this.valIds.hls.toBeDeleted;
+        }
+        break;
+      }
+      case 'oem': {
+        if (this.valIds.oem.id !== undefined) {
+          this.valIds.oem.toBeDeleted = !this.valIds.oem.toBeDeleted;
+        }
+        break;
+      }
+      case 'theatre': {
+        if (this.valIds.theatre.id !== undefined) {
+          this.valIds.theatre.toBeDeleted = !this.valIds.theatre.toBeDeleted;
+        }
+        break;
+      }
+      case 'ticino': {
+        if (this.valIds.ticino.id !== undefined) {
+          this.valIds.ticino.toBeDeleted = !this.valIds.ticino.toBeDeleted;
+        }
+        break;
+      }
+      case 'web': {
+        if (this.valIds.web.id !== undefined) {
+          this.valIds.web.toBeDeleted = !this.valIds.web.toBeDeleted;
+        }
+        break;
+      }
     }
   }
 
@@ -447,28 +548,69 @@ export class EditartComponent implements ControlValueAccessor, OnInit {
       //
       const obs: Array<Observable<string>> = [];
 
-      if (this.valIds.numLines.changed) {
+      if (this.valIds.article.toBeDeleted && this.valIds.article.id !== undefined) {
         let gaga: Observable<string>;
-        if (this.valIds.numLines.id === undefined) {
-          console.log('createIntValue');
-          gaga = this.knoraService.createIntValue(
+        gaga = this.knoraService.deleteTextValue(
+          this.resId,
+          this.knoraService.mlsOntology + 'Article',
+          this.valIds.article.id as string,
+          this.knoraService.mlsOntology + 'hasArticleText');
+        obs.push(gaga);
+      } else if (this.valIds.article.changed) {
+        let gaga: Observable<string>;
+        if (this.valIds.article.id === undefined) {
+          gaga = this.knoraService.createTextValue(
             this.resId,
             this.knoraService.mlsOntology + 'Article',
-            this.knoraService.mlsOntology + 'hasNumlines',
-            this.form.value.numLines);
+            this.knoraService.mlsOntology + 'hasArticleText',
+            this.form.value.article);
         } else {
-          console.log('updateIntValue');
-          gaga = this.knoraService.updateIntValue(
+          gaga = this.knoraService.updateTextValue(
             this.resId,
             this.knoraService.mlsOntology + 'Article',
-            this.valIds.numLines.id as string,
-            this.knoraService.mlsOntology + 'hasNumlines',
-            this.form.value.numLines);
+            this.valIds.article.id as string,
+            this.knoraService.mlsOntology + 'hasArticleText',
+            this.form.value.article);
         }
         obs.push(gaga);
       }
 
-      if (this.valIds.fonoteca.changed) {
+      if (this.valIds.pages.toBeDeleted && this.valIds.pages.id !== undefined) {
+        let gaga: Observable<string>;
+        gaga = this.knoraService.deleteTextValue(
+          this.resId,
+          this.knoraService.mlsOntology + 'Article',
+          this.valIds.pages.id as string,
+          this.knoraService.mlsOntology + 'hasPages');
+        obs.push(gaga);
+      } else if (this.valIds.pages.changed) {
+        let gaga: Observable<string>;
+        if (this.valIds.pages.id === undefined) {
+          gaga = this.knoraService.createTextValue(
+            this.resId,
+            this.knoraService.mlsOntology + 'Article',
+            this.knoraService.mlsOntology + 'hasPages',
+            this.form.value.pages);
+        } else {
+          gaga = this.knoraService.updateTextValue(
+            this.resId,
+            this.knoraService.mlsOntology + 'Article',
+            this.valIds.pages.id as string,
+            this.knoraService.mlsOntology + 'hasPages',
+            this.form.value.pages);
+        }
+        obs.push(gaga);
+      }
+
+      if (this.valIds.fonoteca.toBeDeleted && this.valIds.fonoteca.id !== undefined) {
+        let gaga: Observable<string>;
+        gaga = this.knoraService.deleteTextValue(
+          this.resId,
+          this.knoraService.mlsOntology + 'Article',
+          this.valIds.fonoteca.id as string,
+          this.knoraService.mlsOntology + 'hasFonotecacode');
+        obs.push(gaga);
+      } else if (this.valIds.fonoteca.changed) {
         let gaga: Observable<string>;
         if (this.valIds.fonoteca.id === undefined) {
           console.log('createTextValue');
@@ -489,7 +631,15 @@ export class EditartComponent implements ControlValueAccessor, OnInit {
         obs.push(gaga);
       }
 
-      if (this.valIds.hls.changed) {
+      if (this.valIds.hls.toBeDeleted && this.valIds.hls.id !== undefined) {
+        let gaga: Observable<string>;
+        gaga = this.knoraService.deleteTextValue(
+          this.resId,
+          this.knoraService.mlsOntology + 'Article',
+          this.valIds.hls.id as string,
+          this.knoraService.mlsOntology + 'hasHlsCcode');
+        obs.push(gaga);
+      } else if (this.valIds.hls.changed) {
         let gaga: Observable<string>;
         if (this.valIds.hls.id === undefined) {
           gaga = this.knoraService.createTextValue(
@@ -508,7 +658,15 @@ export class EditartComponent implements ControlValueAccessor, OnInit {
         obs.push(gaga);
       }
 
-      if (this.valIds.oem.changed) {
+      if (this.valIds.oem.toBeDeleted && this.valIds.oem.id !== undefined) {
+        let gaga: Observable<string>;
+        gaga = this.knoraService.deleteTextValue(
+          this.resId,
+          this.knoraService.mlsOntology + 'Article',
+          this.valIds.oem.id as string,
+          this.knoraService.mlsOntology + 'hasOemlCode');
+        obs.push(gaga);
+      } else if (this.valIds.oem.changed) {
         let gaga: Observable<string>;
         if (this.valIds.oem.id === undefined) {
           gaga = this.knoraService.createTextValue(
@@ -527,7 +685,15 @@ export class EditartComponent implements ControlValueAccessor, OnInit {
         obs.push(gaga);
       }
 
-      if (this.valIds.theatre.changed) {
+      if (this.valIds.theatre.toBeDeleted && this.valIds.theatre.id !== undefined) {
+        let gaga: Observable<string>;
+        gaga = this.knoraService.deleteTextValue(
+          this.resId,
+          this.knoraService.mlsOntology + 'Article',
+          this.valIds.theatre.id as string,
+          this.knoraService.mlsOntology + 'hasTheaterLexCode');
+        obs.push(gaga);
+      } else if (this.valIds.theatre.changed) {
         let gaga: Observable<string>;
         if (this.valIds.theatre.id === undefined) {
           gaga = this.knoraService.createTextValue(
@@ -546,7 +712,15 @@ export class EditartComponent implements ControlValueAccessor, OnInit {
         obs.push(gaga);
       }
 
-      if (this.valIds.ticino.changed) {
+      if (this.valIds.ticino.toBeDeleted && this.valIds.ticino.id !== undefined) {
+        let gaga: Observable<string>;
+        gaga = this.knoraService.deleteTextValue(
+          this.resId,
+          this.knoraService.mlsOntology + 'Article',
+          this.valIds.ticino.id as string,
+          this.knoraService.mlsOntology + 'hasTicinoLexCode');
+        obs.push(gaga);
+      } else if (this.valIds.ticino.changed) {
         let gaga: Observable<string>;
         if (this.valIds.ticino.id === undefined) {
           gaga = this.knoraService.createTextValue(
@@ -565,7 +739,15 @@ export class EditartComponent implements ControlValueAccessor, OnInit {
         obs.push(gaga);
       }
 
-      if (this.valIds.web.changed) {
+      if (this.valIds.web.toBeDeleted && this.valIds.web.id !== undefined) {
+        let gaga: Observable<string>;
+        gaga = this.knoraService.deleteTextValue(
+          this.resId,
+          this.knoraService.mlsOntology + 'Article',
+          this.valIds.web.id as string,
+          this.knoraService.mlsOntology + 'hasWebLink');
+        obs.push(gaga);
+      } else if (this.valIds.web.changed) {
         let gaga: Observable<string>;
         if (this.valIds.web.id === undefined) {
           gaga = this.knoraService.createTextValue(

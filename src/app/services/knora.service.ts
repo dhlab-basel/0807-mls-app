@@ -22,16 +22,15 @@ import {
   CreateResource,
   CreateLinkValue,
   ILabelSearchParams,
-  CreateTextValueAsXml,
   CreateTextValueAsString,
   UpdateTextValueAsString,
   UpdateResource,
-  UpdateValue, CreateIntValue, CreateValue, WriteValueResponse, UpdateIntValue, ReadIntValue
+  UpdateValue, CreateIntValue, CreateValue, WriteValueResponse, UpdateIntValue, ReadIntValue, DeleteValue, DeleteValueResponse
 } from '@dasch-swiss/dsp-js';
 
 import {AppInitService} from '../app-init.service';
 import {Observable, of} from 'rxjs';
-import {catchError, map, tap} from 'rxjs/operators';
+import {catchError, map} from 'rxjs/operators';
 import {GravsearchTemplatesService} from './gravsearch-templates.service';
 
 
@@ -144,7 +143,7 @@ export class ArticleData {
     // public lexicon: string,
     public lexiconIri: string,
     public article: string,
-    public numLines?: string,
+    public pages?: string,
     public fonoteca?: string,
     public hls?: string,
     public oem?: string,
@@ -348,7 +347,7 @@ export class KnoraService {
             case Cardinality._1_n: cardinalityStr = '1-n'; break;
           }
           const pdata = data.properties[prop.propertyIndex] as ResourcePropertyDefinition;
-          const propInfo: ResInfoProps = {
+          resInfo.properties[prop.propertyIndex] = {
             cardinality: cardinalityStr,
             label: pdata.label,
             comment: pdata.comment,
@@ -360,7 +359,6 @@ export class KnoraService {
             isLinkProperty: pdata.isLinkProperty,
             isLinkValueProperty: pdata.isLinkValueProperty
           };
-          resInfo.properties[prop.propertyIndex] = propInfo;
         }
         return resInfo;
       }, catchError(error => {console.log(error); return error; }))
@@ -485,11 +483,11 @@ export class KnoraService {
       articleVal
     ];
 
-    if (data.numLines !== null && data.numLines !== undefined && data.numLines !== '') {
-      const numLinesVal = new CreateIntValue();
-      numLinesVal.int = parseInt(data.numLines, 10);
-      props[this.mlsOntology + 'hasNumlines'] = [
-        numLinesVal
+    if (data.pages !== null && data.pages !== undefined && data.pages !== '') {
+      const pagesVal = new CreateTextValueAsString();
+      pagesVal.text = data.pages;
+      props[this.mlsOntology + 'hasPages'] = [
+        pagesVal
       ];
     }
 
@@ -557,10 +555,10 @@ export class KnoraService {
 
   /**
    * creates a new text value
-   * @param resId
-   * @param resType
-   * @param property
-   * @param text
+   * @param resId Resource id (IRI)
+   * @param resType Resource type (IRI)
+   * @param property property type (IRI)
+   * @param text Text value
    */
   createTextValue(resId: string, resType: string, property: string, text: string): Observable<string> {
     const createTextVal = new CreateTextValueAsString();
@@ -579,7 +577,7 @@ export class KnoraService {
       }),
       catchError((error: ApiResponseError) => {
         console.log('createTextValue HOPPLA', error);
-        return of('error');
+        return of('ERROR');
       })
     );
   }
@@ -587,10 +585,11 @@ export class KnoraService {
   /**
    * Updates a text value
    *
-   * @param resId
-   * @param resType
-   * @param property
-   * @param text
+   * @param resId Resource id (IRI)
+   * @param resType Resource type (IRI)
+   * @param valId Value id (IRI)
+   * @param property Property class (IRI)
+   * @param text Text value
    */
   updateTextValue(resId: string, resType: string, valId: string, property: string, text: string): Observable<string> {
     const updateTextVal = new UpdateTextValueAsString();
@@ -611,7 +610,31 @@ export class KnoraService {
       }),
       catchError((error: ApiResponseError) => {
         console.log('updateTextValue HOPPLA', error);
-        return of('error');
+        return of('ERROR');
+      })
+    );
+  }
+
+  deleteTextValue(resId: string, resType: string, valId: string, property: string): Observable<string> {
+    const deleteVal = new DeleteValue();
+
+    deleteVal.id = valId;
+    deleteVal.type = 'http://api.knora.org/ontology/knora-api/v2#TextValue';
+
+    const updateResource = new UpdateResource<DeleteValue>();
+    updateResource.id = resId;
+    updateResource.type = resType;
+    updateResource.property = property;
+    updateResource.value = deleteVal;
+
+    return this.knoraApiConnection.v2.values.deleteValue(updateResource).pipe(
+      map((res: DeleteValueResponse) => {
+        console.log('deleteTextValue', res);
+        return 'OK';
+      }),
+      catchError((error: ApiResponseError) => {
+        console.log('deleteTextValue HOPPLA', error);
+        return of('ERROR');
       })
     );
   }
@@ -661,5 +684,30 @@ export class KnoraService {
       })
     );
   }
+
+  deleteIntValue(resId: string, resType: string, valId: string, property: string): Observable<string> {
+    const deleteVal = new DeleteValue();
+
+    deleteVal.id = valId;
+    deleteVal.type = 'http://api.knora.org/ontology/knora-api/v2#IntValue';
+
+    const updateResource = new UpdateResource<DeleteValue>();
+    updateResource.id = resId;
+    updateResource.type = resType;
+    updateResource.property = property;
+    updateResource.value = deleteVal;
+
+    return this.knoraApiConnection.v2.values.deleteValue(updateResource).pipe(
+      map((res: DeleteValueResponse) => {
+        console.log('deleteIntValue', res);
+        return 'OK';
+      }),
+      catchError((error: ApiResponseError) => {
+        console.log('deleteIntValue HOPPLA', error);
+        return of('ERROR');
+      })
+    );
+  }
+
 
 }
