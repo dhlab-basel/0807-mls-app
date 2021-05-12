@@ -95,6 +95,12 @@ export class ArticleComponent implements OnInit {
         articleIri: this.articleIri,
       };
       const dialogRef = this.dialog.open(EditartComponent, editConfig);
+
+      dialogRef.afterClosed().subscribe(data => {
+        if (data) {
+          this.getArticle();
+        }
+      });
     });
 
   }

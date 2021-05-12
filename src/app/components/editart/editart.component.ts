@@ -530,9 +530,7 @@ export class EditartComponent implements ControlValueAccessor, OnInit {
   }
 
   save() {
-    console.log(this.form.value);
-
-
+    let reload = false;
     if (this.inData.articleIri === undefined) {
       //
       // we create a new article
@@ -542,6 +540,7 @@ export class EditartComponent implements ControlValueAccessor, OnInit {
           console.log('CREATE_RESULT:', res);
         },
       );
+      reload = true;
     } else {
       //
       // we edit an existing article, update/create only changed fields
@@ -556,6 +555,7 @@ export class EditartComponent implements ControlValueAccessor, OnInit {
           this.valIds.article.id as string,
           this.knoraService.mlsOntology + 'hasArticleText');
         obs.push(gaga);
+        reload = true;
       } else if (this.valIds.article.changed) {
         let gaga: Observable<string>;
         if (this.valIds.article.id === undefined) {
@@ -573,6 +573,7 @@ export class EditartComponent implements ControlValueAccessor, OnInit {
             this.form.value.article);
         }
         obs.push(gaga);
+        reload = true;
       }
 
       if (this.valIds.pages.toBeDeleted && this.valIds.pages.id !== undefined) {
@@ -583,6 +584,7 @@ export class EditartComponent implements ControlValueAccessor, OnInit {
           this.valIds.pages.id as string,
           this.knoraService.mlsOntology + 'hasPages');
         obs.push(gaga);
+        reload = true;
       } else if (this.valIds.pages.changed) {
         let gaga: Observable<string>;
         if (this.valIds.pages.id === undefined) {
@@ -599,6 +601,7 @@ export class EditartComponent implements ControlValueAccessor, OnInit {
             this.knoraService.mlsOntology + 'hasPages',
             this.form.value.pages);
         }
+        reload = true;
         obs.push(gaga);
       }
 
@@ -610,6 +613,7 @@ export class EditartComponent implements ControlValueAccessor, OnInit {
           this.valIds.fonoteca.id as string,
           this.knoraService.mlsOntology + 'hasFonotecacode');
         obs.push(gaga);
+        reload = true;
       } else if (this.valIds.fonoteca.changed) {
         let gaga: Observable<string>;
         if (this.valIds.fonoteca.id === undefined) {
@@ -629,6 +633,7 @@ export class EditartComponent implements ControlValueAccessor, OnInit {
             this.form.value.fonoteca);
         }
         obs.push(gaga);
+        reload = true;
       }
 
       if (this.valIds.hls.toBeDeleted && this.valIds.hls.id !== undefined) {
@@ -639,6 +644,7 @@ export class EditartComponent implements ControlValueAccessor, OnInit {
           this.valIds.hls.id as string,
           this.knoraService.mlsOntology + 'hasHlsCcode');
         obs.push(gaga);
+        reload = true;
       } else if (this.valIds.hls.changed) {
         let gaga: Observable<string>;
         if (this.valIds.hls.id === undefined) {
@@ -656,6 +662,7 @@ export class EditartComponent implements ControlValueAccessor, OnInit {
             this.form.value.hls);
         }
         obs.push(gaga);
+        reload = true;
       }
 
       if (this.valIds.oem.toBeDeleted && this.valIds.oem.id !== undefined) {
@@ -666,6 +673,7 @@ export class EditartComponent implements ControlValueAccessor, OnInit {
           this.valIds.oem.id as string,
           this.knoraService.mlsOntology + 'hasOemlCode');
         obs.push(gaga);
+        reload = true;
       } else if (this.valIds.oem.changed) {
         let gaga: Observable<string>;
         if (this.valIds.oem.id === undefined) {
@@ -683,6 +691,7 @@ export class EditartComponent implements ControlValueAccessor, OnInit {
             this.form.value.oem);
         }
         obs.push(gaga);
+        reload = true;
       }
 
       if (this.valIds.theatre.toBeDeleted && this.valIds.theatre.id !== undefined) {
@@ -693,6 +702,7 @@ export class EditartComponent implements ControlValueAccessor, OnInit {
           this.valIds.theatre.id as string,
           this.knoraService.mlsOntology + 'hasTheaterLexCode');
         obs.push(gaga);
+        reload = true;
       } else if (this.valIds.theatre.changed) {
         let gaga: Observable<string>;
         if (this.valIds.theatre.id === undefined) {
@@ -709,6 +719,7 @@ export class EditartComponent implements ControlValueAccessor, OnInit {
             this.knoraService.mlsOntology + 'hasTheaterLexCode',
             this.form.value.theatre);
         }
+        reload = true;
         obs.push(gaga);
       }
 
@@ -720,6 +731,7 @@ export class EditartComponent implements ControlValueAccessor, OnInit {
           this.valIds.ticino.id as string,
           this.knoraService.mlsOntology + 'hasTicinoLexCode');
         obs.push(gaga);
+        reload = true;
       } else if (this.valIds.ticino.changed) {
         let gaga: Observable<string>;
         if (this.valIds.ticino.id === undefined) {
@@ -737,6 +749,7 @@ export class EditartComponent implements ControlValueAccessor, OnInit {
             this.form.value.ticino);
         }
         obs.push(gaga);
+        reload = true;
       }
 
       if (this.valIds.web.toBeDeleted && this.valIds.web.id !== undefined) {
@@ -747,6 +760,7 @@ export class EditartComponent implements ControlValueAccessor, OnInit {
           this.valIds.web.id as string,
           this.knoraService.mlsOntology + 'hasWebLink');
         obs.push(gaga);
+        reload = true;
       } else if (this.valIds.web.changed) {
         let gaga: Observable<string>;
         if (this.valIds.web.id === undefined) {
@@ -764,17 +778,18 @@ export class EditartComponent implements ControlValueAccessor, OnInit {
             this.form.value.web);
         }
         obs.push(gaga);
+        reload = true;
       }
 
       forkJoin(obs).subscribe(res => {
         console.log('forkJoin:', res);
       });
     }
-    this.dialogRef.close();
+    this.dialogRef.close(reload);
   }
 
   cancel() {
-    this.dialogRef.close();
+    this.dialogRef.close(false);
   }
 
   getLexica(): void {
