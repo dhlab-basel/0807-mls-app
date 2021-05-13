@@ -73,8 +73,9 @@ class ArticleIds {
                  formControlName="label"
                  (input)="_handleInput('label')">
         </mat-form-field>
-        <mat-icon color="warn" *ngIf="valIds.label.changed">cached</mat-icon>
+        <button *ngIf="valIds.label.changed" mat-mini-fab (click)="_handleUndo('label')"><mat-icon color="warn">cached</mat-icon></button>
         <br/>
+
         <mat-form-field *ngIf="inData.lemmaIri === undefined" [style.width.px]=400>
           <input matInput [matAutocomplete]="auto"
                  required
@@ -120,8 +121,8 @@ class ArticleIds {
 
         <ckeditor matInput #editor [editor]="Editor" formControlName="article" (change)="_handleInput('article')"></ckeditor>
         <br/>
-        <mat-icon color="warn" *ngIf="valIds.article.changed">cached</mat-icon>
-        <button *ngIf="valIds.article.id !== undefined" class="mat-raised-button" (click)="_handleDelete('article')">
+        <button *ngIf="valIds.article.changed" mat-mini-fab (click)="_handleUndo('article')"><mat-icon color="warn">cached</mat-icon></button>
+        <button *ngIf="valIds.article.id !== undefined" mat-mini-fab (click)="_handleDelete('article')">
           <mat-icon *ngIf="!valIds.article.toBeDeleted">delete</mat-icon>
           <mat-icon *ngIf="valIds.article.toBeDeleted" color="warn">delete</mat-icon>
         </button>
@@ -137,9 +138,9 @@ class ArticleIds {
                  (input)="_handleInput('pages')">
         </mat-form-field>
         &nbsp;
-        <mat-icon color="warn" *ngIf="valIds.pages.changed">cached</mat-icon>
+        <button *ngIf="valIds.pages.changed" mat-mini-fab (click)="_handleUndo('pages')"><mat-icon color="warn">cached</mat-icon></button>
         &nbsp;
-        <button *ngIf="valIds.pages.id !== undefined" class="mat-raised-button" (click)="_handleDelete('pages')">
+        <button *ngIf="valIds.pages.id !== undefined" mat-mini-fab (click)="_handleDelete('pages')">
           <mat-icon *ngIf="!valIds.pages.toBeDeleted">delete</mat-icon>
           <mat-icon *ngIf="valIds.pages.toBeDeleted" color="warn">delete</mat-icon>
         </button>
@@ -152,9 +153,9 @@ class ArticleIds {
                  (input)="_handleInput('fonoteca')">
         </mat-form-field>
         &nbsp;
-        <mat-icon color="warn" *ngIf="valIds.fonoteca.changed">cached</mat-icon>
+        <button *ngIf="valIds.fonoteca.changed" mat-mini-fab (click)="_handleUndo('fonoteca')"><mat-icon color="warn">cached</mat-icon></button>
         &nbsp;
-        <button *ngIf="valIds.fonoteca.id !== undefined" class="mat-raised-button" (click)="_handleDelete('fonoteca')">
+        <button *ngIf="valIds.fonoteca.id !== undefined" mat-mini-fab (click)="_handleDelete('fonoteca')">
           <mat-icon *ngIf="!valIds.fonoteca.toBeDeleted">delete</mat-icon>
           <mat-icon *ngIf="valIds.fonoteca.toBeDeleted" color="warn">delete</mat-icon>
         </button>
@@ -167,9 +168,9 @@ class ArticleIds {
                  (input)="_handleInput('hls')">
         </mat-form-field>
         &nbsp;
-        <mat-icon color="warn" *ngIf="valIds.hls.changed">cached</mat-icon>
+        <button *ngIf="valIds.hls.changed" mat-mini-fab (click)="_handleUndo('hls')"><mat-icon color="warn">cached</mat-icon></button>
         &nbsp;
-        <button *ngIf="valIds.hls.id !== undefined" class="mat-raised-button" (click)="_handleDelete('hls')">
+        <button *ngIf="valIds.hls.id !== undefined" mat-mini-fab (click)="_handleDelete('hls')">
           <mat-icon *ngIf="!valIds.hls.toBeDeleted">delete</mat-icon>
           <mat-icon *ngIf="valIds.hls.toBeDeleted" color="warn">delete</mat-icon>
         </button>
@@ -182,9 +183,9 @@ class ArticleIds {
                  (input)="_handleInput('oem')">
         </mat-form-field>
         &nbsp;
-        <mat-icon color="warn" *ngIf="valIds.oem.changed">cached</mat-icon>
+        <button *ngIf="valIds.oem.changed" mat-mini-fab (click)="_handleUndo('oem')"><mat-icon color="warn">cached</mat-icon></button>
         &nbsp;
-        <button *ngIf="valIds.oem.id !== undefined" class="mat-raised-button" (click)="_handleDelete('oem')">
+        <button *ngIf="valIds.oem.id !== undefined" mat-mini-fab (click)="_handleDelete('oem')">
           <mat-icon *ngIf="!valIds.oem.toBeDeleted">delete</mat-icon>
           <mat-icon *ngIf="valIds.oem.toBeDeleted" color="warn">delete</mat-icon>
         </button>
@@ -197,9 +198,9 @@ class ArticleIds {
                  (input)="_handleInput('theatre')">
         </mat-form-field>
         &nbsp;
-        <mat-icon color="warn" *ngIf="valIds.theatre.changed">cached</mat-icon>
+        <button *ngIf="valIds.theatre.changed" mat-mini-fab (click)="_handleUndo('theatre')"><mat-icon color="warn">cached</mat-icon></button>
         &nbsp;
-        <button *ngIf="valIds.theatre.id !== undefined" class="mat-raised-button" (click)="_handleDelete('theatre')">
+        <button *ngIf="valIds.theatre.id !== undefined" mat-mini-fab (click)="_handleDelete('theatre')">
           <mat-icon *ngIf="!valIds.theatre.toBeDeleted">delete</mat-icon>
           <mat-icon *ngIf="valIds.theatre.toBeDeleted" color="warn">delete</mat-icon>
         </button>
@@ -212,9 +213,9 @@ class ArticleIds {
                  (input)="_handleInput('ticino')">
         </mat-form-field>
         &nbsp;
-        <mat-icon color="warn" *ngIf="valIds.ticino.changed">cached</mat-icon>
+        <button *ngIf="valIds.ticino.changed" mat-mini-fab (click)="_handleUndo('ticino')"><mat-icon color="warn">cached</mat-icon></button>
         &nbsp;
-        <button *ngIf="valIds.ticino.id !== undefined" class="mat-raised-button" (click)="_handleDelete('ticino')">
+        <button *ngIf="valIds.ticino.id !== undefined" mat-mini-fab (click)="_handleDelete('ticino')">
           <mat-icon *ngIf="!valIds.ticino.toBeDeleted">delete</mat-icon>
           <mat-icon *ngIf="valIds.ticino.toBeDeleted" color="warn">delete</mat-icon>
         </button>
@@ -227,9 +228,9 @@ class ArticleIds {
                  (input)="_handleInput('web')">
         </mat-form-field>
         &nbsp;
-        <mat-icon color="warn" *ngIf="valIds.web.changed">cached</mat-icon>
+        <button *ngIf="valIds.web.changed" mat-mini-fab (click)="_handleUndo('web')"><mat-icon color="warn">cached</mat-icon></button>
         &nbsp;
-        <button *ngIf="valIds.web.id !== undefined" class="mat-raised-button" (click)="_handleDelete('web')">
+        <button *ngIf="valIds.web.id !== undefined" mat-mini-fab (click)="_handleDelete('web')">
           <mat-icon *ngIf="!valIds.web.toBeDeleted">delete</mat-icon>
           <mat-icon *ngIf="valIds.web.toBeDeleted" color="warn">delete</mat-icon>
         </button>
@@ -514,6 +515,10 @@ export class EditartComponent implements ControlValueAccessor, OnInit {
         break;
       }
     }
+  }
+
+  _handleUndo(what: string) {
+    console.log('UNDO-----------UNDO');
   }
 
 
