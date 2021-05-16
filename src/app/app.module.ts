@@ -52,6 +52,8 @@ import {KnoraTextInputComponent} from './components/knora/knora-text-input/knora
 import { EditartComponent } from './components/editart/editart.component';
 import { CKEditorModule } from '@ckeditor/ckeditor5-angular';
 import { LemmaselectComponent } from './components/lemmaselect/lemmaselect.component';
+import { EditlemComponent } from './components/editlem/editlem.component';
+import {ClipboardModule} from '@angular/cdk/clipboard';
 
 export function initializeApp(appInitService: AppInitService) {
   return (): Promise<any> => {
@@ -87,6 +89,7 @@ export function initializeApp(appInitService: AppInitService) {
     KnoraTextInputComponent,
     EditartComponent,
     LemmaselectComponent,
+    EditlemComponent,
   ],
   entryComponents: [
     LoginComponent,
@@ -121,6 +124,7 @@ export function initializeApp(appInitService: AppInitService) {
     MatSelectModule,
     MatAutocompleteModule,
     CKEditorModule,
+    ClipboardModule,
   ],
   providers: [
     AppInitService,

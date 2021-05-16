@@ -3,6 +3,9 @@ import { ActivatedRoute } from '@angular/router';
 import { ElementRef, ViewChild } from '@angular/core';
 import { Router} from '@angular/router';
 import {KnoraService} from '../../services/knora.service';
+import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
+import {EditartComponent} from '../editart/editart.component';
+import {EditlemComponent} from '../editlem/editlem.component';
 
 @Component({
   selector: 'app-lemmata',
@@ -19,6 +22,9 @@ import {KnoraService} from '../../services/knora.service';
         Sie können das Lexikon alphabetisch durchblättern oder gezielt durchsuchen.
         Vorsicht: Bislang verbirgt sich noch nicht hinter jedem Eintrag ein vollwertiger Artikel.
         Wir arbeiten daran!
+        <br/>
+        <button mat-raised-button (click)="openAddLemmaDialog()">Add Lemma</button>
+
       </mat-card-subtitle>
       <mat-card-content>
         <form (submit)="searchEvent($event)" (keyup.enter)="searchEvent($event)">
@@ -74,6 +80,7 @@ import {KnoraService} from '../../services/knora.service';
 export class LemmataComponent implements OnInit {
   @ViewChild('searchField')
   private searchField: ElementRef;
+  public allowEdit: boolean;
 
   lemmata: Array<Array<string>> = [];
   startchar: string;
@@ -87,8 +94,11 @@ export class LemmataComponent implements OnInit {
 
   constructor(private knoraService: KnoraService,
               private activatedRoute: ActivatedRoute,
+              public dialog: MatDialog,
               private elementRef: ElementRef,
               private router: Router) {
+    this.allowEdit = this.knoraService.loggedin;
+
     this.startchar = 'A';
     this.page = 0;
     this.searchterm = '';
@@ -232,6 +242,23 @@ export class LemmataComponent implements OnInit {
     this.showAindex = true;
     this.getLemmata();
   }
+
+  openAddLemmaDialog() {
+    this.activatedRoute.params.subscribe(params => {
+      const createConfig = new MatDialogConfig();
+      createConfig.autoFocus = true;
+      createConfig.width = '800px';
+      const dialogRef = this.dialog.open(EditlemComponent, createConfig);
+
+      dialogRef.afterClosed().subscribe(data => {
+        if (data) {
+          //const tmp = this.lemmaIri.slice();
+          //this.lemmaIri = tmp;
+        }
+      });
+    });
+  }
+
 
   ngOnInit() {
     this.activatedRoute.queryParams.subscribe(params => {

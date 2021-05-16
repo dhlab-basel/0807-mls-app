@@ -3,5 +3,6 @@
   "server": "https://api.dasch.swiss:443",
   "ontologyPrefix": "http://api.dasch.swiss",
   "servername": "api.dasch.swiss",
+  "project": "http://rdfh.ch/projects/0807",
   "port": 443
 }

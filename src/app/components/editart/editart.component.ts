@@ -10,7 +10,7 @@ import {ActivatedRoute} from '@angular/router';
 import {LemmataComponent} from '../lemmata/lemmata.component';
 import {LemmaselectComponent} from '../lemmaselect/lemmaselect.component';
 import {concatMap, map} from 'rxjs/operators';
-import {Constants, DeleteValue, ReadResourceSequence, UpdateResource} from '@dasch-swiss/dsp-js';
+import {Constants, DeleteValue, ReadResourceSequence, UpdateResource, UpdateResourceMetadata} from '@dasch-swiss/dsp-js';
 import {forkJoin, from, Observable, Subject} from 'rxjs';
 import {KnoraLinkVal} from '../knora/knora-link-input/knora-link-input.component';
 import {MatIconModule} from '@angular/material/icon';
@@ -116,7 +116,7 @@ class ArticleIds {
                  formControlName="lexiconIri"
                  aria-label="Value">
         </mat-form-field>
-        <mat-icon color="warn" *ngIf="valIds.lexicon.changed">cached</mat-icon>
+        <button *ngIf="valIds.lexicon.changed" mat-mini-fab (click)="_handleUndo('lexicon')"><mat-icon color="warn">cached</mat-icon></button>
         <br/>
 
         <ckeditor matInput #editor [editor]="Editor" formControlName="article" (change)="_handleInput('article')"></ckeditor>
@@ -265,6 +265,7 @@ export class EditartComponent implements ControlValueAccessor, OnInit {
   data: ArticleData = new ArticleData('', '', '', '', '');
 
   resId: string;
+  lastmod: string;
   public valIds: ArticleIds = new ArticleIds();
 
   constructor(public knoraService: KnoraService,
@@ -301,8 +302,10 @@ export class EditartComponent implements ControlValueAccessor, OnInit {
         console.log(data);
         console.log('-------------------------------------');
         this.resId = data.id;
+        this.lastmod = data.lastmod;
         this.form.controls.label.setValue(data.label);
         this.valIds.label = {id: data.label, changed: false, toBeDeleted: false};
+        this.data.label = data.label;
         for (const ele of data.properties) {
           switch (ele.propname) {
             case this.knoraService.mlsOntology + 'hasALinkToLemmaValue': {
@@ -315,48 +318,57 @@ export class EditartComponent implements ControlValueAccessor, OnInit {
               this.form.controls.lexiconIri.setValue(ele.values[0]);
               this.form.controls.lexiconIri.disable();
               this.valIds.lexicon = {id: ele.ids[0], changed: false, toBeDeleted: false};
+              this.data.lexiconIri = ele.values[0];
               break;
             }
             case this.knoraService.mlsOntology + 'hasArticleText': {
               this.form.controls.article.setValue(ele.values[0]);
               this.valIds.article = {id: ele.ids[0], changed: false, toBeDeleted: false};
+              this.data.article = ele.values[0];
               break;
             }
 
             case this.knoraService.mlsOntology + 'hasPages': {
               this.form.controls.pages.setValue(ele.values[0]);
               this.valIds.pages = {id: ele.ids[0], changed: false, toBeDeleted: false};
+              this.data.pages = ele.values[0];
               break;
             }
 
             case this.knoraService.mlsOntology + 'hasFonotecacode': {
               this.form.controls.fonoteca.setValue(ele.values[0]);
               this.valIds.fonoteca = {id: ele.ids[0], changed: false, toBeDeleted: false};
+              this.data.fonoteca = ele.values[0];
               break;
             }
             case this.knoraService.mlsOntology + 'hasHlsCcode': {
               this.form.controls.hls.setValue(ele.values[0]);
               this.valIds.hls = {id: ele.ids[0], changed: false, toBeDeleted: false};
+              this.data.hls = ele.values[0];
               break;
             }
             case this.knoraService.mlsOntology + 'hasOemlCode': {
               this.form.controls.oem.setValue(ele.values[0]);
               this.valIds.oem = {id: ele.ids[0], changed: false, toBeDeleted: false};
+              this.data.oem = ele.values[0];
               break;
             }
             case this.knoraService.mlsOntology + 'hasTheaterLexCode': {
               this.form.controls.theatre.setValue(ele.values[0]);
               this.valIds.theatre = {id: ele.ids[0], changed: false, toBeDeleted: false};
+              this.data.theatre = ele.values[0];
               break;
             }
             case this.knoraService.mlsOntology + 'hasTicinoLexCode': {
               this.form.controls.ticino.setValue(ele.values[0]);
               this.valIds.ticino = {id: ele.ids[0], changed: false, toBeDeleted: false};
+              this.data.ticino = ele.values[0];
               break;
             }
             case this.knoraService.mlsOntology + 'hasWebLink': {
               this.form.controls.web.setValue(ele.values[0]);
               this.valIds.web = {id: ele.ids[0], changed: false, toBeDeleted: false};
+              this.data.web = ele.values[0];
               break;
             }
           }
@@ -518,7 +530,58 @@ export class EditartComponent implements ControlValueAccessor, OnInit {
   }
 
   _handleUndo(what: string) {
-    console.log('UNDO-----------UNDO');
+    switch (what) {
+      case 'label': {
+        this.form.controls.label.setValue(this.data.label);
+        this.valIds.label.changed = false;
+        break;
+      }
+      case 'article': {
+        this.form.controls.article.setValue(this.data.article);
+        this.valIds.article.changed = false;
+        break;
+      }
+      case 'lexicon': {
+        this.form.controls.lexiconIri.setValue(this.data.lexiconIri);
+        this.valIds.lexicon.changed = false;
+        break;
+      }
+      case 'pages': {
+        this.form.controls.pages.setValue(this.data.pages);
+        this.valIds.pages.changed = false;
+        break;
+      }
+      case 'fonoteca': {
+        this.form.controls.fonoteca.setValue(this.data.fonoteca);
+        this.valIds.fonoteca.changed = false;
+        break;
+      }
+      case 'hls': {
+        this.form.controls.hls.setValue(this.data.hls);
+        this.valIds.hls.changed = false;
+        break;
+      }
+      case 'oem': {
+        this.form.controls.oem.setValue(this.data.oem);
+        this.valIds.oem.changed = false;
+        break;
+      }
+      case 'theatre': {
+        this.form.controls.theatre.setValue(this.data.theatre);
+        this.valIds.theatre.changed = false;
+        break;
+      }
+      case 'ticino': {
+        this.form.controls.ticino.setValue(this.data.ticino);
+        this.valIds.ticino.changed = false;
+        break;
+      }
+      case 'web': {
+        this.form.controls.web.setValue(this.data.web);
+        this.valIds.web.changed = false;
+        break;
+      }
+    }
   }
 
 
@@ -551,6 +614,15 @@ export class EditartComponent implements ControlValueAccessor, OnInit {
       // we edit an existing article, update/create only changed fields
       //
       const obs: Array<Observable<string>> = [];
+
+      if (this.valIds.label.changed) {
+        const gaga: Observable<string> = this.knoraService.updateLabel(
+          this.resId,
+          this.knoraService.mlsOntology + 'Article',
+          this.lastmod,
+          this.form.value.label);
+        obs.push(gaga);
+      }
 
       if (this.valIds.article.toBeDeleted && this.valIds.article.id !== undefined) {
         let gaga: Observable<string>;

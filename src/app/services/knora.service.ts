@@ -25,14 +25,60 @@ import {
   CreateTextValueAsString,
   UpdateTextValueAsString,
   UpdateResource,
-  UpdateValue, CreateIntValue, CreateValue, WriteValueResponse, UpdateIntValue, ReadIntValue, DeleteValue, DeleteValueResponse
+  UpdateValue,
+  CreateIntValue,
+  CreateValue,
+  WriteValueResponse,
+  UpdateIntValue,
+  ReadIntValue,
+  DeleteValue,
+  DeleteValueResponse,
+  ListsResponse,
+  List,
+  StringLiteral,
+  CreateListRequest,
+  CreateListValue,
+  UpdateResourceMetadata,
+  UpdateResourceMetadataResponse,
+  UpdateListValue
 } from '@dasch-swiss/dsp-js';
 
 import {AppInitService} from '../app-init.service';
 import {Observable, of} from 'rxjs';
 import {catchError, map} from 'rxjs/operators';
 import {GravsearchTemplatesService} from './gravsearch-templates.service';
+import {insertAfterLastOccurrence} from '@angular/cdk/schematics';
 
+export class LangString {
+  data: {[index: string]: string};
+
+  constructor(langstr: Array<StringLiteral>) {
+    this.data = {};
+    for (const p of langstr) {
+        this.data[p.language || 'de'] = p.value || 'GAGA';
+    }
+  }
+
+  get(lang: string): string {
+    if (lang in this.data) {
+      return this.data[lang];
+    } else {
+      for (const l in this.data) {
+        if (this.data.hasOwnProperty(l)) {
+          return this.data[l];
+        }
+      }
+    }
+    return '-';
+  }
+}
+
+export class ListData {
+  constructor(public listid: string,
+              public labels: LangString,
+              public name?: string) {
+  }
+}
 
 /**
  * Data structures for properties from a resource (instance)
@@ -100,6 +146,7 @@ export interface ResourceData {
   id: string; /** Id (iri) of the resource */
   label: string; /** Label of the resource */
   permission: string; /** permission of the current user */
+  lastmod: string; /** last modification date of resource */
   properties: Array<PropertyData>; /** Array of properties with associated value(s) */
 }
 
@@ -154,6 +201,39 @@ export class ArticleData {
   }
 }
 
+export class Lemma {
+  constructor(
+    public label: string,
+    public text: string, // mls:hasLemmaText: TextValue
+    public type: string, // mls:hasLemmaType: ListValue -> hlist:ArticleTyp
+    public typeIri: string,
+    public givenName: string, // mls:hasGivenName: TextValue
+    public familyName: string, // mls:hasFamilyName: TextValue
+    public pseudonym: string, // mls:hasPseudonym: TextValue
+    public variants: string, // mls:hasVariants: TextValue, ToDo: can have mutiple values -> Array
+    public century: string, // mls:hasCentury: TextValue
+    public deceased: string, // mls:hasDeceasedValue: ListValue -> hlist:ArtikelTyp
+    public deceasedIri: string,
+    public startDate: string, // mls:hasStartDate: TextValue: TextValue
+    public startDateInfo: string, // mls:hasStartDateInfo: TextValue
+    public endDate: string, // mls:hasEndDate: TextValue
+    public endDateInfo: string, // mls:hasEndDateInfo: TextValue
+    public sex: string, // mls:hasSex
+    public sexIri: string,
+    public relevance: string, // mls:hasRelevanceValue: ListValue -> hlist:ArticleTyp
+    public relevanceIri: string, // mls:hasRelevanceValue: ListValue -> hlist:ArticleTyp
+    public gnd: string, // mls:hasGnd: TextValue
+    public viaf: string, // mls:hasViaf: TextValue
+    public comment: string, // mls:haslemmaComment: TextValue
+  ) {
+
+  }
+}
+
+export interface OptionType {
+  iri: string;
+  name: string;
+}
 
 
 @Injectable({
@@ -166,6 +246,16 @@ export class KnoraService {
   loggedin: boolean;
   useremail: string;
   listAdminCache: ListAdminCache;
+
+  lemmaTypeListIri: string;
+  public lemmaTypes: Array<OptionType> = [];
+  deceasedTypeListIri: string;
+  public deceasedTypes: Array<OptionType> = [];
+  sexTypeListIri: string;
+  public sexTypes: Array<OptionType> = [];
+  relevanceTypeIri: string;
+  public relevanceTypes: Array<OptionType> = [];
+
 
   constructor(
     private appInitService: AppInitService,
@@ -180,6 +270,8 @@ export class KnoraService {
     this.loggedin = false;
     this.useremail = '';
     this.listAdminCache = new ListAdminCache(this.knoraApiConnection.admin);
+
+    this.getListTypes();
   }
 
   private processResourceProperties(data: ReadResource): Array<PropertyData> {
@@ -373,6 +465,7 @@ export class KnoraService {
           id: data.id,
           label: data.label,
           permission: data.userHasPermission,
+          lastmod: data.lastModificationDate || '',
           properties: this.processResourceProperties(data)};
       }
     ));
@@ -413,7 +506,6 @@ export class KnoraService {
   getLemma(iri: string): Observable<LemmaData> {
     return this.knoraApiConnection.v2.res.getResource(iri).pipe(
       map((data: ReadResource) => {
-        console.log('=*=*=*=*=', data);
         return {
             id: data.id,
             label: data.label,
@@ -433,6 +525,31 @@ export class KnoraService {
   getList(listIri: string): Observable<ListResponse> {
     return this.listAdminCache.getList(listIri).pipe(
       map( (res: ListResponse) => res)
+    );
+  }
+
+  getAllLists(): Observable<Array<ListData>> {
+    return this.knoraApiConnection.admin.listsEndpoint.getListsInProject(this.appInitService.getSettings().project).pipe(
+      map((res: ApiResponseData<ListsResponse>) => {
+        const result: Array<ListData> = [];
+        for (const list of res.body.lists) {
+          console.log('LIST=', list);
+          result.push(new ListData(list.id, new LangString(list.labels)));
+        }
+        return result;
+      })
+    );
+  }
+
+  getFlatList(listIri: string): Observable<Array<ListData>> {
+    return this.listAdminCache.getList(listIri).pipe(
+      map( (res: ListResponse) => {
+        const flatList: Array<ListData> = [];
+        for (const child of res.list.children) {
+          flatList.push(new ListData(child.id, new LangString(child.labels), child.name));
+        }
+        return flatList;
+      })
     );
   }
 
@@ -538,6 +655,130 @@ export class KnoraService {
         webVal
       ];
     }
+
+    console.log(props);
+    createResource.properties = props;
+
+    return this.knoraApiConnection.v2.res.createResource(createResource).pipe(
+      map((res: ReadResource) => {
+        return res.id;
+      }),
+      catchError((error: ApiResponseError) => {
+        console.log('===ERROR::', error);
+        return of('error'); }
+      )
+    );
+  }
+
+  createLemma(data: Lemma): Observable<string> {
+    const createResource = new CreateResource();
+    createResource.label = data.label;
+    createResource.type = this.mlsOntology + 'Lemma';
+    createResource.attachedToProject = 'http://rdfh.ch/projects/0807';
+
+    const props = {};
+
+    const textVal = new CreateTextValueAsString();
+    textVal.text = data.text;
+    props[this.mlsOntology + 'hasLemmaText'] = [
+      textVal
+    ];
+
+    const typeVal = new CreateListValue();
+    typeVal.listNode = data.typeIri;
+    props[this.mlsOntology + 'hasLemmaType'] = [
+      textVal
+    ];
+
+    const givenNameVal = new CreateTextValueAsString();
+    givenNameVal.text = data.givenName;
+    props[this.mlsOntology + 'hasGivenName'] = [
+      givenNameVal
+    ];
+
+    const familyNameVal = new CreateTextValueAsString();
+    familyNameVal.text = data.familyName;
+    props[this.mlsOntology + 'hasFamilyName'] = [
+      familyNameVal
+    ];
+
+    const pseudonymVal = new CreateTextValueAsString();
+    pseudonymVal.text = data.pseudonym;
+    props[this.mlsOntology + 'hasPseudonym'] = [
+      pseudonymVal
+    ];
+
+    const variantsVal = new CreateTextValueAsString();
+    variantsVal.text = data.variants;
+    props[this.mlsOntology + 'hasVariants'] = [
+      variantsVal
+    ];
+
+    const centuryVal = new CreateTextValueAsString();
+    centuryVal.text = data.century;
+    props[this.mlsOntology + 'hasCentury'] = [
+      centuryVal
+    ];
+
+    const deceasedVal = new CreateListValue();
+    deceasedVal.listNode = data.deceasedIri;
+    props[this.mlsOntology + 'hasDeceasedValue'] = [
+      deceasedVal
+    ];
+
+    const startDateVal = new CreateTextValueAsString();
+    startDateVal.text = data.startDate;
+    props[this.mlsOntology + 'hasStartDate'] = [
+      startDateVal
+    ];
+
+    const startDateInfoVal = new CreateTextValueAsString();
+    startDateInfoVal.text = data.startDateInfo;
+    props[this.mlsOntology + 'hasStartDateInfo'] = [
+      startDateInfoVal
+    ];
+
+    const endDateVal = new CreateTextValueAsString();
+    endDateVal.text = data.endDate;
+    props[this.mlsOntology + 'hasEndDate'] = [
+      endDateVal
+    ];
+
+    const endDateInfoVal = new CreateTextValueAsString();
+    endDateInfoVal.text = data.endDateInfo;
+    props[this.mlsOntology + 'hasEndDateInfo'] = [
+      endDateInfoVal
+    ];
+
+    const sexVal = new CreateListValue();
+    sexVal.listNode = data.sexIri;
+    props[this.mlsOntology + 'hasSex'] = [
+      sexVal
+    ];
+
+    const relevanceVal = new CreateListValue();
+    relevanceVal.listNode = data.relevanceIri;
+    props[this.mlsOntology + 'hasRelevanceValue'] = [
+      relevanceVal
+    ];
+
+    const gndVal = new CreateTextValueAsString();
+    gndVal.text = data.gnd;
+    props[this.mlsOntology + 'hasGnd'] = [
+      gndVal
+    ];
+
+    const viafVal = new CreateTextValueAsString();
+    viafVal.text = data.viaf;
+    props[this.mlsOntology + 'hasViaf'] = [
+      viafVal
+    ];
+
+    const commentVal = new CreateTextValueAsString();
+    commentVal.text = data.comment;
+    props[this.mlsOntology + 'haslemmaComment'] = [
+      commentVal
+    ];
 
     console.log(props);
     createResource.properties = props;
@@ -706,6 +947,145 @@ export class KnoraService {
         console.log('deleteIntValue HOPPLA', error);
         return of('ERROR');
       })
+    );
+  }
+
+  createListValue(resId: string, resType: string, property: string, nodeIri: string): Observable<string> {
+    const createListVal = new CreateListValue();
+    createListVal.listNode = nodeIri;
+
+    const createResource = new UpdateResource<CreateValue>();
+    createResource.id = resId;
+    createResource.type = resType;
+    createResource.property = property;
+    createResource.value = createListVal;
+
+    return this.knoraApiConnection.v2.values.createValue(createResource).pipe(
+      map((res: WriteValueResponse) => {
+        console.log('createListValue', res);
+        return 'OK';
+      }),
+      catchError((error: ApiResponseError) => {
+        console.log('createListValue HOPPLA', error);
+        return of('error');
+      })
+    );
+  }
+
+  updateListValue(resId: string, resType: string, valId: string, property: string, nodeIri: string): Observable<string> {
+    const updateListVal = new UpdateListValue();
+    updateListVal.id = valId;
+    updateListVal.listNode = nodeIri;
+
+    const updateResource = new UpdateResource<UpdateValue>();
+    updateResource.id = resId;
+    updateResource.type = resType;
+    updateResource.property = property;
+    updateResource.value = updateListVal;
+    console.log(updateResource);
+
+    return this.knoraApiConnection.v2.values.updateValue(updateResource).pipe(
+      map((res: WriteValueResponse) => {
+        console.log('updateListValue', res);
+        return 'OK';
+      }),
+      catchError((error: ApiResponseError) => {
+        console.log('updateListValue HOPPLA', error);
+        return of('error');
+      })
+    );
+  }
+
+  deleteListValue(resId: string, resType: string, valId: string, property: string): Observable<string> {
+    const deleteVal = new DeleteValue();
+
+    deleteVal.id = valId;
+    deleteVal.type = 'http://api.knora.org/ontology/knora-api/v2#ListValue';
+
+    const updateResource = new UpdateResource<DeleteValue>();
+    updateResource.id = resId;
+    updateResource.type = resType;
+    updateResource.property = property;
+    updateResource.value = deleteVal;
+
+    return this.knoraApiConnection.v2.values.deleteValue(updateResource).pipe(
+      map((res: DeleteValueResponse) => {
+        console.log('deleteListValue', res);
+        return 'OK';
+      }),
+      catchError((error: ApiResponseError) => {
+        console.log('deleteListValue HOPPLA', error);
+        return of('ERROR');
+      })
+    );
+  }
+
+  updateLabel(resId: string, resType: string, lastmod: string, label: string) {
+    const updateResourceMetadata = new UpdateResourceMetadata();
+    updateResourceMetadata.id = resId;
+    updateResourceMetadata.type = resType;
+    updateResourceMetadata.lastModificationDate = lastmod;
+    updateResourceMetadata.label = label;
+
+    return this.knoraApiConnection.v2.res.updateResourceMetadata(updateResourceMetadata).pipe(
+      map((res: UpdateResourceMetadataResponse) => {
+        console.log('updateResourceMetadata', res);
+        return 'OK';
+      }),
+      catchError((error: ApiResponseError) => {
+        console.log('updateResourceMetadata HOPPLA', error);
+        return of('ERROR');
+      })
+    );
+  }
+
+  getListTypes() {
+    this.getAllLists().subscribe(
+      lists => {
+        for (const list of lists) {
+          if (list.labels.get('de') === 'Artikeltyp') {
+            this.lemmaTypeListIri = list.listid;
+            this.getFlatList(list.listid).subscribe(
+              (res: Array<ListData>) => {
+                for (const lt of res) {
+                  this.lemmaTypes.push({iri: lt.listid, name: lt.labels.get('de')});
+                }
+              }
+            );
+          }
+          if (list.labels.get('de') === 'Verstorben') {
+            this.deceasedTypeListIri = list.listid;
+            this.getFlatList(list.listid).subscribe(
+              (res: Array<ListData>) => {
+                for (const lt of res) {
+                  this.deceasedTypes.push({iri: lt.listid, name: lt.labels.get('de')});
+                }
+              }
+            );
+          }
+          if (list.labels.get('de') === 'Geschlecht') {
+            this.sexTypeListIri = list.listid;
+            this.getFlatList(list.listid).subscribe(
+              (res: Array<ListData>) => {
+                for (const lt of res) {
+                  this.sexTypes.push({iri: lt.listid, name: lt.labels.get('de')});
+                }
+              }
+            );
+          }
+          if (list.labels.get('de') === 'Relevantes Lemma') {
+            this.relevanceTypeIri = list.listid;
+            this.getFlatList(list.listid).subscribe(
+              (res: Array<ListData>) => {
+                for (const lt of res) {
+                  this.relevanceTypes.push({iri: lt.listid, name: lt.labels.get('de')});
+                }
+              }
+            );
+          }
+
+        }
+      }
     );
   }
 
