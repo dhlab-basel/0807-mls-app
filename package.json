@@ -12,9 +12,9 @@
   },
   "private": true,
   "dependencies": {
-    "@angular-devkit/core": "~0.1002.1",
+    "@angular-devkit/core": "^12.0.0",
     "@angular/animations": "^12.0.0",
-    "@angular/cdk": "^10.2.7",
+    "@angular/cdk": "^12.0.0",
     "@angular/common": "^12.0.0",
     "@angular/compiler": "^12.0.0",
     "@angular/core": "^12.0.0",
@@ -23,13 +23,13 @@
     "@angular/platform-browser": "^12.0.0",
     "@angular/platform-browser-dynamic": "^12.0.0",
     "@angular/router": "^12.0.0",
-    "@babel/compat-data": "7.8.0",
+    "@babel/compat-data": "7.14.0",
     "@ckeditor/ckeditor5-angular": "^2.0.1",
     "@ckeditor/ckeditor5-build-classic": "^27.1.0",
     "@dasch-swiss/dsp-js": "^2.2.0",
-    "rxjs": "^6.5.4",
+    "rxjs": "^6.5.3",
     "squirrelly": "^7.9.1",
-    "tslib": "^2.0.0",
+    "tslib": "^2.2.0",
     "zone.js": "^0.11.4"
   },
   "devDependencies": {

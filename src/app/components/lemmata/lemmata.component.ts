@@ -23,7 +23,10 @@ import {EditlemComponent} from '../editlem/editlem.component';
         Vorsicht: Bislang verbirgt sich noch nicht hinter jedem Eintrag ein vollwertiger Artikel.
         Wir arbeiten daran!
         <br/>
-        <button mat-raised-button (click)="openAddLemmaDialog()">Add Lemma</button>
+        <div  *ngIf="allowEdit">
+          <button mat-raised-button (click)="openAddLemmaDialog()">Add Lemma</button>
+        </div>
+
 
       </mat-card-subtitle>
       <mat-card-content>

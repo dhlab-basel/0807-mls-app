@@ -27,7 +27,7 @@ import {Router} from '@angular/router';
     </mat-card>
   `,
   styles: [
-    '.bgimg {background: url("../assets/mls-title-bg-img.jpg"); background-repeat: no-repeat; background-size: cover; background-position: center; margin-left: 50px; margin-right: 50px;}',
+    '.bgimg {background: url("/assets/mls-title-bg-img.jpg"); background-repeat: no-repeat; background-size: cover; background-position: center; margin-left: 50px; margin-right: 50px;}',
     '.gaga {min-height: max-content;}',
     '.gugus {min-height: 400px;}',
     '.iswhite {background-color: white; min-width: 400px;}'
