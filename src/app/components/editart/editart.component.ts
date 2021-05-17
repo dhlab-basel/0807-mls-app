@@ -308,6 +308,7 @@ export class EditartComponent implements ControlValueAccessor, OnInit {
               this.form.controls.lemma.setValue(ele.values[0]);
               this.form.controls.lemma.disable();
               this.valIds.lemma = {id: ele.ids[0], changed: false, toBeDeleted: false};
+              this.data.lemmaIri = ele.values[0];
               break;
             }
             case this.knoraService.mlsOntology + 'hasALinkToLexiconValue': {

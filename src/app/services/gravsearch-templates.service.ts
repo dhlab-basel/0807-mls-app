@@ -39,7 +39,7 @@ export class GravsearchTemplatesService {
         ?lemma a mls:Lemma .
         ?lemma mls:hasRelevanceValue ?relval .
         ?lemma mls:hasLemmaText ?text .
-        FILTER knora-api:matchText(?text, "{{ start }}*")
+        FILTER regex(?text, "^{{ start }}", "i")
         ?lemma mls:hasFamilyName ?fname .
         {{ #if lexicon_iri }}
         ?lexicon a knora-api:Resource .
@@ -58,6 +58,8 @@ export class GravsearchTemplatesService {
   `, params);
     return result;
   }
+  // FILTER regex(?text, "^{{ start }}", "i")
+  // FILTER knora-api:matchText(?text, "{{ start }}*")
 
   lemmata_search(params: {[index: string]: string}): string {
     const result = this.sparqlPrep.compile(`

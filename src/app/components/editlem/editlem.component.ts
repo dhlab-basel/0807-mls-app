@@ -359,6 +359,7 @@ export class EditlemComponent implements OnInit {
             case this.knoraService.mlsOntology + 'hasLemmaText': {
               this.form.controls.text.setValue(ele.values[0]);
               this.valIds.text = {id: ele.ids[0], changed: false, toBeDeleted: false};
+              this.data.text = ele.values[0];
               break;
             }
             case this.knoraService.mlsOntology + 'hasLemmaType': {
@@ -371,21 +372,25 @@ export class EditlemComponent implements OnInit {
             case this.knoraService.mlsOntology + 'hasGivenName': {
               this.form.controls.givenName.setValue(ele.values[0]);
               this.valIds.givenName = {id: ele.ids[0], changed: false, toBeDeleted: false};
+              this.data.givenName = ele.values[0];
               break;
             }
             case this.knoraService.mlsOntology + 'hasFamilyName': {
               this.form.controls.familyName.setValue(ele.values[0]);
               this.valIds.familyName = {id: ele.ids[0], changed: false, toBeDeleted: false};
+              this.data.familyName = ele.values[0];
               break;
             }
             case this.knoraService.mlsOntology + 'hasPseudonym': {
               this.form.controls.pseudonym.setValue(ele.values[0]);
               this.valIds.pseudonym = {id: ele.ids[0], changed: false, toBeDeleted: false};
+              this.data.pseudonym = ele.values[0];
               break;
             }
             case this.knoraService.mlsOntology + 'hasCentury': {
               this.form.controls.century.setValue(ele.values[0]);
               this.valIds.century = {id: ele.ids[0], changed: false, toBeDeleted: false};
+              this.data.century = ele.values[0];
               break;
             }
             case this.knoraService.mlsOntology + 'hasDeceasedValue': {
@@ -398,21 +403,25 @@ export class EditlemComponent implements OnInit {
             case this.knoraService.mlsOntology + 'hasStartDate': {
               this.form.controls.startDate.setValue(ele.values[0]);
               this.valIds.startDate = {id: ele.ids[0], changed: false, toBeDeleted: false};
+              this.data.startDate = ele.values[0];
               break;
             }
             case this.knoraService.mlsOntology + 'hasStartDateInfo': {
               this.form.controls.startDateInfo.setValue(ele.values[0]);
               this.valIds.startDateInfo = {id: ele.ids[0], changed: false, toBeDeleted: false};
+              this.data.startDateInfo = ele.values[0];
               break;
             }
             case this.knoraService.mlsOntology + 'hasEndDate': {
               this.form.controls.endDate.setValue(ele.values[0]);
               this.valIds.endDate = {id: ele.ids[0], changed: false, toBeDeleted: false};
+              this.data.endDate = ele.values[0];
               break;
             }
             case this.knoraService.mlsOntology + 'hasEndDateInfo': {
               this.form.controls.endDateInfo.setValue(ele.values[0]);
               this.valIds.endDateInfo = {id: ele.ids[0], changed: false, toBeDeleted: false};
+              this.data.endDateInfo = ele.values[0];
               break;
             }
             case this.knoraService.mlsOntology + 'hasSex': {
@@ -432,16 +441,19 @@ export class EditlemComponent implements OnInit {
             case this.knoraService.mlsOntology + 'hasViaf': {
               this.form.controls.viaf.setValue(ele.values[0]);
               this.valIds.viaf = {id: ele.ids[0], changed: false, toBeDeleted: false};
+              this.data.viaf = ele.values[0];
               break;
             }
             case this.knoraService.mlsOntology + 'hasGnd': {
               this.form.controls.gnd.setValue(ele.values[0]);
               this.valIds.gnd = {id: ele.ids[0], changed: false, toBeDeleted: false};
+              this.data.gnd = ele.values[0];
               break;
             }
             case this.knoraService.mlsOntology + 'hasLemmaComment': {
               this.form.controls.comment.setValue(ele.values[0]);
               this.valIds.comment = {id: ele.ids[0], changed: false, toBeDeleted: false};
+              this.data.comment = ele.values[0];
               break;
             }
 
