@@ -251,6 +251,7 @@ export class LemmataComponent implements OnInit {
       const createConfig = new MatDialogConfig();
       createConfig.autoFocus = true;
       createConfig.width = '800px';
+      createConfig.data = {};
       const dialogRef = this.dialog.open(EditlemComponent, createConfig);
 
       dialogRef.afterClosed().subscribe(data => {

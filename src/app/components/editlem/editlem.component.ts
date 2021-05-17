@@ -1,4 +1,4 @@
-import {Component, Inject, OnInit, Optional, Self} from '@angular/core';
+import {Component, Inject, Input, OnInit, Optional, Self} from '@angular/core';
 import {ArticleData, KnoraService, Lemma, ListData, ListPropertyData, OptionType} from '../../services/knora.service';
 import {FormBuilder, FormGroup, NgControl} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
@@ -322,20 +322,33 @@ export class EditlemComponent implements OnInit {
               @Inject(MAT_DIALOG_DATA) data,
               @Optional() @Self() public ngControl: NgControl) {
     this.inData = data;
-    console.log('inData=', this.inData);
     this.lemmaTypes = knoraService.lemmaTypes;
     this.deceasedTypes = knoraService.deceasedTypes;
     this.sexTypes = knoraService.sexTypes;
     this.relevanceTypes = knoraService.relevanceTypes;
   }
 
+  @Input()
+  get value(): Lemma | null {
+    const {value: {label, text, type, typeIri, givenName, familyName, pseudonym, variants, century, deceased,
+    deceasedIri, startDate, startDateInfo, endDate, endDateInfo, sex, sexIri, relevance, relevanceIri, gnd, viaf, comment}} = this.form;
+    return new Lemma(label, text, type, typeIri, givenName, familyName, pseudonym, variants, century, deceased,
+      deceasedIri, startDate, startDateInfo, endDate, endDateInfo, sex, sexIri, relevance, relevanceIri, gnd, viaf, comment);
+  }
+  set value(knoraVal: Lemma | null) {
+    const {label, text, type, typeIri, givenName, familyName, pseudonym, variants, century, deceased,
+      deceasedIri, startDate, startDateInfo, endDate, endDateInfo, sex, sexIri, relevance, relevanceIri, gnd, viaf, comment}
+      = knoraVal || new Lemma('', '', '', '', '', '', '', '', '', '',
+      '', '', '', '', '', '', '', '', '', '', '', '');
+    this.form.setValue({label, text, type, typeIri, givenName, familyName, pseudonym, variants, century, deceased,
+      deceasedIri, startDate, startDateInfo, endDate, endDateInfo, sex, sexIri, relevance, relevanceIri, gnd, viaf, comment});
+  }
+
+
   ngOnInit(): void {
 
     if (this.inData.lemmaIri !== undefined) {
       this.knoraService.getResource(this.inData.lemmaIri).subscribe((data) => {
-        console.log('=====================================');
-        console.log(data);
-        console.log('-------------------------------------');
         this.resId = data.id;
         this.lastmod = data.lastmod;
         this.form.controls.label.setValue(data.label);
@@ -518,7 +531,6 @@ export class EditlemComponent implements OnInit {
   }
 
   _handleDelete(what: string): void {
-    console.log('_handleDelete=', what);
     switch (what) {
       case 'label':
         if (this.valIds.label.id !== undefined) {
@@ -604,7 +616,6 @@ export class EditlemComponent implements OnInit {
   }
 
   _handleUndo(what: string) {
-    console.log('_handleUndo=', what);
     switch (what) {
       case 'label':
         this.form.controls.label.setValue(this.data.label);
@@ -670,7 +681,6 @@ export class EditlemComponent implements OnInit {
   }
 
   save() {
-    console.log('save()');
     let reload = false;
     if (this.inData.lemmaIri === undefined) {
       //
@@ -1046,7 +1056,6 @@ export class EditlemComponent implements OnInit {
       }
 
       if (this.valIds.sex.toBeDeleted && this.valIds.sex.id !== undefined) {
-        console.log('??????????????>>>>>SEX CHANGE');
         let gaga: Observable<string>;
         gaga = this.knoraService.deleteListValue(
           this.resId,

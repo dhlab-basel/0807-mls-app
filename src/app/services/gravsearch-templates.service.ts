@@ -39,7 +39,7 @@ export class GravsearchTemplatesService {
         ?lemma a mls:Lemma .
         ?lemma mls:hasRelevanceValue ?relval .
         ?lemma mls:hasLemmaText ?text .
-        FILTER knora-api:matchText(?text, "{{ start}}*")
+        FILTER knora-api:matchText(?text, "{{ start }}*")
         ?lemma mls:hasFamilyName ?fname .
         {{ #if lexicon_iri }}
         ?lexicon a knora-api:Resource .

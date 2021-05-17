@@ -275,7 +275,6 @@ export class EditartComponent implements ControlValueAccessor, OnInit {
               @Inject(MAT_DIALOG_DATA) data,
               @Optional() @Self() public ngControl: NgControl) {
     this.inData = data;
-    console.log('inData=', this.inData);
     this.resId = '';
   }
 
@@ -298,9 +297,6 @@ export class EditartComponent implements ControlValueAccessor, OnInit {
 
     if (this.inData.articleIri !== undefined) {
       this.knoraService.getResource(this.inData.articleIri).subscribe((data) => {
-        console.log('=====================================');
-        console.log(data);
-        console.log('-------------------------------------');
         this.resId = data.id;
         this.lastmod = data.lastmod;
         this.form.controls.label.setValue(data.label);
@@ -406,10 +402,8 @@ export class EditartComponent implements ControlValueAccessor, OnInit {
   onTouched = () => {};
 
   _handleLinkInput(what: string): void {
-    console.log('this.lemma=', this.form.value.lemma);
     this.knoraService.getResourcesByLabel(this.form.value.lemma, this.knoraService.mlsOntology + 'Lemma').subscribe(
       res => {
-        console.log('_handleLinkInput:', res);
         this.options = res;
         this.form.value.lemma = res[0].label;
         this.form.value.lemmaIri = res[0].id;
@@ -419,12 +413,10 @@ export class EditartComponent implements ControlValueAccessor, OnInit {
   }
 
   _optionSelected(val): void {
-    console.log('_optionSelected(1):', val);
     const res = this.options.filter(tmp => tmp.label === val);
     if (res.length !== 1) {
       console.log('BIG ERROR...');
     }
-    console.log('****>', res);
     this.value = new ArticleData(
       this.form.value.label,
       res[0].label, // lemma
@@ -481,7 +473,6 @@ export class EditartComponent implements ControlValueAccessor, OnInit {
   }
 
   _handleDelete(what: string): void {
-    console.log('_handleDelete=', what);
     switch (what) {
       case 'pages': {
         if (this.valIds.pages.id !== undefined) {
@@ -694,14 +685,12 @@ export class EditartComponent implements ControlValueAccessor, OnInit {
       } else if (this.valIds.fonoteca.changed) {
         let gaga: Observable<string>;
         if (this.valIds.fonoteca.id === undefined) {
-          console.log('createTextValue');
           gaga = this.knoraService.createTextValue(
             this.resId,
             this.knoraService.mlsOntology + 'Article',
             this.knoraService.mlsOntology + 'hasFonotecacode',
             this.form.value.fonoteca);
         } else {
-          console.log('updateTextValue');
           gaga = this.knoraService.updateTextValue(
             this.resId,
             this.knoraService.mlsOntology + 'Article',

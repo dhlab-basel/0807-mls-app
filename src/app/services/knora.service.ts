@@ -414,10 +414,8 @@ export class KnoraService {
   }
 
   getResinfo(ontoIri: string, resIri: string): Observable<ResInfo> {
-    console.log('=====> getResinfo(1)', ontoIri, resIri);
     return this.knoraApiConnection.v2.ontologyCache.getOntology(ontoIri).pipe(  // ToDo: Use Cache
       map((cachedata: Map<string, ReadOntology>) => {
-        console.log('=====> getResinfo(2)', cachedata);
         const data = cachedata.get(ontoIri) as ReadOntology;
         const resInfo: ResInfo = {
           id: data.classes[resIri].id,
@@ -460,7 +458,6 @@ export class KnoraService {
   getResource(iri: string): Observable<ResourceData> {
     return this.knoraApiConnection.v2.res.getResource(iri).pipe(
       map((data: ReadResource) => {
-        console.log('GET_RESOURCE:', data);
         return {
           id: data.id,
           label: data.label,
@@ -486,7 +483,6 @@ export class KnoraService {
     return this.knoraApiConnection.v2.search.doExtendedSearch(query)
       .pipe(
       map((data: ReadResourceSequence) => {
-        console.log('^^^^^^^^^', data);
         return this.processSearchResult(data.resources, fields);
       }));
   }
@@ -533,7 +529,6 @@ export class KnoraService {
       map((res: ApiResponseData<ListsResponse>) => {
         const result: Array<ListData> = [];
         for (const list of res.body.lists) {
-          console.log('LIST=', list);
           result.push(new ListData(list.id, new LangString(list.labels)));
         }
         return result;
@@ -656,7 +651,6 @@ export class KnoraService {
       ];
     }
 
-    console.log(props);
     createResource.properties = props;
 
     return this.knoraApiConnection.v2.res.createResource(createResource).pipe(
@@ -664,7 +658,6 @@ export class KnoraService {
         return res.id;
       }),
       catchError((error: ApiResponseError) => {
-        console.log('===ERROR::', error);
         return of('error'); }
       )
     );
@@ -678,109 +671,142 @@ export class KnoraService {
 
     const props = {};
 
-    const textVal = new CreateTextValueAsString();
-    textVal.text = data.text;
-    props[this.mlsOntology + 'hasLemmaText'] = [
-      textVal
-    ];
+    if (data.text !== null && data.text !== undefined && data.text !== '') {
+      const textVal = new CreateTextValueAsString();
+      textVal.text = data.text;
+      props[this.mlsOntology + 'hasLemmaText'] = [
+        textVal
+      ];
+    }
 
-    const typeVal = new CreateListValue();
-    typeVal.listNode = data.typeIri;
-    props[this.mlsOntology + 'hasLemmaType'] = [
-      textVal
-    ];
+    if (data.typeIri !== null && data.typeIri !== undefined && data.typeIri !== '') {
+      const typeVal = new CreateListValue();
+      typeVal.listNode = data.typeIri;
+      props[this.mlsOntology + 'hasLemmaType'] = [
+        typeVal
+      ];
+    }
 
-    const givenNameVal = new CreateTextValueAsString();
-    givenNameVal.text = data.givenName;
-    props[this.mlsOntology + 'hasGivenName'] = [
-      givenNameVal
-    ];
+    if (data.givenName !== null && data.givenName !== undefined && data.givenName !== '') {
+      const givenNameVal = new CreateTextValueAsString();
+      givenNameVal.text = data.givenName;
+      props[this.mlsOntology + 'hasGivenName'] = [
+        givenNameVal
+      ];
+    }
 
-    const familyNameVal = new CreateTextValueAsString();
-    familyNameVal.text = data.familyName;
-    props[this.mlsOntology + 'hasFamilyName'] = [
-      familyNameVal
-    ];
+    if (data.familyName !== null && data.familyName !== undefined && data.familyName !== '') {
+      const familyNameVal = new CreateTextValueAsString();
+      familyNameVal.text = data.familyName;
+      props[this.mlsOntology + 'hasFamilyName'] = [
+        familyNameVal
+      ];
+    }
 
-    const pseudonymVal = new CreateTextValueAsString();
-    pseudonymVal.text = data.pseudonym;
-    props[this.mlsOntology + 'hasPseudonym'] = [
-      pseudonymVal
-    ];
+    if (data.pseudonym !== null && data.pseudonym !== undefined && data.pseudonym !== '') {
+      const pseudonymVal = new CreateTextValueAsString();
+      pseudonymVal.text = data.pseudonym;
+      props[this.mlsOntology + 'hasPseudonym'] = [
+        pseudonymVal
+      ];
+    }
 
-    const variantsVal = new CreateTextValueAsString();
-    variantsVal.text = data.variants;
-    props[this.mlsOntology + 'hasVariants'] = [
-      variantsVal
-    ];
+    if (data.variants !== null && data.variants !== undefined && data.variants !== '') {
+      const variantsVal = new CreateTextValueAsString();
+      variantsVal.text = data.variants;
+      props[this.mlsOntology + 'hasVariants'] = [
+        variantsVal
+      ];
+    }
 
-    const centuryVal = new CreateTextValueAsString();
-    centuryVal.text = data.century;
-    props[this.mlsOntology + 'hasCentury'] = [
-      centuryVal
-    ];
+    if (data.century !== null && data.century !== undefined && data.century !== '') {
+      const centuryVal = new CreateTextValueAsString();
+      centuryVal.text = data.century;
+      props[this.mlsOntology + 'hasCentury'] = [
+        centuryVal
+      ];
+    }
 
-    const deceasedVal = new CreateListValue();
-    deceasedVal.listNode = data.deceasedIri;
-    props[this.mlsOntology + 'hasDeceasedValue'] = [
-      deceasedVal
-    ];
+    if (data.deceasedIri !== null && data.deceasedIri !== undefined && data.deceasedIri !== '') {
+      const deceasedVal = new CreateListValue();
+      deceasedVal.listNode = data.deceasedIri;
+      props[this.mlsOntology + 'hasDeceasedValue'] = [
+        deceasedVal
+      ];
+    }
 
-    const startDateVal = new CreateTextValueAsString();
-    startDateVal.text = data.startDate;
-    props[this.mlsOntology + 'hasStartDate'] = [
-      startDateVal
-    ];
+    if (data.startDate !== null && data.startDate !== undefined && data.startDate !== '') {
+      const startDateVal = new CreateTextValueAsString();
+      startDateVal.text = data.startDate;
+      props[this.mlsOntology + 'hasStartDate'] = [
+        startDateVal
+      ];
+    }
 
-    const startDateInfoVal = new CreateTextValueAsString();
-    startDateInfoVal.text = data.startDateInfo;
-    props[this.mlsOntology + 'hasStartDateInfo'] = [
-      startDateInfoVal
-    ];
+    if (data.startDateInfo !== null && data.startDateInfo !== undefined && data.startDateInfo !== '') {
+      const startDateInfoVal = new CreateTextValueAsString();
+      startDateInfoVal.text = data.startDateInfo;
+      props[this.mlsOntology + 'hasStartDateInfo'] = [
+        startDateInfoVal
+      ];
+    }
 
-    const endDateVal = new CreateTextValueAsString();
-    endDateVal.text = data.endDate;
-    props[this.mlsOntology + 'hasEndDate'] = [
-      endDateVal
-    ];
+    if (data.endDate !== null && data.endDate !== undefined && data.endDate !== '') {
+      const endDateVal = new CreateTextValueAsString();
+      endDateVal.text = data.endDate;
+      props[this.mlsOntology + 'hasEndDate'] = [
+        endDateVal
+      ];
+    }
 
-    const endDateInfoVal = new CreateTextValueAsString();
-    endDateInfoVal.text = data.endDateInfo;
-    props[this.mlsOntology + 'hasEndDateInfo'] = [
-      endDateInfoVal
-    ];
+    if (data.endDateInfo !== null && data.endDateInfo !== undefined && data.endDateInfo !== '') {
+      const endDateInfoVal = new CreateTextValueAsString();
+      endDateInfoVal.text = data.endDateInfo;
+      props[this.mlsOntology + 'hasEndDateInfo'] = [
+        endDateInfoVal
+      ];
+    }
 
-    const sexVal = new CreateListValue();
-    sexVal.listNode = data.sexIri;
-    props[this.mlsOntology + 'hasSex'] = [
-      sexVal
-    ];
+    if (data.sexIri !== null && data.sexIri !== undefined && data.sexIri !== '') {
+      const sexVal = new CreateListValue();
+      sexVal.listNode = data.sexIri;
+      props[this.mlsOntology + 'hasSex'] = [
+        sexVal
+      ];
+    }
 
-    const relevanceVal = new CreateListValue();
-    relevanceVal.listNode = data.relevanceIri;
-    props[this.mlsOntology + 'hasRelevanceValue'] = [
-      relevanceVal
-    ];
+    if (data.relevanceIri !== null && data.relevanceIri !== undefined && data.relevanceIri !== '') {
+      const relevanceVal = new CreateListValue();
+      relevanceVal.listNode = data.relevanceIri;
+      props[this.mlsOntology + 'hasRelevanceValue'] = [
+        relevanceVal
+      ];
+    }
 
-    const gndVal = new CreateTextValueAsString();
-    gndVal.text = data.gnd;
-    props[this.mlsOntology + 'hasGnd'] = [
-      gndVal
-    ];
+    if (data.gnd !== null && data.gnd !== undefined && data.gnd !== '') {
+      const gndVal = new CreateTextValueAsString();
+      gndVal.text = data.gnd;
+      props[this.mlsOntology + 'hasGnd'] = [
+        gndVal
+      ];
+    }
 
-    const viafVal = new CreateTextValueAsString();
-    viafVal.text = data.viaf;
-    props[this.mlsOntology + 'hasViaf'] = [
-      viafVal
-    ];
+    if (data.viaf !== null && data.viaf !== undefined && data.viaf !== '') {
+      const viafVal = new CreateTextValueAsString();
+      viafVal.text = data.viaf;
+      props[this.mlsOntology + 'hasViaf'] = [
+        viafVal
+      ];
+    }
 
-    const commentVal = new CreateTextValueAsString();
-    commentVal.text = data.comment;
-    props[this.mlsOntology + 'haslemmaComment'] = [
-      commentVal
-    ];
+    if (data.comment !== null && data.comment !== undefined && data.comment !== '') {
+      const commentVal = new CreateTextValueAsString();
+      commentVal.text = data.comment;
+      props[this.mlsOntology + 'hasLemmaComment'] = [
+        commentVal
+      ];
+    }
 
-    console.log(props);
     createResource.properties = props;
 
     return this.knoraApiConnection.v2.res.createResource(createResource).pipe(
@@ -788,7 +814,6 @@ export class KnoraService {
         return res.id;
       }),
       catchError((error: ApiResponseError) => {
-        console.log('===ERROR::', error);
         return of('error'); }
       )
     );
@@ -813,11 +838,9 @@ export class KnoraService {
 
     return this.knoraApiConnection.v2.values.createValue(createResource).pipe(
       map((res: WriteValueResponse) => {
-        console.log('createTextValue', res);
         return 'OK';
       }),
       catchError((error: ApiResponseError) => {
-        console.log('createTextValue HOPPLA', error);
         return of('ERROR');
       })
     );
@@ -842,15 +865,12 @@ export class KnoraService {
     updateResource.type = resType;
     updateResource.property = property;
     updateResource.value = updateTextVal;
-    console.log(updateResource);
 
     return this.knoraApiConnection.v2.values.updateValue(updateResource).pipe(
       map((res: WriteValueResponse) => {
-        console.log('updateTextValue', res);
         return 'OK';
       }),
       catchError((error: ApiResponseError) => {
-        console.log('updateTextValue HOPPLA', error);
         return of('ERROR');
       })
     );
@@ -870,11 +890,9 @@ export class KnoraService {
 
     return this.knoraApiConnection.v2.values.deleteValue(updateResource).pipe(
       map((res: DeleteValueResponse) => {
-        console.log('deleteTextValue', res);
         return 'OK';
       }),
       catchError((error: ApiResponseError) => {
-        console.log('deleteTextValue HOPPLA', error);
         return of('ERROR');
       })
     );
@@ -892,11 +910,9 @@ export class KnoraService {
 
     return this.knoraApiConnection.v2.values.createValue(createResource).pipe(
       map((res: WriteValueResponse) => {
-        console.log('createTextValue', res);
         return 'OK';
       }),
       catchError((error: ApiResponseError) => {
-        console.log('createTextValue HOPPLA', error);
         return of('error');
       })
     );
@@ -912,15 +928,12 @@ export class KnoraService {
     updateResource.type = resType;
     updateResource.property = property;
     updateResource.value = updateIntVal;
-    console.log(updateResource);
 
     return this.knoraApiConnection.v2.values.updateValue(updateResource).pipe(
       map((res: WriteValueResponse) => {
-        console.log('updateTextValue', res);
         return 'OK';
       }),
       catchError((error: ApiResponseError) => {
-        console.log('updateTextValue HOPPLA', error);
         return of('error');
       })
     );
@@ -940,11 +953,9 @@ export class KnoraService {
 
     return this.knoraApiConnection.v2.values.deleteValue(updateResource).pipe(
       map((res: DeleteValueResponse) => {
-        console.log('deleteIntValue', res);
         return 'OK';
       }),
       catchError((error: ApiResponseError) => {
-        console.log('deleteIntValue HOPPLA', error);
         return of('ERROR');
       })
     );
@@ -962,11 +973,9 @@ export class KnoraService {
 
     return this.knoraApiConnection.v2.values.createValue(createResource).pipe(
       map((res: WriteValueResponse) => {
-        console.log('createListValue', res);
         return 'OK';
       }),
       catchError((error: ApiResponseError) => {
-        console.log('createListValue HOPPLA', error);
         return of('error');
       })
     );
@@ -982,15 +991,12 @@ export class KnoraService {
     updateResource.type = resType;
     updateResource.property = property;
     updateResource.value = updateListVal;
-    console.log(updateResource);
 
     return this.knoraApiConnection.v2.values.updateValue(updateResource).pipe(
       map((res: WriteValueResponse) => {
-        console.log('updateListValue', res);
         return 'OK';
       }),
       catchError((error: ApiResponseError) => {
-        console.log('updateListValue HOPPLA', error);
         return of('error');
       })
     );
@@ -1010,11 +1016,9 @@ export class KnoraService {
 
     return this.knoraApiConnection.v2.values.deleteValue(updateResource).pipe(
       map((res: DeleteValueResponse) => {
-        console.log('deleteListValue', res);
         return 'OK';
       }),
       catchError((error: ApiResponseError) => {
-        console.log('deleteListValue HOPPLA', error);
         return of('ERROR');
       })
     );
@@ -1029,11 +1033,9 @@ export class KnoraService {
 
     return this.knoraApiConnection.v2.res.updateResourceMetadata(updateResourceMetadata).pipe(
       map((res: UpdateResourceMetadataResponse) => {
-        console.log('updateResourceMetadata', res);
         return 'OK';
       }),
       catchError((error: ApiResponseError) => {
-        console.log('updateResourceMetadata HOPPLA', error);
         return of('ERROR');
       })
     );
