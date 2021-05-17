@@ -54,8 +54,6 @@ export class LoginComponent implements OnInit {
       email: [this.email, []],
       password: [this.password, []]
     });
-    this.form.controls.email.setValue('lukas.rosenthaler@gmail.com');
-    this.form.controls.password.setValue('RioGrande2020');
   }
 
   save() {
