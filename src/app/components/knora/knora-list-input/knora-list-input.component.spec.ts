@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { KnoraListInputComponent } from './knora-list-input.component';
 
@@ -6,7 +6,7 @@ describe('KnoraListInputComponent', () => {
   let component: KnoraListInputComponent;
   let fixture: ComponentFixture<KnoraListInputComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ KnoraListInputComponent ]
     })

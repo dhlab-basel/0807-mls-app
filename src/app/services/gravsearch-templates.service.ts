@@ -39,6 +39,7 @@ export class GravsearchTemplatesService {
         ?lemma a mls:Lemma .
         ?lemma mls:hasRelevanceValue ?relval .
         ?lemma mls:hasLemmaText ?text .
+        FILTER regex(?text, "^{{ start }}", "i")
         ?lemma mls:hasFamilyName ?fname .
         {{ #if lexicon_iri }}
         ?lexicon a knora-api:Resource .
@@ -51,14 +52,14 @@ export class GravsearchTemplatesService {
         OPTIONAL { ?lemma mls:hasStartDate ?startdate . }
         OPTIONAL { ?lemma mls:hasEndDate ?enddate . }
         FILTER (?relval = "Ja"^^knora-api:ListNode) .
-        FILTER regex(?text, "^{{ start }}", "i")
     }
     ORDER BY ASC(?text)
     OFFSET {{ page }}
   `, params);
-
     return result;
   }
+  // FILTER regex(?text, "^{{ start }}", "i")
+  // FILTER knora-api:matchText(?text, "{{ start }}*")
 
   lemmata_search(params: {[index: string]: string}): string {
     const result = this.sparqlPrep.compile(`
@@ -94,16 +95,18 @@ export class GravsearchTemplatesService {
         ?article mls:hasALinkToLexicon ?lexicon .
         OPTIONAL { ?lexicon mls:hasShortname ?shortname . }
         {{ #endif }}
+        {{ #if searchterm }}
         {
           ?lemma mls:hasPseudonym ?pseudo .
-          FILTER regex(?pseudo, "{{ searchterm }}", "i") .
+          FILTER knora-api:matchText(?pseudo, "{{ searchterm }}") .
         } UNION {
-            ?lemma mls:hasLemmaText ?text .
-            FILTER regex(?text, "{{ searchterm }}", "i") .
+          ?lemma mls:hasLemmaText ?text .
+          FILTER knora-api:matchText(?text, "{{ searchterm }}") .
         } UNION {
           ?lemma mls:hasVariants ?variant .
-          FILTER regex(?variant, "{{ searchterm }}", "i") .
+          FILTER knora-api:matchText(?variant, "{{ searchterm }}") .
         }
+        {{ #endif }}
         OPTIONAL { ?lemma mls:hasStartDate ?startdate . }
         OPTIONAL { ?lemma mls:hasEndDate ?enddate . }
         OPTIONAL { ?lemma mls:hasFamilyName ?fname . }
@@ -147,6 +150,7 @@ export class GravsearchTemplatesService {
    *
    * @param params ontology, lemma_iri [, lexicon_iri]
    */
+  /*
   lexica_from_lemma_query(params: {[index: string]: string}): string {
     const result = this.sparqlPrep.compile(`
     PREFIX knora-api: <http://api.knora.org/ontology/knora-api/simple/v2#>
@@ -165,13 +169,46 @@ export class GravsearchTemplatesService {
         {{ #if lexicon_iri }}
         BIND(<{{ lexicon_iri }}> AS ?lexicon)
         {{ #endif }}
-        ?article a knora-api:Resource .
+        ?lemma a mls:Lemma .
         ?article a mls:Article .
         ?article mls:hasALinkToLemma ?lemma .
-        ?lemma mls:hasLemmaText ?text .
-        ?lexicon a knora-api:Resource .
         ?lexicon a mls:Lexicon .
         ?article mls:hasALinkToLexicon ?lexicon .
+        ?lemma mls:hasLemmaText ?text .
+        OPTIONAL { ?article mls:hasArticleText ?arttext . }
+        OPTIONAL { ?lexicon mls:hasShortname ?shortname . }
+        OPTIONAL { ?lexicon mls:hasCitationForm ?citation . }
+        OPTIONAL { ?lexicon mls:hasYear ?year . }
+    }
+    ORDER BY ASC(?year)
+  `, params);
+    return result;
+  }
+*/
+  lexica_from_lemma_query(params: {[index: string]: string}): string {
+    const result = this.sparqlPrep.compile(`
+    PREFIX knora-api: <http://api.knora.org/ontology/knora-api/simple/v2#>
+    PREFIX mls: <{{ ontology }}/ontology/0807/mls/simple/v2#>
+    CONSTRUCT {
+        ?lexicon knora-api:isMainResource true .
+        ?article mls:hasALinkToLemma ?lemma .
+        ?lemma mls:hasLemmaText ?text .
+        ?article mls:hasALinkToLexicon ?lexicon .
+        ?article mls:hasArticleText ?arttext .
+        ?lexicon mls:hasShortname ?shortname .
+        ?lexicon mls:hasCitationForm ?citation .
+        ?lexicon mls:hasYear ?year.
+    } WHERE {
+        BIND(<{{ lemma_iri }}> AS ?lemma)
+        {{ #if lexicon_iri }}
+        BIND(<{{ lexicon_iri }}> AS ?lexicon)
+        {{ #endif }}
+        ?lemma a mls:Lemma .
+        ?article a mls:Article .
+        ?article mls:hasALinkToLemma ?lemma .
+        ?lexicon a mls:Lexicon .
+        ?article mls:hasALinkToLexicon ?lexicon .
+        ?lemma mls:hasLemmaText ?text .
         OPTIONAL { ?article mls:hasArticleText ?arttext . }
         OPTIONAL { ?lexicon mls:hasShortname ?shortname . }
         OPTIONAL { ?lexicon mls:hasCitationForm ?citation . }

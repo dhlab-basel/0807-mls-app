@@ -29,8 +29,8 @@ export interface LoginData {
       </mat-form-field>
     </mat-dialog-content>
     <mat-dialog-actions>
-      <button class="mat-raised-button" (click)="close()">Cancel</button>
-      <button class="mat-raised-button mat-primary" (click)="save()">Login</button>
+      <button type="button" mat-primary class="mat-raised-button" (click)="close()">Cancel</button>
+      <button type="submit" class="mat-raised-button mat-primary" (click)="save()">Login</button>
     </mat-dialog-actions>
   `,
   styles: [

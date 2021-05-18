@@ -1,4 +1,4 @@
-import {Component, Input, OnInit} from '@angular/core';
+import {Component, Input, OnChanges, OnInit} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import { Router} from '@angular/router';
 import {KnoraService} from '../../services/knora.service';
@@ -31,7 +31,7 @@ import {Constants} from '@dasch-swiss/dsp-js';
   ]
 })
 
-export class LexFromLemmaComponent implements OnInit {
+export class LexFromLemmaComponent implements OnInit, OnChanges {
   @Input()
   lexiconIri: string;
   @Input()
@@ -74,6 +74,11 @@ export class LexFromLemmaComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.getLexsFromLemma();
+  }
+
+  ngOnChanges() {
+    console.log('ngOnChanges: ', this.lemmaIri);
     this.getLexsFromLemma();
   }
 

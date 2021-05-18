@@ -43,6 +43,7 @@ export class LexiconComponent implements OnInit {
     id: '',
     label: '',
     permission: '',
+    lastmod: '',
     properties: [{propname: '', label: '', values: [], ids: [], comments: [], permissions: []}]
   };
   columnsToDisplay: Array<string> = ['KEY', 'VALUE'];

@@ -3,6 +3,9 @@ import { ActivatedRoute } from '@angular/router';
 import { ElementRef, ViewChild } from '@angular/core';
 import { Router} from '@angular/router';
 import {KnoraService} from '../../services/knora.service';
+import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
+import {EditartComponent} from '../editart/editart.component';
+import {EditlemComponent} from '../editlem/editlem.component';
 
 @Component({
   selector: 'app-lemmata',
@@ -19,6 +22,12 @@ import {KnoraService} from '../../services/knora.service';
         Sie können das Lexikon alphabetisch durchblättern oder gezielt durchsuchen.
         Vorsicht: Bislang verbirgt sich noch nicht hinter jedem Eintrag ein vollwertiger Artikel.
         Wir arbeiten daran!
+        <br/>
+        <div  *ngIf="allowEdit">
+          <button mat-raised-button (click)="openAddLemmaDialog()">Add Lemma</button>
+        </div>
+
+
       </mat-card-subtitle>
       <mat-card-content>
         <form (submit)="searchEvent($event)" (keyup.enter)="searchEvent($event)">
@@ -74,6 +83,7 @@ import {KnoraService} from '../../services/knora.service';
 export class LemmataComponent implements OnInit {
   @ViewChild('searchField')
   private searchField: ElementRef;
+  public allowEdit: boolean;
 
   lemmata: Array<Array<string>> = [];
   startchar: string;
@@ -87,8 +97,11 @@ export class LemmataComponent implements OnInit {
 
   constructor(private knoraService: KnoraService,
               private activatedRoute: ActivatedRoute,
+              public dialog: MatDialog,
               private elementRef: ElementRef,
               private router: Router) {
+    this.allowEdit = this.knoraService.loggedin;
+
     this.startchar = 'A';
     this.page = 0;
     this.searchterm = '';
@@ -181,8 +194,11 @@ export class LemmataComponent implements OnInit {
 
     const paramsCnt: {[index: string]: string} = {
       page: '0',
-      searchterm: this.searchterm
+      // searchterm: this.searchterm
     };
+    if (this.searchterm !== '') {
+      paramsCnt.searchterm = this.searchterm;
+    }
     if (this.lexiconIri !== undefined) {
       paramsCnt.lexicon_iri = this.lexiconIri;
     }
@@ -192,8 +208,11 @@ export class LemmataComponent implements OnInit {
 
     const params: {[index: string]: string} = {
       page: String(this.page),
-      searchterm: this.searchterm
+      // searchterm: this.searchterm
     };
+    if (this.searchterm !== '') {
+      params.searchterm = this.searchterm;
+    }
     if (this.lexiconIri !== undefined) {
       params.lexicon_iri = this.lexiconIri;
     }
@@ -205,6 +224,7 @@ export class LemmataComponent implements OnInit {
       this.knoraService.mlsOntology + 'hasEndDate',
       'http://api.knora.org/ontology/knora-api/v2#hasIncomingLinkValue'
     ];
+    console.log('searchLemmata', params)
     this.knoraService.gravsearchQuery('lemmata_search', params, fields)
       .subscribe(data => {
         this.lemmata = data;
@@ -225,6 +245,24 @@ export class LemmataComponent implements OnInit {
     this.showAindex = true;
     this.getLemmata();
   }
+
+  openAddLemmaDialog() {
+    this.activatedRoute.params.subscribe(params => {
+      const createConfig = new MatDialogConfig();
+      createConfig.autoFocus = true;
+      createConfig.width = '800px';
+      createConfig.data = {};
+      const dialogRef = this.dialog.open(EditlemComponent, createConfig);
+
+      dialogRef.afterClosed().subscribe(data => {
+        if (data) {
+          //const tmp = this.lemmaIri.slice();
+          //this.lemmaIri = tmp;
+        }
+      });
+    });
+  }
+
 
   ngOnInit() {
     this.activatedRoute.queryParams.subscribe(params => {

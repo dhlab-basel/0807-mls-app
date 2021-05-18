@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { LexFromLemmaComponent } from './lex-from-lemma.component';
 
@@ -6,7 +6,7 @@ describe('LexFromLemmaComponent', () => {
   let component: LexFromLemmaComponent;
   let fixture: ComponentFixture<LexFromLemmaComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ LexFromLemmaComponent ]
     })

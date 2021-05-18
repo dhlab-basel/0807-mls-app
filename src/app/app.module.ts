@@ -49,6 +49,11 @@ import {ConfirmDialogComponent} from './components/knora/confirm-dialog/confirm-
 import {KnoraLinkInputComponent} from './components/knora/knora-link-input/knora-link-input.component';
 import {CreateResourceComponent} from './components/knora/create-resource/create-resource/create-resource.component';
 import {KnoraTextInputComponent} from './components/knora/knora-text-input/knora-text-input.component';
+import { EditartComponent } from './components/editart/editart.component';
+import { CKEditorModule } from '@ckeditor/ckeditor5-angular';
+import { LemmaselectComponent } from './components/lemmaselect/lemmaselect.component';
+import { EditlemComponent } from './components/editlem/editlem.component';
+import {ClipboardModule} from '@angular/cdk/clipboard';
 
 export function initializeApp(appInitService: AppInitService) {
   return (): Promise<any> => {
@@ -82,6 +87,9 @@ export function initializeApp(appInitService: AppInitService) {
     KnoraLinkInputComponent,
     CreateResourceComponent,
     KnoraTextInputComponent,
+    EditartComponent,
+    LemmaselectComponent,
+    EditlemComponent,
   ],
   entryComponents: [
     LoginComponent,
@@ -114,7 +122,9 @@ export function initializeApp(appInitService: AppInitService) {
     FormsModule,
     ReactiveFormsModule,
     MatSelectModule,
-    MatAutocompleteModule
+    MatAutocompleteModule,
+    CKEditorModule,
+    ClipboardModule,
   ],
   providers: [
     AppInitService,

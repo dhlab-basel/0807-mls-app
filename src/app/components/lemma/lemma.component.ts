@@ -4,6 +4,9 @@ import {KnoraService, LemmaData} from '../../services/knora.service';
 import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {EditResourceComponent} from '../knora/edit-resource/edit-resource.component';
 import {CreateResourceComponent} from '../knora/create-resource/create-resource/create-resource.component';
+import {EditartComponent} from '../editart/editart.component';
+import {EditlemComponent} from '../editlem/editlem.component';
+import {ClipboardModule} from '@angular/cdk/clipboard';
 
 @Component({
   selector: 'app-lemma',
@@ -35,10 +38,13 @@ import {CreateResourceComponent} from '../knora/create-resource/create-resource/
         {{lemma.properties[hasGnd].label}}: <a href="http://d-nb.info/gnd/{{ lemma.properties[hasGnd].values[0] }}"
                                                target="_blank">{{ lemma.properties[hasGnd].values[0] }}</a>
       </div>
-      <div style="padding-top: 10px;">ARK-ID: {{lemma.arkUrl}}</div>
+      <div style="padding-top: 10px;">
+        ARK-ID: {{lemma.arkUrl}} &nbsp;
+        <button mat-raised-button [cdkCopyToClipboard]="lemma.arkUrl" matTooltip="In Zwischenablage kopieren"><mat-icon>content_copy</mat-icon></button>
+      </div>
       <mat-card-actions *ngIf="allowEdit">
-        <button mat-raised-button (click)="openEditDialog()">edit</button>
-        <button mat-raised-button (click)="openCreateDialog()">create</button>
+        <button mat-raised-button (click)="openEditLemmaDialog()">Edit Lemma</button>
+        <button mat-raised-button (click)="openAddArticleDialog()">Add article</button>
       </mat-card-actions>
     </mat-card>
     <mat-card>
@@ -48,11 +54,13 @@ import {CreateResourceComponent} from '../knora/create-resource/create-resource/
       <app-lex-from-lemma [lemmaIri]="lemmaIri">
       </app-lex-from-lemma>
     </mat-card>
+
   `,
   styles: [
     'td.mat-cell {padding-left: 10px; padding-right:20px;}',
     'tr.mat-row {height: 24px;}',
-    '.clickable {cursor: pointer;}'
+    '.clickable {cursor: pointer;}',
+    '.full-width { width: 500px; font-size: 16px; }'
   ]
 })
 
@@ -115,17 +123,44 @@ export class LemmaComponent implements OnInit {
 
   }
 
-  openCreateDialog() {
+  openEditLemmaDialog() {
     this.route.params.subscribe(params => {
       const createConfig = new MatDialogConfig();
       createConfig.autoFocus = true;
       createConfig.width = '800px';
       createConfig.data = {
-        resClassIri: this.knoraService.mlsOntology + 'Lemma'
+        lemmaIri: this.lemma.id,
+        lemmaLabel: this.lemma.label
       };
-      const dialogRef = this.dialog.open(CreateResourceComponent, createConfig);
-    });
+      const dialogRef = this.dialog.open(EditlemComponent, createConfig);
 
+      dialogRef.afterClosed().subscribe(data => {
+        if (data) {
+          const tmp = this.lemmaIri.slice();
+          this.lemmaIri = tmp;
+        }
+      });
+    });
+  }
+
+  openAddArticleDialog() {
+    this.route.params.subscribe(params => {
+      const createConfig = new MatDialogConfig();
+      createConfig.autoFocus = true;
+      createConfig.width = '800px';
+      createConfig.data = {
+        lemmaIri: this.lemma.id,
+        lemmaLabel: this.lemma.label
+      };
+      const dialogRef = this.dialog.open(EditartComponent, createConfig);
+
+      dialogRef.afterClosed().subscribe(data => {
+        if (data) {
+          const tmp = this.lemmaIri.slice();
+          this.lemmaIri = tmp;
+        }
+      });
+    });
   }
 
   ngOnInit() {
