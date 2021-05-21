@@ -10,6 +10,7 @@ import {InfoComponent} from './components/info/info.component';
 import {AboutComponent} from './components/about/about.component';
 import {TheprojectComponent} from './components/theproject/theproject.component';
 import {EditartComponent} from './components/editart/editart.component';
+import {EditlemComponent} from './components/editlem/editlem.component';
 
 const routes: Routes = [{
   path: 'home',
@@ -38,6 +39,12 @@ const routes: Routes = [{
 }, {
   path: 'editart',
   component: EditartComponent
+}, {
+  path: 'editlem/:iri',
+  component: EditlemComponent
+}, {
+  path: 'editlem',
+  component: EditlemComponent
 }, {
   path: 'about',
   component: AboutComponent

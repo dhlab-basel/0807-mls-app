@@ -50,6 +50,8 @@ export class LoginComponent implements OnInit {
               @Inject(MAT_DIALOG_DATA) data: LoginData) { }
 
   ngOnInit() {
+    this.email = 'lukas.rosenthaler@gmail.com';
+    this.password = 'RioGrande2020';
     this.form = this.fb.group({
       email: [this.email, []],
       password: [this.password, []]

@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import {ActivatedRoute} from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 import {KnoraService} from '../../services/knora.service';
 import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {EditResourceComponent} from '../knora/edit-resource/edit-resource.component';
@@ -30,7 +30,7 @@ import {EditartComponent} from '../editart/editart.component';
 
     </mat-card>
     <mat-card-actions *ngIf="knoraService.loggedin">
-      <button mat-raised-button (click)="openEditDialog()">edit</button>
+      <button mat-raised-button (click)="editArticle()">edit</button>
     </mat-card-actions>
   `,
   styles: [
@@ -44,7 +44,8 @@ export class ArticleComponent implements OnInit {
 
   constructor(private route: ActivatedRoute,
               public dialog: MatDialog,
-              public knoraService: KnoraService) {
+              public knoraService: KnoraService,
+              private router: Router) {
 
   }
 
@@ -71,8 +72,16 @@ export class ArticleComponent implements OnInit {
               articledata.hlscode = ele.values[0];
               break;
             }
+            case this.knoraService.mlsOntology + 'hasOemlCode': {
+              articledata.oemlexcode = ele.values[0];
+              break;
+            }
             case this.knoraService.mlsOntology + 'hasTheaterLexCode': {
               articledata.theaterlexcode = ele.values[0];
+              break;
+            }
+            case this.knoraService.mlsOntology + 'hasTicinoLexCode': {
+              articledata.ticinolexcode = ele.values[0];
               break;
             }
             case this.knoraService.mlsOntology + 'hasWebLink': {
@@ -104,6 +113,19 @@ export class ArticleComponent implements OnInit {
     });
 
   }
+
+  editArticle(event): void {
+    let url: string;
+    url = 'editart/' + encodeURIComponent(this.articleIri);
+    this.router.navigateByUrl(url).then(e => {
+      if (e) {
+        console.log('Navigation is successful!');
+      } else {
+        console.log('Navigation has failed!');
+      }
+    });
+  }
+
 
   ngOnInit() {
     this.getArticle();

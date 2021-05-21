@@ -4,16 +4,17 @@ import * as ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import {KnoraService, ArticleData, ResourceData, IntPropertyData} from '../../services/knora.service';
 import {CKEditorComponent} from '@ckeditor/ckeditor5-angular';
 import {ControlValueAccessor, FormBuilder, FormGroup, NgControl} from '@angular/forms';
-import {MAT_DIALOG_DATA, MatDialog, MatDialogConfig, MatDialogRef} from '@angular/material/dialog';
 import {EditResourceComponent} from '../knora/edit-resource/edit-resource.component';
 import {ActivatedRoute} from '@angular/router';
 import {LemmataComponent} from '../lemmata/lemmata.component';
 import {LemmaselectComponent} from '../lemmaselect/lemmaselect.component';
 import {concatMap, map} from 'rxjs/operators';
+import {combineLatest} from 'rxjs';
 import {Constants, DeleteValue, ReadResourceSequence, UpdateResource, UpdateResourceMetadata} from '@dasch-swiss/dsp-js';
 import {forkJoin, from, Observable, Subject} from 'rxjs';
 import {KnoraLinkVal} from '../knora/knora-link-input/knora-link-input.component';
 import {MatIconModule} from '@angular/material/icon';
+import {Location} from '@angular/common';
 
 interface Lexica {
   iri: string;
@@ -60,8 +61,7 @@ class ArticleIds {
 @Component({
   selector: 'app-editart',
   template: `
-    <mat-dialog-content>
-     <mat-card class="maxw" xmlns="http://www.w3.org/1999/html">
+    <mat-card class="maxw" xmlns="http://www.w3.org/1999/html">
       <mat-card-title>
         Artikel-Editor
       </mat-card-title>
@@ -73,7 +73,9 @@ class ArticleIds {
                  formControlName="label"
                  (input)="_handleInput('label')">
         </mat-form-field>
-        <button *ngIf="valIds.label.changed" mat-mini-fab (click)="_handleUndo('label')"><mat-icon color="warn">cached</mat-icon></button>
+        <button *ngIf="valIds.label.changed" mat-mini-fab (click)="_handleUndo('label')">
+          <mat-icon color="warn">cached</mat-icon>
+        </button>
         <br/>
 
         <mat-form-field *ngIf="inData.lemmaIri === undefined" [style.width.px]=400>
@@ -116,12 +118,16 @@ class ArticleIds {
                  formControlName="lexiconIri"
                  aria-label="Value">
         </mat-form-field>
-        <button *ngIf="valIds.lexicon.changed" mat-mini-fab (click)="_handleUndo('lexicon')"><mat-icon color="warn">cached</mat-icon></button>
+        <button *ngIf="valIds.lexicon.changed" mat-mini-fab (click)="_handleUndo('lexicon')">
+          <mat-icon color="warn">cached</mat-icon>
+        </button>
         <br/>
 
         <ckeditor matInput #editor [editor]="Editor" formControlName="article" (change)="_handleInput('article')"></ckeditor>
         <br/>
-        <button *ngIf="valIds.article.changed" mat-mini-fab (click)="_handleUndo('article')"><mat-icon color="warn">cached</mat-icon></button>
+        <button *ngIf="valIds.article.changed" mat-mini-fab (click)="_handleUndo('article')">
+          <mat-icon color="warn">cached</mat-icon>
+        </button>
         <button *ngIf="valIds.article.id !== undefined" mat-mini-fab (click)="_handleDelete('article')">
           <mat-icon *ngIf="!valIds.article.toBeDeleted">delete</mat-icon>
           <mat-icon *ngIf="valIds.article.toBeDeleted" color="warn">delete</mat-icon>
@@ -138,7 +144,9 @@ class ArticleIds {
                  (input)="_handleInput('pages')">
         </mat-form-field>
         &nbsp;
-        <button *ngIf="valIds.pages.changed" mat-mini-fab (click)="_handleUndo('pages')"><mat-icon color="warn">cached</mat-icon></button>
+        <button *ngIf="valIds.pages.changed" mat-mini-fab (click)="_handleUndo('pages')">
+          <mat-icon color="warn">cached</mat-icon>
+        </button>
         &nbsp;
         <button *ngIf="valIds.pages.id !== undefined" mat-mini-fab (click)="_handleDelete('pages')">
           <mat-icon *ngIf="!valIds.pages.toBeDeleted">delete</mat-icon>
@@ -153,7 +161,9 @@ class ArticleIds {
                  (input)="_handleInput('fonoteca')">
         </mat-form-field>
         &nbsp;
-        <button *ngIf="valIds.fonoteca.changed" mat-mini-fab (click)="_handleUndo('fonoteca')"><mat-icon color="warn">cached</mat-icon></button>
+        <button *ngIf="valIds.fonoteca.changed" mat-mini-fab (click)="_handleUndo('fonoteca')">
+          <mat-icon color="warn">cached</mat-icon>
+        </button>
         &nbsp;
         <button *ngIf="valIds.fonoteca.id !== undefined" mat-mini-fab (click)="_handleDelete('fonoteca')">
           <mat-icon *ngIf="!valIds.fonoteca.toBeDeleted">delete</mat-icon>
@@ -168,7 +178,9 @@ class ArticleIds {
                  (input)="_handleInput('hls')">
         </mat-form-field>
         &nbsp;
-        <button *ngIf="valIds.hls.changed" mat-mini-fab (click)="_handleUndo('hls')"><mat-icon color="warn">cached</mat-icon></button>
+        <button *ngIf="valIds.hls.changed" mat-mini-fab (click)="_handleUndo('hls')">
+          <mat-icon color="warn">cached</mat-icon>
+        </button>
         &nbsp;
         <button *ngIf="valIds.hls.id !== undefined" mat-mini-fab (click)="_handleDelete('hls')">
           <mat-icon *ngIf="!valIds.hls.toBeDeleted">delete</mat-icon>
@@ -183,7 +195,9 @@ class ArticleIds {
                  (input)="_handleInput('oem')">
         </mat-form-field>
         &nbsp;
-        <button *ngIf="valIds.oem.changed" mat-mini-fab (click)="_handleUndo('oem')"><mat-icon color="warn">cached</mat-icon></button>
+        <button *ngIf="valIds.oem.changed" mat-mini-fab (click)="_handleUndo('oem')">
+          <mat-icon color="warn">cached</mat-icon>
+        </button>
         &nbsp;
         <button *ngIf="valIds.oem.id !== undefined" mat-mini-fab (click)="_handleDelete('oem')">
           <mat-icon *ngIf="!valIds.oem.toBeDeleted">delete</mat-icon>
@@ -198,7 +212,9 @@ class ArticleIds {
                  (input)="_handleInput('theatre')">
         </mat-form-field>
         &nbsp;
-        <button *ngIf="valIds.theatre.changed" mat-mini-fab (click)="_handleUndo('theatre')"><mat-icon color="warn">cached</mat-icon></button>
+        <button *ngIf="valIds.theatre.changed" mat-mini-fab (click)="_handleUndo('theatre')">
+          <mat-icon color="warn">cached</mat-icon>
+        </button>
         &nbsp;
         <button *ngIf="valIds.theatre.id !== undefined" mat-mini-fab (click)="_handleDelete('theatre')">
           <mat-icon *ngIf="!valIds.theatre.toBeDeleted">delete</mat-icon>
@@ -213,7 +229,9 @@ class ArticleIds {
                  (input)="_handleInput('ticino')">
         </mat-form-field>
         &nbsp;
-        <button *ngIf="valIds.ticino.changed" mat-mini-fab (click)="_handleUndo('ticino')"><mat-icon color="warn">cached</mat-icon></button>
+        <button *ngIf="valIds.ticino.changed" mat-mini-fab (click)="_handleUndo('ticino')">
+          <mat-icon color="warn">cached</mat-icon>
+        </button>
         &nbsp;
         <button *ngIf="valIds.ticino.id !== undefined" mat-mini-fab (click)="_handleDelete('ticino')">
           <mat-icon *ngIf="!valIds.ticino.toBeDeleted">delete</mat-icon>
@@ -228,7 +246,9 @@ class ArticleIds {
                  (input)="_handleInput('web')">
         </mat-form-field>
         &nbsp;
-        <button *ngIf="valIds.web.changed" mat-mini-fab (click)="_handleUndo('web')"><mat-icon color="warn">cached</mat-icon></button>
+        <button *ngIf="valIds.web.changed" mat-mini-fab (click)="_handleUndo('web')">
+          <mat-icon color="warn">cached</mat-icon>
+        </button>
         &nbsp;
         <button *ngIf="valIds.web.id !== undefined" mat-mini-fab (click)="_handleDelete('web')">
           <mat-icon *ngIf="!valIds.web.toBeDeleted">delete</mat-icon>
@@ -236,14 +256,12 @@ class ArticleIds {
         </button>
         <br/>
 
-        <mat-dialog-actions>
-          <button class="mat-raised-button" (click)="cancel()">Cancel</button>
+        <mat-card-actions>
+          <button appBackButton class="mat-raised-button" matTooltip="Zurück ohne zu sichern">Cancel</button>
           <button type="submit" class="mat-raised-button mat-primary" (click)="save()">Save</button>
-        </mat-dialog-actions>
+        </mat-card-actions>
       </mat-card-content>
     </mat-card>
-    </mat-dialog-content>
-
   `,
   styles: [
     '.maxw { min-width: 500px; max-width: 1000px; }',
@@ -271,10 +289,10 @@ export class EditartComponent implements ControlValueAccessor, OnInit {
   constructor(public knoraService: KnoraService,
               private fb: FormBuilder,
               public route: ActivatedRoute,
-              private dialogRef: MatDialogRef<EditartComponent>,
-              @Inject(MAT_DIALOG_DATA) data,
+              private location: Location,
               @Optional() @Self() public ngControl: NgControl) {
-    this.inData = data;
+    // this.inData = data;
+    this.inData = {};
     this.resId = '';
   }
 
@@ -290,112 +308,120 @@ export class EditartComponent implements ControlValueAccessor, OnInit {
   }
 
   ngOnInit(): void {
-    if (this.inData.lemmaIri !== undefined) {
-      this.data.lemma = this.inData.lemmaLabel;
-      this.data.lemmaIri = this.inData.lemmaIri;
-    }
+    combineLatest([this.route.params, this.route.queryParams]).subscribe(arr  => {
+      if (arr[0].iri !== undefined) {
+        this.inData.articleIri = arr[0].iri;
+      }
+      if (arr[1].lemma !== undefined && arr[1].label !== undefined) {
+        this.inData.lemmaIri = arr[1].lemma;
+        this.inData.lemmaLabel = arr[1].label;
+        this.data.lemmaIri = this.inData.lemmaIri;
+        this.data.lemma = this.inData.lemmaLabel;
+      }
+      if (this.inData.articleIri !== undefined) {
+        this.knoraService.getResource(this.inData.articleIri).subscribe((data) => {
+          this.resId = data.id;
+          this.lastmod = data.lastmod;
+          this.form.controls.label.setValue(data.label);
+          this.valIds.label = {id: data.label, changed: false, toBeDeleted: false};
+          this.data.label = data.label;
+          for (const ele of data.properties) {
+            switch (ele.propname) {
+              case this.knoraService.mlsOntology + 'hasALinkToLemmaValue': {
+                this.form.controls.lemma.setValue(ele.values[0]);
+                this.form.controls.lemma.disable();
+                this.valIds.lemma = {id: ele.ids[0], changed: false, toBeDeleted: false};
+                this.data.lemmaIri = ele.values[0];
+                break;
+              }
+              case this.knoraService.mlsOntology + 'hasALinkToLexiconValue': {
+                this.form.controls.lexiconIri.setValue(ele.values[0]);
+                this.form.controls.lexiconIri.disable();
+                this.valIds.lexicon = {id: ele.ids[0], changed: false, toBeDeleted: false};
+                this.data.lexiconIri = ele.values[0];
+                break;
+              }
+              case this.knoraService.mlsOntology + 'hasArticleText': {
+                this.form.controls.article.setValue(ele.values[0]);
+                this.valIds.article = {id: ele.ids[0], changed: false, toBeDeleted: false};
+                this.data.article = ele.values[0];
+                break;
+              }
 
-    if (this.inData.articleIri !== undefined) {
-      this.knoraService.getResource(this.inData.articleIri).subscribe((data) => {
-        this.resId = data.id;
-        this.lastmod = data.lastmod;
-        this.form.controls.label.setValue(data.label);
-        this.valIds.label = {id: data.label, changed: false, toBeDeleted: false};
-        this.data.label = data.label;
-        for (const ele of data.properties) {
-          switch (ele.propname) {
-            case this.knoraService.mlsOntology + 'hasALinkToLemmaValue': {
-              this.form.controls.lemma.setValue(ele.values[0]);
-              this.form.controls.lemma.disable();
-              this.valIds.lemma = {id: ele.ids[0], changed: false, toBeDeleted: false};
-              this.data.lemmaIri = ele.values[0];
-              break;
-            }
-            case this.knoraService.mlsOntology + 'hasALinkToLexiconValue': {
-              this.form.controls.lexiconIri.setValue(ele.values[0]);
-              this.form.controls.lexiconIri.disable();
-              this.valIds.lexicon = {id: ele.ids[0], changed: false, toBeDeleted: false};
-              this.data.lexiconIri = ele.values[0];
-              break;
-            }
-            case this.knoraService.mlsOntology + 'hasArticleText': {
-              this.form.controls.article.setValue(ele.values[0]);
-              this.valIds.article = {id: ele.ids[0], changed: false, toBeDeleted: false};
-              this.data.article = ele.values[0];
-              break;
-            }
+              case this.knoraService.mlsOntology + 'hasPages': {
+                this.form.controls.pages.setValue(ele.values[0]);
+                this.valIds.pages = {id: ele.ids[0], changed: false, toBeDeleted: false};
+                this.data.pages = ele.values[0];
+                break;
+              }
 
-            case this.knoraService.mlsOntology + 'hasPages': {
-              this.form.controls.pages.setValue(ele.values[0]);
-              this.valIds.pages = {id: ele.ids[0], changed: false, toBeDeleted: false};
-              this.data.pages = ele.values[0];
-              break;
-            }
-
-            case this.knoraService.mlsOntology + 'hasFonotecacode': {
-              this.form.controls.fonoteca.setValue(ele.values[0]);
-              this.valIds.fonoteca = {id: ele.ids[0], changed: false, toBeDeleted: false};
-              this.data.fonoteca = ele.values[0];
-              break;
-            }
-            case this.knoraService.mlsOntology + 'hasHlsCcode': {
-              this.form.controls.hls.setValue(ele.values[0]);
-              this.valIds.hls = {id: ele.ids[0], changed: false, toBeDeleted: false};
-              this.data.hls = ele.values[0];
-              break;
-            }
-            case this.knoraService.mlsOntology + 'hasOemlCode': {
-              this.form.controls.oem.setValue(ele.values[0]);
-              this.valIds.oem = {id: ele.ids[0], changed: false, toBeDeleted: false};
-              this.data.oem = ele.values[0];
-              break;
-            }
-            case this.knoraService.mlsOntology + 'hasTheaterLexCode': {
-              this.form.controls.theatre.setValue(ele.values[0]);
-              this.valIds.theatre = {id: ele.ids[0], changed: false, toBeDeleted: false};
-              this.data.theatre = ele.values[0];
-              break;
-            }
-            case this.knoraService.mlsOntology + 'hasTicinoLexCode': {
-              this.form.controls.ticino.setValue(ele.values[0]);
-              this.valIds.ticino = {id: ele.ids[0], changed: false, toBeDeleted: false};
-              this.data.ticino = ele.values[0];
-              break;
-            }
-            case this.knoraService.mlsOntology + 'hasWebLink': {
-              this.form.controls.web.setValue(ele.values[0]);
-              this.valIds.web = {id: ele.ids[0], changed: false, toBeDeleted: false};
-              this.data.web = ele.values[0];
-              break;
+              case this.knoraService.mlsOntology + 'hasFonotecacode': {
+                this.form.controls.fonoteca.setValue(ele.values[0]);
+                this.valIds.fonoteca = {id: ele.ids[0], changed: false, toBeDeleted: false};
+                this.data.fonoteca = ele.values[0];
+                break;
+              }
+              case this.knoraService.mlsOntology + 'hasHlsCcode': {
+                this.form.controls.hls.setValue(ele.values[0]);
+                this.valIds.hls = {id: ele.ids[0], changed: false, toBeDeleted: false};
+                this.data.hls = ele.values[0];
+                break;
+              }
+              case this.knoraService.mlsOntology + 'hasOemlCode': {
+                this.form.controls.oem.setValue(ele.values[0]);
+                this.valIds.oem = {id: ele.ids[0], changed: false, toBeDeleted: false};
+                this.data.oem = ele.values[0];
+                break;
+              }
+              case this.knoraService.mlsOntology + 'hasTheaterLexCode': {
+                this.form.controls.theatre.setValue(ele.values[0]);
+                this.valIds.theatre = {id: ele.ids[0], changed: false, toBeDeleted: false};
+                this.data.theatre = ele.values[0];
+                break;
+              }
+              case this.knoraService.mlsOntology + 'hasTicinoLexCode': {
+                this.form.controls.ticino.setValue(ele.values[0]);
+                this.valIds.ticino = {id: ele.ids[0], changed: false, toBeDeleted: false};
+                this.data.ticino = ele.values[0];
+                break;
+              }
+              case this.knoraService.mlsOntology + 'hasWebLink': {
+                this.form.controls.web.setValue(ele.values[0]);
+                this.valIds.web = {id: ele.ids[0], changed: false, toBeDeleted: false};
+                this.data.web = ele.values[0];
+                break;
+              }
             }
           }
-        }
+        });
+      }
+      this.form = this.fb.group({
+        label: [this.data.label, []],
+        lemma: [this.data.lemma, []],
+        lemmaIri: [this.data.lemmaIri, []],
+        lexiconIri: [this.data.lexiconIri, []],
+        article: [this.data.article, []],
+        pages: [this.data.pages, []],
+        fonoteca: [this.data.fonoteca, []],
+        hls: [this.data.hls, []],
+        oem: [this.data.oem, []],
+        theatre: [this.data.theatre, []],
+        ticino: [this.data.ticino, []],
+        web: [this.data.web, []],
       });
-    }
 
-    this.form = this.fb.group({
-      label: [this.data.label, []],
-      lemma: [this.data.lemma, []],
-      lemmaIri: [this.data.lemmaIri, []],
-      lexiconIri: [this.data.lexiconIri, []],
-      article: [this.data.article, []],
-      pages: [this.data.pages, []],
-      fonoteca: [this.data.fonoteca, []],
-      hls: [this.data.hls, []],
-      oem: [this.data.oem, []],
-      theatre: [this.data.theatre, []],
-      ticino: [this.data.ticino, []],
-      web: [this.data.web, []],
+      if (this.inData.lemmaIri !== undefined) {
+        this.form.controls.lemma.disable();
+      }
+      this.getLexica();
     });
 
-    if (this.inData.lemmaIri !== undefined) {
-      this.form.controls.lemma.disable();
-    }
+
+
 
     this.form.valueChanges.pipe(
       map(data => console.log(data))
     );
-    this.getLexica();
   }
 
   onChange = (_: any) => {};
@@ -850,14 +876,12 @@ export class EditartComponent implements ControlValueAccessor, OnInit {
 
       forkJoin(obs).subscribe(res => {
         console.log('forkJoin:', res);
+        this.location.back();
       });
     }
-    this.dialogRef.close(reload);
+    this.location.back();
   }
 
-  cancel() {
-    this.dialogRef.close(false);
-  }
 
   getLexica(): void {
     //

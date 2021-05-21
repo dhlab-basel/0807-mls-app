@@ -1,5 +1,5 @@
 import {Component, OnInit} from '@angular/core';
-import {ActivatedRoute} from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 import {KnoraService, LemmaData} from '../../services/knora.service';
 import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {EditResourceComponent} from '../knora/edit-resource/edit-resource.component';
@@ -43,8 +43,8 @@ import {ClipboardModule} from '@angular/cdk/clipboard';
         <button mat-raised-button [cdkCopyToClipboard]="lemma.arkUrl" matTooltip="In Zwischenablage kopieren"><mat-icon>content_copy</mat-icon></button>
       </div>
       <mat-card-actions *ngIf="allowEdit">
-        <button mat-raised-button (click)="openEditLemmaDialog()">Edit Lemma</button>
-        <button mat-raised-button (click)="openAddArticleDialog()">Add article</button>
+        <button mat-raised-button (click)="editLemma()">Edit Lemma</button>
+        <button mat-raised-button (click)="addArticle()">Add article</button>
       </mat-card-actions>
     </mat-card>
     <mat-card>
@@ -89,7 +89,8 @@ export class LemmaComponent implements OnInit {
 
   constructor(public route: ActivatedRoute,
               public dialog: MatDialog,
-              public knoraService: KnoraService) {
+              public knoraService: KnoraService,
+              private router: Router) {
     this.lemma = {id: '', label: '', permission: '', arkUrl: '', properties: {}};
     this.editPermissionSet = new Set<string>(['M', 'D', 'CR']);
     this.allowEdit = false;
@@ -143,24 +144,12 @@ export class LemmaComponent implements OnInit {
     });
   }
 
-  openAddArticleDialog() {
-    this.route.params.subscribe(params => {
-      const createConfig = new MatDialogConfig();
-      createConfig.autoFocus = true;
-      createConfig.width = '800px';
-      createConfig.data = {
-        lemmaIri: this.lemma.id,
-        lemmaLabel: this.lemma.label
-      };
-      const dialogRef = this.dialog.open(EditartComponent, createConfig);
+  editLemma() {
+    this.router.navigate(['/editlem',this.lemma.id]);
+  }
 
-      dialogRef.afterClosed().subscribe(data => {
-        if (data) {
-          const tmp = this.lemmaIri.slice();
-          this.lemmaIri = tmp;
-        }
-      });
-    });
+  addArticle(): void {
+    this.router.navigate(['/editart'], { queryParams: { lemma: this.lemma.id, label: this.lemma.label } });
   }
 
   ngOnInit() {
