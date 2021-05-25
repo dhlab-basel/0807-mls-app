@@ -145,7 +145,7 @@ export class LemmaComponent implements OnInit {
   }
 
   editLemma() {
-    this.router.navigate(['/editlem',this.lemma.id]);
+    this.router.navigate(['/editlem', this.lemma.id]);
   }
 
   addArticle(): void {

@@ -1,9 +1,22 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnInit, Pipe, PipeTransform, SecurityContext} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {KnoraService} from '../../services/knora.service';
 import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
-import {EditResourceComponent} from '../knora/edit-resource/edit-resource.component';
 import {EditartComponent} from '../editart/editart.component';
+import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
+
+@Pipe({ name: 'sanitizeHtml' })
+export class SanitizeHtmlPipe implements PipeTransform {
+
+  constructor(private sanitizer: DomSanitizer) { }
+
+  transform(value: string): SafeHtml {
+    console.log('Anti-Sanitizer!!!!!!!!!!!!!!!!!!!!!!');
+    console.log(this.sanitizer.bypassSecurityTrustHtml(value));
+    return this.sanitizer.bypassSecurityTrustHtml(value);
+  }
+}
+
 
 @Component({
   selector: 'app-article',
@@ -12,8 +25,11 @@ import {EditartComponent} from '../editart/editart.component';
         <mat-card-title>
             Artikel
         </mat-card-title>
-      <div [innerHTML]="article.arttext"></div>
-      (Seite: {{ article.npages }})
+      <mat-card-content>
+        <div [innerHTML]="article.arttext | sanitizeHtml"></div>
+        (Seite: {{ article.npages }})
+      </mat-card-content>
+
     </mat-card>
     <mat-card>
         <mat-card-title>
@@ -34,18 +50,21 @@ import {EditartComponent} from '../editart/editart.component';
     </mat-card-actions>
   `,
   styles: [
-    '.maxw { max-width: 500px; }',
+    '.maxw { min-width: 700px; }',
     '.clickable {cursor: pointer;}'
   ]
 })
+
 export class ArticleComponent implements OnInit {
   articleIri: string;
   article: {[index: string]: string} = {};
+  arttext: SafeHtml;
 
   constructor(private route: ActivatedRoute,
               public dialog: MatDialog,
               public knoraService: KnoraService,
-              private router: Router) {
+              private router: Router,
+              private sanitizer: DomSanitizer) {
 
   }
 
@@ -57,7 +76,10 @@ export class ArticleComponent implements OnInit {
         for (const ele of data.properties) {
           switch (ele.propname) {
             case this.knoraService.mlsOntology + 'hasArticleText': {
+              const regex = /<oembed.+?url="https?:\/\/www\.youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})"><\/oembed>/g;
               articledata.arttext = ele.values[0].replace(/\\n/g, '<br />');
+              articledata.arttext = articledata.arttext.replace(regex, '<iframe width="560" height="315" src="https://www.youtube.com/embed/$1" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>');
+              console.log(articledata.arttext);
               break;
             }
             case this.knoraService.mlsOntology + 'hasPages': {
@@ -114,7 +136,7 @@ export class ArticleComponent implements OnInit {
 
   }
 
-  editArticle(event): void {
+  editArticle(): void {
     let url: string;
     url = 'editart/' + encodeURIComponent(this.articleIri);
     this.router.navigateByUrl(url).then(e => {
@@ -127,7 +149,7 @@ export class ArticleComponent implements OnInit {
   }
 
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.getArticle();
   }
 

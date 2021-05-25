@@ -32,7 +32,7 @@ import {LemmaComponent} from './components/lemma/lemma.component';
 import {AppInitService} from './app-init.service';
 import {LexiconComponent} from './components/lexicon/lexicon.component';
 import {LexFromLemmaComponent} from './components/lex-from-lemma/lex-from-lemma.component';
-import {ArticleComponent} from './components/article/article.component';
+import {ArticleComponent, SanitizeHtmlPipe} from './components/article/article.component';
 import {InfoComponent} from './components/info/info.component';
 import {BackButtonDirective} from './directives/back-button.directive';
 import {AboutComponent} from './components/about/about.component';
@@ -90,6 +90,7 @@ export function initializeApp(appInitService: AppInitService) {
     EditartComponent,
     LemmaselectComponent,
     EditlemComponent,
+    SanitizeHtmlPipe,
   ],
   entryComponents: [
     LoginComponent,
@@ -133,7 +134,7 @@ export function initializeApp(appInitService: AppInitService) {
     },
     {provide: MatFormFieldControl, useExisting: KnoraStringInputComponent},
     SparqlPrep,
-    DatePipe
+    DatePipe, SanitizeHtmlPipe
   ],
   bootstrap: [AppComponent]
 })

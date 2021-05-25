@@ -24,7 +24,7 @@ import {EditlemComponent} from '../editlem/editlem.component';
         Wir arbeiten daran!
         <br/>
         <div  *ngIf="allowEdit">
-          <button mat-raised-button (click)="openAddLemmaDialog()">Add Lemma</button>
+          <button mat-raised-button (click)="addLemma()">Add Lemma</button>
         </div>
 
 
@@ -261,6 +261,10 @@ export class LemmataComponent implements OnInit {
         }
       });
     });
+  }
+
+  addLemma() {
+    this.router.navigate(['/editlem']);
   }
 
 

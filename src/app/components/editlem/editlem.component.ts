@@ -713,6 +713,10 @@ export class EditlemComponent implements OnInit {
         this.form.controls.relevanceIri.setValue(this.data.relevanceIri);
         this.valIds.relevance.changed = false;
         break;
+      case 'viaf':
+        this.form.controls.viaf.setValue(this.data.viaf);
+        this.valIds.viaf.changed = false;
+        break;
       case 'gnd':
         this.form.controls.gnd.setValue(this.data.gnd);
         this.valIds.gnd.changed = false;
@@ -725,7 +729,6 @@ export class EditlemComponent implements OnInit {
   }
 
   save() {
-    let reload = false;
     if (this.inData.lemmaIri === undefined) {
       //
       // we create a new Lemma
@@ -735,7 +738,7 @@ export class EditlemComponent implements OnInit {
           console.log('CREATE_RESULT:', res);
         },
       );
-      reload = true;
+      this.location.back();
     } else {
       //
       // we edit an existing Lemma, update/create only changed fields
@@ -759,7 +762,6 @@ export class EditlemComponent implements OnInit {
           this.valIds.text.id as string,
           this.knoraService.mlsOntology + 'hasLemmaText');
         obs.push(gaga);
-        reload = true;
       } else if (this.valIds.text.changed) {
         let gaga: Observable<string>;
         if (this.valIds.text.id === undefined) {
@@ -777,7 +779,6 @@ export class EditlemComponent implements OnInit {
             this.form.value.article);
         }
         obs.push(gaga);
-        reload = true;
       }
 
       if (this.valIds.type.toBeDeleted && this.valIds.type.id !== undefined) {
@@ -788,7 +789,6 @@ export class EditlemComponent implements OnInit {
           this.valIds.type.id as string,
           this.knoraService.mlsOntology + 'hasLemmaType');
         obs.push(gaga);
-        reload = true;
       } else if (this.valIds.type.changed) {
         let gaga: Observable<string>;
         if (this.valIds.type.id === undefined) {
@@ -806,7 +806,6 @@ export class EditlemComponent implements OnInit {
             this.form.value.typeIri);
         }
         obs.push(gaga);
-        reload = true;
       }
 
       if (this.valIds.givenName.toBeDeleted && this.valIds.givenName.id !== undefined) {
@@ -817,7 +816,6 @@ export class EditlemComponent implements OnInit {
           this.valIds.givenName.id as string,
           this.knoraService.mlsOntology + 'hasGivenName');
         obs.push(gaga);
-        reload = true;
       } else if (this.valIds.givenName.changed) {
         let gaga: Observable<string>;
         if (this.valIds.givenName.id === undefined) {
@@ -835,7 +833,6 @@ export class EditlemComponent implements OnInit {
             this.form.value.givenName);
         }
         obs.push(gaga);
-        reload = true;
       }
 
       if (this.valIds.familyName.toBeDeleted && this.valIds.familyName.id !== undefined) {
@@ -846,7 +843,6 @@ export class EditlemComponent implements OnInit {
           this.valIds.familyName.id as string,
           this.knoraService.mlsOntology + 'hasFamilyName');
         obs.push(gaga);
-        reload = true;
       } else if (this.valIds.familyName.changed) {
         let gaga: Observable<string>;
         if (this.valIds.familyName.id === undefined) {
@@ -864,7 +860,6 @@ export class EditlemComponent implements OnInit {
             this.form.value.familyName);
         }
         obs.push(gaga);
-        reload = true;
       }
 
       if (this.valIds.pseudonym.toBeDeleted && this.valIds.pseudonym.id !== undefined) {
@@ -875,7 +870,6 @@ export class EditlemComponent implements OnInit {
           this.valIds.pseudonym.id as string,
           this.knoraService.mlsOntology + 'hasPseudonym');
         obs.push(gaga);
-        reload = true;
       } else if (this.valIds.pseudonym.changed) {
         let gaga: Observable<string>;
         if (this.valIds.pseudonym.id === undefined) {
@@ -893,7 +887,6 @@ export class EditlemComponent implements OnInit {
             this.form.value.pseudonym);
         }
         obs.push(gaga);
-        reload = true;
       }
 
       if (this.valIds.variants.toBeDeleted && this.valIds.variants.id !== undefined) {
@@ -904,7 +897,6 @@ export class EditlemComponent implements OnInit {
           this.valIds.variants.id as string,
           this.knoraService.mlsOntology + 'hasVariants');
         obs.push(gaga);
-        reload = true;
       } else if (this.valIds.variants.changed) {
         let gaga: Observable<string>;
         if (this.valIds.variants.id === undefined) {
@@ -922,7 +914,6 @@ export class EditlemComponent implements OnInit {
             this.form.value.variants);
         }
         obs.push(gaga);
-        reload = true;
       }
 
       if (this.valIds.century.toBeDeleted && this.valIds.century.id !== undefined) {
@@ -932,9 +923,7 @@ export class EditlemComponent implements OnInit {
           this.knoraService.mlsOntology + 'Lemma',
           this.valIds.century.id as string,
           this.knoraService.mlsOntology + 'hasCentury');
-        obs.push(gaga);
-        reload = true;
-      } else if (this.valIds.century.changed) {
+        obs.push(gaga);} else if (this.valIds.century.changed) {
         let gaga: Observable<string>;
         if (this.valIds.century.id === undefined) {
           gaga = this.knoraService.createTextValue(
@@ -951,7 +940,6 @@ export class EditlemComponent implements OnInit {
             this.form.value.century);
         }
         obs.push(gaga);
-        reload = true;
       }
 
       if (this.valIds.deceased.toBeDeleted && this.valIds.deceased.id !== undefined) {
@@ -962,7 +950,6 @@ export class EditlemComponent implements OnInit {
           this.valIds.deceased.id as string,
           this.knoraService.mlsOntology + 'hasDeceasedValue');
         obs.push(gaga);
-        reload = true;
       } else if (this.valIds.deceased.changed) {
         let gaga: Observable<string>;
         if (this.valIds.deceased.id === undefined) {
@@ -980,7 +967,6 @@ export class EditlemComponent implements OnInit {
             this.form.value.deceasedIri);
         }
         obs.push(gaga);
-        reload = true;
       }
 
       if (this.valIds.startDate.toBeDeleted && this.valIds.startDate.id !== undefined) {
@@ -991,7 +977,6 @@ export class EditlemComponent implements OnInit {
           this.valIds.startDate.id as string,
           this.knoraService.mlsOntology + 'hasStartDate');
         obs.push(gaga);
-        reload = true;
       } else if (this.valIds.startDate.changed) {
         let gaga: Observable<string>;
         if (this.valIds.startDate.id === undefined) {
@@ -1009,7 +994,6 @@ export class EditlemComponent implements OnInit {
             this.form.value.startDate);
         }
         obs.push(gaga);
-        reload = true;
       }
 
       if (this.valIds.startDateInfo.toBeDeleted && this.valIds.startDateInfo.id !== undefined) {
@@ -1020,7 +1004,6 @@ export class EditlemComponent implements OnInit {
           this.valIds.startDateInfo.id as string,
           this.knoraService.mlsOntology + 'hasStartDateInfo');
         obs.push(gaga);
-        reload = true;
       } else if (this.valIds.startDateInfo.changed) {
         let gaga: Observable<string>;
         if (this.valIds.startDateInfo.id === undefined) {
@@ -1038,7 +1021,6 @@ export class EditlemComponent implements OnInit {
             this.form.value.startDateInfo);
         }
         obs.push(gaga);
-        reload = true;
       }
 
       if (this.valIds.endDate.toBeDeleted && this.valIds.endDate.id !== undefined) {
@@ -1049,7 +1031,6 @@ export class EditlemComponent implements OnInit {
           this.valIds.endDate.id as string,
           this.knoraService.mlsOntology + 'hasEndDate');
         obs.push(gaga);
-        reload = true;
       } else if (this.valIds.endDate.changed) {
         let gaga: Observable<string>;
         if (this.valIds.endDate.id === undefined) {
@@ -1067,7 +1048,6 @@ export class EditlemComponent implements OnInit {
             this.form.value.endDate);
         }
         obs.push(gaga);
-        reload = true;
       }
 
       if (this.valIds.endDateInfo.toBeDeleted && this.valIds.endDateInfo.id !== undefined) {
@@ -1078,7 +1058,6 @@ export class EditlemComponent implements OnInit {
           this.valIds.endDateInfo.id as string,
           this.knoraService.mlsOntology + 'hasEndDateInfo');
         obs.push(gaga);
-        reload = true;
       } else if (this.valIds.endDateInfo.changed) {
         let gaga: Observable<string>;
         if (this.valIds.endDateInfo.id === undefined) {
@@ -1096,7 +1075,6 @@ export class EditlemComponent implements OnInit {
             this.form.value.endDateInfo);
         }
         obs.push(gaga);
-        reload = true;
       }
 
       if (this.valIds.sex.toBeDeleted && this.valIds.sex.id !== undefined) {
@@ -1107,7 +1085,6 @@ export class EditlemComponent implements OnInit {
           this.valIds.sex.id as string,
           this.knoraService.mlsOntology + 'hasSex');
         obs.push(gaga);
-        reload = true;
       } else if (this.valIds.sex.changed) {
         let gaga: Observable<string>;
         if (this.valIds.sex.id === undefined) {
@@ -1125,7 +1102,6 @@ export class EditlemComponent implements OnInit {
             this.form.value.sexIri);
         }
         obs.push(gaga);
-        reload = true;
       }
 
       if (this.valIds.relevance.toBeDeleted && this.valIds.relevance.id !== undefined) {
@@ -1136,7 +1112,6 @@ export class EditlemComponent implements OnInit {
           this.valIds.relevance.id as string,
           this.knoraService.mlsOntology + 'hasRelevanceValue');
         obs.push(gaga);
-        reload = true;
       } else if (this.valIds.relevance.changed) {
         let gaga: Observable<string>;
         if (this.valIds.relevance.id === undefined) {
@@ -1154,7 +1129,6 @@ export class EditlemComponent implements OnInit {
             this.form.value.relevanceIri);
         }
         obs.push(gaga);
-        reload = true;
       }
 
       if (this.valIds.gnd.toBeDeleted && this.valIds.gnd.id !== undefined) {
@@ -1165,7 +1139,6 @@ export class EditlemComponent implements OnInit {
           this.valIds.gnd.id as string,
           this.knoraService.mlsOntology + 'hasGnd');
         obs.push(gaga);
-        reload = true;
       } else if (this.valIds.gnd.changed) {
         let gaga: Observable<string>;
         if (this.valIds.gnd.id === undefined) {
@@ -1183,7 +1156,6 @@ export class EditlemComponent implements OnInit {
             this.form.value.gnd);
         }
         obs.push(gaga);
-        reload = true;
       }
 
       if (this.valIds.viaf.toBeDeleted && this.valIds.viaf.id !== undefined) {
@@ -1194,7 +1166,6 @@ export class EditlemComponent implements OnInit {
           this.valIds.viaf.id as string,
           this.knoraService.mlsOntology + 'hasViaf');
         obs.push(gaga);
-        reload = true;
       } else if (this.valIds.viaf.changed) {
         let gaga: Observable<string>;
         if (this.valIds.viaf.id === undefined) {
@@ -1212,7 +1183,6 @@ export class EditlemComponent implements OnInit {
             this.form.value.viaf);
         }
         obs.push(gaga);
-        reload = true;
       }
 
       if (this.valIds.comment.toBeDeleted && this.valIds.comment.id !== undefined) {
@@ -1223,7 +1193,6 @@ export class EditlemComponent implements OnInit {
           this.valIds.comment.id as string,
           this.knoraService.mlsOntology + 'hasLemmaComment');
         obs.push(gaga);
-        reload = true;
       } else if (this.valIds.comment.changed) {
         let gaga: Observable<string>;
         if (this.valIds.comment.id === undefined) {
@@ -1241,16 +1210,11 @@ export class EditlemComponent implements OnInit {
             this.form.value.comment);
         }
         obs.push(gaga);
-        reload = true;
       }
       forkJoin(obs).subscribe(res => {
         console.log('forkJoin:', res);
       });
       this.location.back();
-
     }
   }
-
-
-
 }
