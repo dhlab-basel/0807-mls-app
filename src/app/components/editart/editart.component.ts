@@ -53,9 +53,7 @@ class ArticleIds {
     this.theatre = {id: undefined, changed: false, toBeDeleted: false};
     this.ticino = {id: undefined, changed: false, toBeDeleted: false};
     this.web = {id: undefined, changed: false, toBeDeleted: false};
-
   }
-
 }
 
 @Component({
@@ -291,7 +289,6 @@ export class EditartComponent implements ControlValueAccessor, OnInit {
               public route: ActivatedRoute,
               private location: Location,
               @Optional() @Self() public ngControl: NgControl) {
-    // this.inData = data;
     this.inData = {};
     this.resId = '';
   }
@@ -415,9 +412,6 @@ export class EditartComponent implements ControlValueAccessor, OnInit {
       }
       this.getLexica();
     });
-
-
-
 
     this.form.valueChanges.pipe(
       map(data => console.log(data))

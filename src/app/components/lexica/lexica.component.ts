@@ -20,7 +20,9 @@ import {KnoraService} from '../../services/knora.service';
           ° = Online Lexikon<br/>
           / = gedrucktes Lexikon, es wird nur die Liste der Stichworte mitgeteilt<br/>
           - = Stichwortliste<br/>
-
+          <div  *ngIf="allowEdit">
+            <button mat-raised-button (click)="addLexicon()">Add Lemma</button>
+          </div>
         </mat-card-subtitle>
         <mat-card-content>
             <mat-progress-bar mode="indeterminate" *ngIf="showProgbar"></mat-progress-bar>
@@ -69,6 +71,8 @@ export class LexicaComponent implements OnInit {
   columnsToDisplay: Array<string> = ['lexicon_shortname', 'lexicon_citation', 'lexicon_year'];
   showProgbar = false;
   searchterm: string;
+  public allowEdit: boolean;
+
 
   constructor(private knoraService: KnoraService,
               private activatedRoute: ActivatedRoute,
@@ -81,7 +85,7 @@ export class LexicaComponent implements OnInit {
       this.startchar = params.hasOwnProperty('startchar') ? params.startchar : 'A';
       console.log(this.startchar); // Print the parameter to the console.
     });
-
+    this.allowEdit = this.knoraService.loggedin;
   }
 
   lexiconSelected(event): void {
@@ -134,6 +138,10 @@ export class LexicaComponent implements OnInit {
 
   ngOnInit() {
     this.getLexica();
+  }
+
+  addLexicon(): void {
+    this.router.navigate(['/editlex']);
   }
 
 }

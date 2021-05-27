@@ -54,6 +54,7 @@ import { CKEditorModule } from '@ckeditor/ckeditor5-angular';
 import { LemmaselectComponent } from './components/lemmaselect/lemmaselect.component';
 import { EditlemComponent } from './components/editlem/editlem.component';
 import {ClipboardModule} from '@angular/cdk/clipboard';
+import { EditlexComponent } from './components/editlex/editlex.component';
 
 export function initializeApp(appInitService: AppInitService) {
   return (): Promise<any> => {
@@ -91,6 +92,7 @@ export function initializeApp(appInitService: AppInitService) {
     LemmaselectComponent,
     EditlemComponent,
     SanitizeHtmlPipe,
+    EditlexComponent,
   ],
   entryComponents: [
     LoginComponent,

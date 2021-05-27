@@ -40,7 +40,7 @@ import {
   CreateListValue,
   UpdateResourceMetadata,
   UpdateResourceMetadataResponse,
-  UpdateListValue
+  UpdateListValue, UpdateLinkValue
 } from '@dasch-swiss/dsp-js';
 
 import {AppInitService} from '../app-init.service';
@@ -198,6 +198,26 @@ export class ArticleData {
     public ticino?: string,
     public web?: string
 ) {
+  }
+}
+
+export class LexiconData {
+  constructor(
+    public label: string,
+    public shortname: string, // mls:hasShortname
+    public citationForm: string, // mls:hasCitationForm
+    public comment: string, // mls:hasLexiconComment
+    public year: string, // mls:hasYear
+    public weblink?: string, // mls:hasLexiconWeblink
+    public library?: string, // mls:hasLibrary
+    public libraryIri?: string,
+    public scanFinished?: string, // mls:hasScanFinished
+    public scanVendor?: string, // mls:hasScanVendor
+    public ocrFinished?: string, // mls:hasOCRFinished
+    public ocrVendor?: string, // mls:hasOCRVendor
+    public editFinished?: string, // mls:hasEditFinished
+    public editVendor?: string, // mls:hasEditVendor
+  ) {
   }
 }
 
@@ -819,6 +839,124 @@ export class KnoraService {
     );
   }
 
+  createLexicon(data: LexiconData): Observable<string> {
+    const createResource = new CreateResource();
+    createResource.label = data.label;
+    createResource.type = this.mlsOntology + 'Article';
+    createResource.attachedToProject = 'http://rdfh.ch/projects/0807';
+
+    const props = {};
+
+    if (data.shortname !== null && data.shortname !== undefined && data.shortname !== '') {
+      const shortnameVal = new CreateTextValueAsString();
+      shortnameVal.text = data.shortname;
+      props[this.mlsOntology + 'hasShortname'] = [
+        shortnameVal
+      ];
+    }
+
+    if (data.citationForm !== null && data.citationForm !== undefined && data.citationForm !== '') {
+      const citationFormVal = new CreateTextValueAsString();
+      citationFormVal.text = data.citationForm;
+      props[this.mlsOntology + 'hasCitationForm'] = [
+        citationFormVal
+      ];
+    }
+
+    if (data.comment !== null && data.comment !== undefined && data.comment !== '') {
+      const commentVal = new CreateTextValueAsString();
+      commentVal.text = data.comment;
+      props[this.mlsOntology + 'hasLexiconComment'] = [
+        commentVal
+      ];
+    }
+
+    if (data.year !== null && data.year !== undefined && data.year !== '') {
+      const yearVal = new CreateTextValueAsString();
+      yearVal.text = data.year;
+      props[this.mlsOntology + 'hasYear'] = [
+        yearVal
+      ];
+    }
+
+    if (data.weblink !== null && data.weblink !== undefined && data.weblink !== '') {
+      const weblinkVal = new CreateTextValueAsString();
+      weblinkVal.text = data.weblink;
+      props[this.mlsOntology + 'hasLexiconWeblink'] = [
+        weblinkVal
+      ];
+    }
+
+    if (data.library !== null && data.library !== undefined &&
+        data.library !== '' && data.libraryIri !== undefined) {
+      const libraryVal = new CreateLinkValue();
+      libraryVal.linkedResourceIri = data.libraryIri;
+      props[this.mlsOntology + 'hasLibrary'] = [
+        libraryVal
+      ];
+    }
+
+    if (data.scanFinished !== null && data.scanFinished !== undefined && data.scanFinished !== '') {
+      const scanFinishedVal = new CreateTextValueAsString();
+      scanFinishedVal.text = data.scanFinished;
+      props[this.mlsOntology + 'hasScanFinished'] = [
+        scanFinishedVal
+      ];
+    }
+
+    if (data.scanVendor !== null && data.scanVendor !== undefined && data.scanVendor !== '') {
+      const scanVendorVal = new CreateTextValueAsString();
+      scanVendorVal.text = data.scanVendor;
+      props[this.mlsOntology + 'hasScanVendor'] = [
+        scanVendorVal
+      ];
+    }
+
+    if (data.ocrFinished !== null && data.ocrFinished !== undefined && data.ocrFinished !== '') {
+      const ocrFinishedVal = new CreateTextValueAsString();
+      ocrFinishedVal.text = data.ocrFinished;
+      props[this.mlsOntology + 'hasOCRFinished'] = [
+        ocrFinishedVal
+      ];
+    }
+
+    if (data.ocrVendor !== null && data.ocrVendor !== undefined && data.ocrVendor !== '') {
+      const ocrVendorVal = new CreateTextValueAsString();
+      ocrVendorVal.text = data.ocrVendor;
+      props[this.mlsOntology + 'hasOCRVendor'] = [
+        ocrVendorVal
+      ];
+    }
+
+    if (data.editFinished !== null && data.editFinished !== undefined && data.editFinished !== '') {
+      const editFinishedVal = new CreateTextValueAsString();
+      editFinishedVal.text = data.editFinished;
+      props[this.mlsOntology + 'hasEditFinished'] = [
+        editFinishedVal
+      ];
+    }
+
+    if (data.editVendor !== null && data.editVendor !== undefined && data.editVendor !== '') {
+      const editVendorVal = new CreateTextValueAsString();
+      editVendorVal.text = data.editVendor;
+      props[this.mlsOntology + 'hasEditFinished'] = [
+        editVendorVal
+      ];
+    }
+
+    createResource.properties = props;
+
+    return this.knoraApiConnection.v2.res.createResource(createResource).pipe(
+      map((res: ReadResource) => {
+        return res.id;
+      }),
+      catchError((error: ApiResponseError) => {
+        return of('error'); }
+      )
+    );
+
+  }
+
   /**
    * creates a new text value
    * @param resId Resource id (IRI)
@@ -881,6 +1019,78 @@ export class KnoraService {
 
     deleteVal.id = valId;
     deleteVal.type = 'http://api.knora.org/ontology/knora-api/v2#TextValue';
+
+    const updateResource = new UpdateResource<DeleteValue>();
+    updateResource.id = resId;
+    updateResource.type = resType;
+    updateResource.property = property;
+    updateResource.value = deleteVal;
+
+    return this.knoraApiConnection.v2.values.deleteValue(updateResource).pipe(
+      map((res: DeleteValueResponse) => {
+        return 'OK';
+      }),
+      catchError((error: ApiResponseError) => {
+        return of('ERROR');
+      })
+    );
+  }
+
+  createLinkValue(resId: string, resType: string, property: string, iri: string): Observable<string> {
+    const createLinkVal = new CreateLinkValue();
+    createLinkVal.linkedResourceIri = iri;
+
+    const createResource = new UpdateResource<CreateValue>();
+    createResource.id = resId;
+    createResource.type = resType;
+    createResource.property = property;
+    createResource.value = createLinkVal;
+
+    return this.knoraApiConnection.v2.values.createValue(createResource).pipe(
+      map((res: WriteValueResponse) => {
+        return 'OK';
+      }),
+      catchError((error: ApiResponseError) => {
+        return of('ERROR');
+      })
+    );
+  }
+
+  /**
+   * Updates a text value
+   *
+   * @param resId Resource id (IRI)
+   * @param resType Resource type (IRI)
+   * @param valId Value id (IRI)
+   * @param property Property class (IRI)
+   * @param text Text value
+   */
+  updateLinkValue(resId: string, resType: string, valId: string, property: string, iri: string): Observable<string> {
+    const updateLinkVal = new UpdateLinkValue();
+    updateLinkVal.id = valId;
+    updateLinkVal.linkedResourceIri = iri;
+
+    const updateResource = new UpdateResource<UpdateValue>();
+    updateResource.id = resId;
+    updateResource.type = resType;
+    updateResource.property = property;
+    updateResource.value = updateLinkVal;
+
+    return this.knoraApiConnection.v2.values.updateValue(updateResource).pipe(
+      map((res: WriteValueResponse) => {
+        return 'OK';
+      }),
+      catchError((error: ApiResponseError) => {
+        return of('ERROR');
+      })
+    );
+  }
+
+  deleteLinkValue(resId: string, resType: string, valId: string, property: string): Observable<string> {
+    const deleteVal = new DeleteValue();
+
+    deleteVal.id = valId;
+    deleteVal.type = 'http://api.knora.org/ontology/knora-api/v2#LinkValue';
 
     const updateResource = new UpdateResource<DeleteValue>();
     updateResource.id = resId;
