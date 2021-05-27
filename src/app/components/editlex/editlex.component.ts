@@ -134,6 +134,7 @@ class LexiconIds {
                  placeholder="Bibliothek"
                  formControlName="library"
                  aria-label="Value"
+                 (change)="_handleInput('library')"
                  (input)="_handleLinkInput('library')">
           <input matInput style="width: 100%" [hidden]="true" formControlName="libraryIri">
           <mat-autocomplete #auto="matAutocomplete" (optionSelected)="_optionSelected($event.option.value)">
@@ -172,7 +173,6 @@ class LexiconIds {
           <input matInput class="full-width"
                  placeholder="Scan bearbeitet von"
                  formControlName="scanVendor"
-                 (change)="_handleInput('scanVendor')"
                  (input)="_handleInput('scanVendor')">
         </mat-form-field>
         &nbsp;

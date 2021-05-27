@@ -21,7 +21,7 @@ import {KnoraService} from '../../services/knora.service';
           / = gedrucktes Lexikon, es wird nur die Liste der Stichworte mitgeteilt<br/>
           - = Stichwortliste<br/>
           <div  *ngIf="allowEdit">
-            <button mat-raised-button (click)="addLexicon()">Add Lemma</button>
+            <button mat-raised-button (click)="addLexicon()">Add Lexicon</button>
           </div>
         </mat-card-subtitle>
         <mat-card-content>
