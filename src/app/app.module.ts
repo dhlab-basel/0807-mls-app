@@ -55,6 +55,7 @@ import { LemmaselectComponent } from './components/lemmaselect/lemmaselect.compo
 import { EditlemComponent } from './components/editlem/editlem.component';
 import {ClipboardModule} from '@angular/cdk/clipboard';
 import { EditlexComponent } from './components/editlex/editlex.component';
+import { EditnewsComponent } from './components/editnews/editnews.component';
 
 export function initializeApp(appInitService: AppInitService) {
   return (): Promise<any> => {
@@ -93,6 +94,7 @@ export function initializeApp(appInitService: AppInitService) {
     EditlemComponent,
     SanitizeHtmlPipe,
     EditlexComponent,
+    EditnewsComponent,
   ],
   entryComponents: [
     LoginComponent,
