@@ -336,11 +336,10 @@ export class EditartComponent implements ControlValueAccessor, OnInit {
               }
               case this.knoraService.mlsOntology + 'hasALinkToLexiconValue': {
                 const tmp = ele as LinkPropertyData;
-                this.form.controls.lexiconIri.setValue(tmp.resourceIris[0]);
-                this.form.controls.lexicon.setValue(tmp.values[0])
+                this.form.controls.lexiconIri.setValue(tmp.values[0]);
                 this.form.controls.lexiconIri.disable();
                 this.valIds.lexicon = {id: tmp.ids[0], changed: false, toBeDeleted: false};
-                this.data.lexiconIri = tmp.resourceIris[0];
+                this.data.lexiconIri = tmp.values[0];
                 break;
               }
               case this.knoraService.mlsOntology + 'hasArticleText': {
