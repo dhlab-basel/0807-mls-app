@@ -40,7 +40,7 @@ import {
   CreateListValue,
   UpdateResourceMetadata,
   UpdateResourceMetadataResponse,
-  UpdateListValue, UpdateLinkValue
+  UpdateListValue, UpdateLinkValue, CreateUriValue, UpdateUriValue
 } from '@dasch-swiss/dsp-js';
 
 import {AppInitService} from '../app-init.service';
@@ -842,7 +842,7 @@ export class KnoraService {
   createLexicon(data: LexiconData): Observable<string> {
     const createResource = new CreateResource();
     createResource.label = data.label;
-    createResource.type = this.mlsOntology + 'Article';
+    createResource.type = this.mlsOntology + 'Lexicon';
     createResource.attachedToProject = 'http://rdfh.ch/projects/0807';
 
     const props = {};
@@ -880,8 +880,8 @@ export class KnoraService {
     }
 
     if (data.weblink !== null && data.weblink !== undefined && data.weblink !== '') {
-      const weblinkVal = new CreateTextValueAsString();
-      weblinkVal.text = data.weblink;
+      const weblinkVal = new CreateUriValue();
+      weblinkVal.uri = data.weblink;
       props[this.mlsOntology + 'hasLexiconWeblink'] = [
         weblinkVal
       ];
@@ -1036,15 +1036,15 @@ export class KnoraService {
     );
   }
 
-  createLinkValue(resId: string, resType: string, property: string, iri: string): Observable<string> {
-    const createLinkVal = new CreateLinkValue();
-    createLinkVal.linkedResourceIri = iri;
+  createUriValue(resId: string, resType: string, property: string, uri: string): Observable<string> {
+    const createUriVal = new CreateUriValue();
+    createUriVal.uri = uri;
 
     const createResource = new UpdateResource<CreateValue>();
     createResource.id = resId;
     createResource.type = resType;
     createResource.property = property;
-    createResource.value = createLinkVal;
+    createResource.value = createUriVal;
 
     return this.knoraApiConnection.v2.values.createValue(createResource).pipe(
       map((res: WriteValueResponse) => {
@@ -1056,15 +1056,69 @@ export class KnoraService {
     );
   }
 
-  /**
-   * Updates a text value
-   *
-   * @param resId Resource id (IRI)
-   * @param resType Resource type (IRI)
-   * @param valId Value id (IRI)
-   * @param property Property class (IRI)
-   * @param text Text value
-   */
+  updateUriValue(resId: string, resType: string, valId: string, property: string, uri: string): Observable<string> {
+    const updateUriVal = new UpdateUriValue();
+    updateUriVal.id = valId;
+    updateUriVal.uri = uri;
+
+    const updateResource = new UpdateResource<UpdateValue>();
+    updateResource.id = resId;
+    updateResource.type = resType;
+    updateResource.property = property;
+    updateResource.value = updateUriVal;
+
+    return this.knoraApiConnection.v2.values.updateValue(updateResource).pipe(
+      map((res: WriteValueResponse) => {
+        return 'OK';
+      }),
+      catchError((error: ApiResponseError) => {
+        return of('ERROR');
+      })
+    );
+  }
+
+  deleteUriValue(resId: string, resType: string, valId: string, property: string): Observable<string> {
+    const deleteVal = new DeleteValue();
+
+    deleteVal.id = valId;
+    deleteVal.type = 'http://api.knora.org/ontology/knora-api/v2#UriValue';
+
+    const updateResource = new UpdateResource<DeleteValue>();
+    updateResource.id = resId;
+    updateResource.type = resType;
+    updateResource.property = property;
+    updateResource.value = deleteVal;
+
+    return this.knoraApiConnection.v2.values.deleteValue(updateResource).pipe(
+      map((res: DeleteValueResponse) => {
+        return 'OK';
+      }),
+      catchError((error: ApiResponseError) => {
+        return of('ERROR');
+      })
+    );
+  }
+
+  createLinkValue(resId: string, resType: string, property: string, iri: string): Observable<string> {
+    const createLinkVal = new CreateLinkValue();
+    createLinkVal.linkedResourceIri = iri;
+
+    const updateResource = new UpdateResource<CreateValue>();
+    updateResource.id = resId;
+    updateResource.type = resType;
+    updateResource.property = property;
+    updateResource.value = createLinkVal;
+
+    return this.knoraApiConnection.v2.values.createValue(updateResource).pipe(
+      map((res: WriteValueResponse) => {
+        return 'OK';
+      }),
+      catchError((error: ApiResponseError) => {
+        return of('ERROR');
+      })
+    );
+  }
+
   updateLinkValue(resId: string, resType: string, valId: string, property: string, iri: string): Observable<string> {
     const updateLinkVal = new UpdateLinkValue();
     updateLinkVal.id = valId;

@@ -1,7 +1,7 @@
 import {Component, Inject, Input, OnDestroy, OnInit, Optional, Self, ViewChild} from '@angular/core';
 import {MatCardModule} from '@angular/material/card';
 import * as ClassicEditor from '@ckeditor/ckeditor5-build-classic';
-import {KnoraService, ArticleData, ResourceData, IntPropertyData} from '../../services/knora.service';
+import {KnoraService, ArticleData, ResourceData, IntPropertyData, LinkPropertyData} from '../../services/knora.service';
 import {CKEditorComponent} from '@ckeditor/ckeditor5-angular';
 import {ControlValueAccessor, FormBuilder, FormGroup, NgControl} from '@angular/forms';
 import {EditResourceComponent} from '../knora/edit-resource/edit-resource.component';
@@ -325,17 +325,22 @@ export class EditartComponent implements ControlValueAccessor, OnInit {
           for (const ele of data.properties) {
             switch (ele.propname) {
               case this.knoraService.mlsOntology + 'hasALinkToLemmaValue': {
-                this.form.controls.lemma.setValue(ele.values[0]);
+                const tmp = ele as LinkPropertyData;
+                this.form.controls.lemmaIri.setValue(tmp.resourceIris[0]);
+                this.form.controls.lemma.setValue(tmp.values[0]);
                 this.form.controls.lemma.disable();
-                this.valIds.lemma = {id: ele.ids[0], changed: false, toBeDeleted: false};
-                this.data.lemmaIri = ele.values[0];
+                this.valIds.lemma = {id: tmp.ids[0], changed: false, toBeDeleted: false};
+                this.data.lemmaIri = tmp.resourceIris[0];
+                this.data.lemma = tmp.values[0];
                 break;
               }
               case this.knoraService.mlsOntology + 'hasALinkToLexiconValue': {
-                this.form.controls.lexiconIri.setValue(ele.values[0]);
+                const tmp = ele as LinkPropertyData;
+                this.form.controls.lexiconIri.setValue(tmp.resourceIris[0]);
+                this.form.controls.lexicon.setValue(tmp.values[0])
                 this.form.controls.lexiconIri.disable();
-                this.valIds.lexicon = {id: ele.ids[0], changed: false, toBeDeleted: false};
-                this.data.lexiconIri = ele.values[0];
+                this.valIds.lexicon = {id: tmp.ids[0], changed: false, toBeDeleted: false};
+                this.data.lexiconIri = tmp.resourceIris[0];
                 break;
               }
               case this.knoraService.mlsOntology + 'hasArticleText': {

@@ -1,5 +1,5 @@
 import {Component, Input, OnInit} from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 import {KnoraService, ResourceData} from '../../services/knora.service';
 import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {EditResourceComponent} from '../knora/edit-resource/edit-resource.component';
@@ -25,7 +25,7 @@ import {EditResourceComponent} from '../knora/edit-resource/edit-resource.compon
           <tr mat-row *matRowDef="let row; columns: columnsToDisplay;" ></tr>
       </table>
       <mat-card-actions *ngIf="knoraService.loggedin">
-        <button mat-raised-button (click)="openEditDialog()">edit</button>
+        <button mat-raised-button (click)="editLexicon()">edit</button>
       </mat-card-actions>
 
   `,
@@ -66,7 +66,8 @@ export class LexiconComponent implements OnInit {
 
   constructor(private route: ActivatedRoute,
               public dialog: MatDialog,
-              public knoraService: KnoraService) {}
+              public knoraService: KnoraService,
+              private router: Router) {}
 
   getLexicon() {
     this.route.params.subscribe(params => {
@@ -106,6 +107,10 @@ export class LexiconComponent implements OnInit {
       const dialogRef = this.dialog.open(EditResourceComponent, editConfig);
     });
 
+  }
+
+  editLexicon() {
+    this.router.navigate(['/editlex', this.lexicon.id]);
   }
 
   ngOnInit() {

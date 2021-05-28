@@ -1,6 +1,6 @@
 import {Component, Input, OnInit, Optional, Self} from '@angular/core';
 import {ControlValueAccessor, FormBuilder, FormGroup, NgControl} from '@angular/forms';
-import {ArticleData, KnoraService, LexiconData} from '../../services/knora.service';
+import {KnoraService, LexiconData, LinkPropertyData, ListPropertyData} from '../../services/knora.service';
 import {ActivatedRoute} from '@angular/router';
 import {Location} from '@angular/common';
 import {combineLatest, forkJoin, Observable} from 'rxjs';
@@ -75,11 +75,12 @@ class LexiconIds {
         <br/>
 
         <mat-form-field [style.width.px]=400>
-          <input matInput required
-                 class="full-width"
-                 placeholder="Zitierform"
-                 formControlName="citationForm"
-                 (input)="_handleInput('citationForm')">
+          <textarea matInput rows="5"
+                    class="full-width"
+                    placeholder="Zitierform"
+                    formControlName="citationForm"
+                    (input)="_handleInput('citationForm')"></textarea>
+
         </mat-form-field>
         <button *ngIf="valIds.citationForm.changed" mat-mini-fab (click)="_handleUndo('citationForm')">
           <mat-icon color="warn">cached</mat-icon>
@@ -149,6 +150,15 @@ class LexiconIds {
                  formControlName="library"
                  aria-label="Value">
         </mat-form-field>
+        &nbsp;
+        <button *ngIf="valIds.library.changed" mat-mini-fab (click)="_handleUndo('library')">
+          <mat-icon color="warn">cached</mat-icon>
+        </button>
+        &nbsp;
+        <button *ngIf="valIds.library.id !== undefined" mat-mini-fab (click)="_handleDelete('library')">
+          <mat-icon *ngIf="!valIds.library.toBeDeleted">delete</mat-icon>
+          <mat-icon *ngIf="valIds.library.toBeDeleted" color="warn">delete</mat-icon>
+        </button>
         <br/>
 
         <mat-form-field [style.width.px]=400>
@@ -325,63 +335,53 @@ export class EditlexComponent implements ControlValueAccessor, OnInit {
               switch (ele.propname) {
                 case this.knoraService.mlsOntology + 'hasShortname':
                   this.form.controls.shortname.setValue(ele.values[0]);
-                  this.form.controls.shortname.disable();
                   this.valIds.shortname = {id: ele.ids[0], changed: false, toBeDeleted: false};
                   break;
                 case this.knoraService.mlsOntology + 'hasCitationForm':
                   this.form.controls.citationForm.setValue(ele.values[0]);
-                  this.form.controls.citationForm.disable();
                   this.valIds.citationForm = {id: ele.ids[0], changed: false, toBeDeleted: false};
                   break;
                 case this.knoraService.mlsOntology + 'hasLexiconComment':
                   this.form.controls.comment.setValue(ele.values[0]);
-                  this.form.controls.comment.disable();
                   this.valIds.comment = {id: ele.ids[0], changed: false, toBeDeleted: false};
                   break;
                 case this.knoraService.mlsOntology + 'hasYear':
                   this.form.controls.year.setValue(ele.values[0]);
-                  this.form.controls.year.disable();
                   this.valIds.year = {id: ele.ids[0], changed: false, toBeDeleted: false};
                   break;
                 case this.knoraService.mlsOntology + 'hasLexiconWeblink':
                   this.form.controls.weblink.setValue(ele.values[0]);
-                  this.form.controls.weblink.disable();
                   this.valIds.weblink = {id: ele.ids[0], changed: false, toBeDeleted: false};
                   break;
-                case this.knoraService.mlsOntology + 'hasLibrary':
-                  this.form.controls.library.setValue(ele.values[0]);
-                  this.form.controls.library.disable();
+                case this.knoraService.mlsOntology + 'hasLibraryValue':
+                  const tmp = ele as LinkPropertyData;
+                  this.form.controls.libraryIri.setValue(tmp.resourceIris[0]);
+                  this.form.controls.library.setValue(tmp.values[0]);
                   this.valIds.library = {id: ele.ids[0], changed: false, toBeDeleted: false};
-                  this.data.libraryIri = ele.values[0];
+                  this.data.libraryIri = tmp.resourceIris[0];
                   break;
                 case this.knoraService.mlsOntology + 'hasScanFinished':
                   this.form.controls.scanFinished.setValue(ele.values[0]);
-                  this.form.controls.scanFinished.disable();
                   this.valIds.scanFinished = {id: ele.ids[0], changed: false, toBeDeleted: false};
                   break;
                 case this.knoraService.mlsOntology + 'hasScanVendor':
                   this.form.controls.scanVendor.setValue(ele.values[0]);
-                  this.form.controls.scanVendor.disable();
                   this.valIds.scanVendor = {id: ele.ids[0], changed: false, toBeDeleted: false};
                   break;
                 case this.knoraService.mlsOntology + 'hasOCRFinished':
                   this.form.controls.ocrFinished.setValue(ele.values[0]);
-                  this.form.controls.ocrFinished.disable();
                   this.valIds.ocrFinished = {id: ele.ids[0], changed: false, toBeDeleted: false};
                   break;
                 case this.knoraService.mlsOntology + 'hasOCRVendor':
                   this.form.controls.ocrVendor.setValue(ele.values[0]);
-                  this.form.controls.ocrVendor.disable();
                   this.valIds.ocrVendor = {id: ele.ids[0], changed: false, toBeDeleted: false};
                   break;
                 case this.knoraService.mlsOntology + 'hasEditFinished':
                   this.form.controls.editFinished.setValue(ele.values[0]);
-                  this.form.controls.editFinished.disable();
                   this.valIds.editFinished = {id: ele.ids[0], changed: false, toBeDeleted: false};
                   break;
                 case this.knoraService.mlsOntology + 'hasEditVendor':
                   this.form.controls.editVendor.setValue(ele.values[0]);
-                  this.form.controls.editVendor.disable();
                   this.valIds.editVendor = {id: ele.ids[0], changed: false, toBeDeleted: false};
                   break;
               }
@@ -397,6 +397,7 @@ export class EditlexComponent implements ControlValueAccessor, OnInit {
         year: [this.data.year, []],
         weblink: [this.data.weblink, []],
         library: [this.data.library, []],
+        libraryIri: [this.data.libraryIri, []],
         scanFinished: [this.data.scanFinished, []],
         scanVendor: [this.data.scanVendor, []],
         ocrFinished: [this.data.ocrFinished, []],
@@ -417,6 +418,8 @@ export class EditlexComponent implements ControlValueAccessor, OnInit {
   onTouched = () => {};
 
   _handleLinkInput(what: string): void {
+    console.log('_handleLinkInput: ', this.form.value.library);
+    this.valIds.library.changed = true;
     this.knoraService.getResourcesByLabel(this.form.value.library, this.knoraService.mlsOntology + 'Library').subscribe(
       res => {
         this.options = res;
@@ -553,6 +556,7 @@ export class EditlexComponent implements ControlValueAccessor, OnInit {
         break;
       case 'library':
         this.form.controls.library.setValue(this.data.library);
+        this.form.controls.libraryIri.setValue(this.data.libraryIri);
         this.valIds.library.changed = false;
         break;
       case 'scanFinished':
@@ -729,7 +733,7 @@ export class EditlexComponent implements ControlValueAccessor, OnInit {
 
       if (this.valIds.weblink.toBeDeleted && this.valIds.weblink.id !== undefined) {
         let gaga: Observable<string>;
-        gaga = this.knoraService.deleteTextValue(
+        gaga = this.knoraService.deleteUriValue(
           this.resId,
           this.knoraService.mlsOntology + 'Lexicon',
           this.valIds.weblink.id as string,
@@ -738,13 +742,13 @@ export class EditlexComponent implements ControlValueAccessor, OnInit {
       } else if (this.valIds.weblink.changed) {
         let gaga: Observable<string>;
         if (this.valIds.weblink.id === undefined) {
-          gaga = this.knoraService.createTextValue(
+          gaga = this.knoraService.createUriValue(
             this.resId,
             this.knoraService.mlsOntology + 'Lexicon',
             this.knoraService.mlsOntology + 'hasLexiconWeblink',
             this.form.value.weblink);
         } else {
-          gaga = this.knoraService.updateTextValue(
+          gaga = this.knoraService.updateUriValue(
             this.resId,
             this.knoraService.mlsOntology + 'Lexicon',
             this.valIds.weblink.id as string,
@@ -760,23 +764,23 @@ export class EditlexComponent implements ControlValueAccessor, OnInit {
           this.resId,
           this.knoraService.mlsOntology + 'Lexicon',
           this.valIds.library.id as string,
-          this.knoraService.mlsOntology + 'hasLibrary');
+          this.knoraService.mlsOntology + 'hasLibraryValue');
         obs.push(gaga);
       } else if (this.valIds.library.changed) {
         let gaga: Observable<string>;
         if (this.valIds.library.id === undefined) {
-          gaga = this.knoraService.createTextValue(
+          gaga = this.knoraService.createLinkValue(
             this.resId,
             this.knoraService.mlsOntology + 'Lexicon',
-            this.knoraService.mlsOntology + 'hasLibrary',
-            this.form.value.library);
+            this.knoraService.mlsOntology + 'hasLibraryValue',
+            this.form.value.libraryIri);
         } else {
-          gaga = this.knoraService.updateTextValue(
+          gaga = this.knoraService.updateLinkValue(
             this.resId,
             this.knoraService.mlsOntology + 'Lexicon',
             this.valIds.library.id as string,
-            this.knoraService.mlsOntology + 'hasLibrary',
-            this.form.value.library);
+            this.knoraService.mlsOntology + 'hasLibraryValue',
+            this.form.value.libraryIri);
         }
         obs.push(gaga);
       }
@@ -944,7 +948,6 @@ export class EditlexComponent implements ControlValueAccessor, OnInit {
       }
       forkJoin(obs).subscribe(res => {
         console.log('forkJoin:', res);
-        this.location.back();
       });
     }
     this.location.back();
