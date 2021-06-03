@@ -12,6 +12,7 @@ import {TheprojectComponent} from './components/theproject/theproject.component'
 import {EditartComponent} from './components/editart/editart.component';
 import {EditlemComponent} from './components/editlem/editlem.component';
 import {EditlexComponent} from './components/editlex/editlex.component';
+import {EditnewsComponent} from './components/editnews/editnews.component';
 
 const routes: Routes = [{
   path: 'home',
@@ -52,6 +53,12 @@ const routes: Routes = [{
 }, {
   path: 'editlex',
   component: EditlexComponent
+}, {
+  path: 'editnews/:iri',
+  component: EditnewsComponent
+}, {
+  path: 'editnews',
+  component: EditnewsComponent
 }, {
   path: 'about',
   component: AboutComponent

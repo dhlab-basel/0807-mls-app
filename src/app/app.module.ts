@@ -56,6 +56,9 @@ import { EditlemComponent } from './components/editlem/editlem.component';
 import {ClipboardModule} from '@angular/cdk/clipboard';
 import { EditlexComponent } from './components/editlex/editlex.component';
 import { EditnewsComponent } from './components/editnews/editnews.component';
+import { MatFileUploadModule } from 'angular-material-fileupload';
+import {MatDatepickerModule} from '@angular/material/datepicker';
+import {MatNativeDateModule} from '@angular/material/core';
 
 export function initializeApp(appInitService: AppInitService) {
   return (): Promise<any> => {
@@ -130,6 +133,9 @@ export function initializeApp(appInitService: AppInitService) {
     MatAutocompleteModule,
     CKEditorModule,
     ClipboardModule,
+    MatFileUploadModule,
+    MatDatepickerModule,
+    MatNativeDateModule
   ],
   providers: [
     AppInitService,

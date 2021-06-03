@@ -246,7 +246,21 @@ export class Lemma {
     public viaf: string, // mls:hasViaf: TextValue
     public comment: string, // mls:haslemmaComment: TextValue
   ) {
+  }
+}
 
+export class News {
+  constructor(
+    public label: string,
+    public title: string, // mls:hasNewsTitle: TextValue
+    public imageid: string,
+    public text: string, // mls:hasNewsText: TextValue
+    public activeDateStart: string, // mls:hasNewitemActiveDate: DateValue
+    public activeDateEnd: string, // mls:hasNewitemActiveDate: DateValue
+    public lemma?: string,  // mls:hasNewsitemLinkToLemmaValue: LinkValue -> mls:Lemma
+    public lemmaIri?: string,
+    public weblink?: string, // mls:hasNewsitemWeblink: UriValue
+  ) {
   }
 }
 
@@ -265,6 +279,7 @@ export class KnoraService {
   mlsOntology: string;
   loggedin: boolean;
   useremail: string;
+  token?: string;
   listAdminCache: ListAdminCache;
 
   lemmaTypeListIri: string;
@@ -403,6 +418,7 @@ export class KnoraService {
             const apiResponse = response as ApiResponseData<LoginResponse>;
             this.loggedin = true;
             this.useremail = email;
+            this.token = apiResponse.body.token;
             return {success: true, token: apiResponse.body.token, user: email};
           } else {
             return {success: false, token: response, user: '-'};
@@ -420,6 +436,7 @@ export class KnoraService {
           const apiResponse = response as ApiResponseData<LogoutResponse>;
           this.loggedin = false;
           this.useremail = '';
+          this.token = undefined;
           return apiResponse.body.message;
         } else {
           return response;
