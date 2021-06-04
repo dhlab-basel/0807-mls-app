@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnInit, Pipe, PipeTransform} from '@angular/core';
 import { DatePipe } from '@angular/common';
 import {KnoraService} from '../../services/knora.service';
 import {Constants} from '@dasch-swiss/dsp-js';
@@ -7,15 +7,15 @@ import {Constants} from '@dasch-swiss/dsp-js';
 @Component({
   selector: 'app-news-items',
   template: `
-    <mat-grid-list cols="6" rowHeight="1:1.5">
+    <mat-grid-list cols="3" rowHeight="1:1">
         <mat-grid-tile *ngFor="let x of items">
-            <mat-card>
-                <mat-card-title>
-                {{x[1]}}
-                </mat-card-title>
-                <img class="newimg" mat-card-image src="{{x[3]}}"/>
+          <mat-grid-tile-header>
+            {{x[1]}}
+          </mat-grid-tile-header>
+          <mat-card role="main">
+                <img mat-card-image layout-fill [src]="x[3] | safe: 'url'"/>
                 <mat-card-content>
-                    <p>{{x[2]}}</p>
+                    <div [innerHTML]="x[2] | safe: 'html'"></div>
                 </mat-card-content>
             </mat-card>
         </mat-grid-tile>
@@ -24,9 +24,10 @@ import {Constants} from '@dasch-swiss/dsp-js';
   styles: [
     '.mat-grid-list {margin-left: 50px; margin-right: 50px;}',
     '.mat-card-title {font-size: 12pt;}',
-    '.newimg {max-width: 150px; max-height: 150px;}'
+    '.newimg {max-width: 512px; max-height: 512px;}'
   ]
 })
+
 export class NewsItemsComponent implements OnInit {
   today: string;
   items: Array<Array<string>> = [];
@@ -50,7 +51,7 @@ export class NewsItemsComponent implements OnInit {
 
     this.knoraService.gravsearchQuery('newsitem_search', params, fields).subscribe(
       (data) => {
-        console.log(data);
+        console.log('NEWSITEMS=', data);
         this.items = data;
       }
     );

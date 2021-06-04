@@ -32,7 +32,7 @@ import {LemmaComponent} from './components/lemma/lemma.component';
 import {AppInitService} from './app-init.service';
 import {LexiconComponent} from './components/lexicon/lexicon.component';
 import {LexFromLemmaComponent} from './components/lex-from-lemma/lex-from-lemma.component';
-import {ArticleComponent, SanitizeHtmlPipe} from './components/article/article.component';
+import {ArticleComponent} from './components/article/article.component';
 import {InfoComponent} from './components/info/info.component';
 import {BackButtonDirective} from './directives/back-button.directive';
 import {AboutComponent} from './components/about/about.component';
@@ -59,6 +59,7 @@ import { EditnewsComponent } from './components/editnews/editnews.component';
 import { MatFileUploadModule } from 'angular-material-fileupload';
 import {MatDatepickerModule} from '@angular/material/datepicker';
 import {MatNativeDateModule} from '@angular/material/core';
+import {SafePipe} from './pipes/safe.pipe';
 
 export function initializeApp(appInitService: AppInitService) {
   return (): Promise<any> => {
@@ -95,9 +96,9 @@ export function initializeApp(appInitService: AppInitService) {
     EditartComponent,
     LemmaselectComponent,
     EditlemComponent,
-    SanitizeHtmlPipe,
     EditlexComponent,
     EditnewsComponent,
+    SafePipe,
   ],
   entryComponents: [
     LoginComponent,
@@ -144,7 +145,8 @@ export function initializeApp(appInitService: AppInitService) {
     },
     {provide: MatFormFieldControl, useExisting: KnoraStringInputComponent},
     SparqlPrep,
-    DatePipe, SanitizeHtmlPipe
+    DatePipe,
+    SafePipe
   ],
   bootstrap: [AppComponent]
 })

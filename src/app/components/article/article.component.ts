@@ -3,20 +3,7 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {KnoraService} from '../../services/knora.service';
 import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {EditartComponent} from '../editart/editart.component';
-import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
-
-@Pipe({ name: 'sanitizeHtml' })
-export class SanitizeHtmlPipe implements PipeTransform {
-
-  constructor(private sanitizer: DomSanitizer) { }
-
-  transform(value: string): SafeHtml {
-    console.log('Anti-Sanitizer!!!!!!!!!!!!!!!!!!!!!!');
-    console.log(this.sanitizer.bypassSecurityTrustHtml(value));
-    return this.sanitizer.bypassSecurityTrustHtml(value);
-  }
-}
-
+import {SafePipe} from '../../pipes/safe.pipe';
 
 @Component({
   selector: 'app-article',
@@ -26,7 +13,7 @@ export class SanitizeHtmlPipe implements PipeTransform {
             Artikel
         </mat-card-title>
       <mat-card-content>
-        <div [innerHTML]="article.arttext | sanitizeHtml"></div>
+        <div [innerHTML]="article.arttext | safe: 'html'"></div>
         (Seite: {{ article.npages }})
       </mat-card-content>
 
@@ -58,13 +45,11 @@ export class SanitizeHtmlPipe implements PipeTransform {
 export class ArticleComponent implements OnInit {
   articleIri: string;
   article: {[index: string]: string} = {};
-  arttext: SafeHtml;
 
   constructor(private route: ActivatedRoute,
               public dialog: MatDialog,
               public knoraService: KnoraService,
-              private router: Router,
-              private sanitizer: DomSanitizer) {
+              private router: Router) {
 
   }
 

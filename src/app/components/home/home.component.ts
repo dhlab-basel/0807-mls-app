@@ -23,7 +23,7 @@ import {Router} from '@angular/router';
       </mat-card-actions>
     </mat-card>
     <mat-card>
-        <app-news-items></app-news-items>
+      <app-news-items></app-news-items>
     </mat-card>
   `,
   styles: [
