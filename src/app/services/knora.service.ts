@@ -40,7 +40,7 @@ import {
   CreateListValue,
   UpdateResourceMetadata,
   UpdateResourceMetadataResponse,
-  UpdateListValue, UpdateLinkValue, CreateUriValue, UpdateUriValue
+  UpdateListValue, UpdateLinkValue, CreateUriValue, UpdateUriValue, CreateStillImageFileValue, CreateDateValue
 } from '@dasch-swiss/dsp-js';
 
 import {AppInitService} from '../app-init.service';
@@ -972,6 +972,79 @@ export class KnoraService {
       )
     );
 
+  }
+
+  createNews(data: News): Observable<string> {
+    const createResource = new CreateResource();
+    createResource.label = data.label;
+    createResource.type = this.mlsOntology + 'Newsitem';
+    createResource.attachedToProject = 'http://rdfh.ch/projects/0807';
+
+    const props = {};
+
+    if (data.title !== null && data.title !== undefined && data.title !== '') {
+      const textVal = new CreateTextValueAsString();
+      textVal.text = data.title;
+      props[this.mlsOntology + 'hasNewsTitle'] = [
+        textVal
+      ];
+    }
+
+    const stillImageValue = new CreateStillImageFileValue();
+    stillImageValue.filename = data.imageid;
+    props[Constants.HasStillImageFileValue] = [
+      stillImageValue
+    ];
+
+    if (data.text !== null && data.text !== undefined && data.text !== '') {
+      const textVal = new CreateTextValueAsString();
+      textVal.text = data.text;
+      props[this.mlsOntology + 'hasNewsText'] = [
+        textVal
+      ];
+    }
+    if (data.activeDateStart !== null && data.activeDateStart !== undefined && data.activeDateStart !== '' &&
+      data.activeDateEnd !== null && data.activeDateEnd !== undefined && data.activeDateEnd !== '') {
+      const dateVal = new CreateDateValue();
+      const start: Date = new Date(Date.parse(data.activeDateStart));
+      dateVal.calendar = 'GREGORIAN';
+      dateVal.startYear = start.getFullYear();
+      dateVal.startMonth = start.getMonth() + 1;
+      dateVal.startDay = start.getDate();
+      dateVal.startEra = 'CE';
+      const end: Date = new Date(Date.parse(data.activeDateEnd));
+      dateVal.endYear = end.getFullYear();
+      dateVal.endMonth = end.getMonth() + 1;
+      dateVal.endDay = end.getDate();
+      dateVal.endEra = 'CE';
+      props[this.mlsOntology + 'hasNewitemActiveDate'] = [
+        dateVal
+      ];
+    }
+    const lemmaVal = new CreateLinkValue();
+    lemmaVal.linkedResourceIri = data.lemmaIri || '';
+    props[this.mlsOntology + 'hasNewsitemLinkToLemmaValue'] = [
+      lemmaVal
+    ];
+
+    if (data.weblink !== null && data.weblink !== undefined && data.weblink !== '') {
+      const weblinkVal = new CreateUriValue();
+      weblinkVal.uri = data.weblink;
+      props[this.mlsOntology + 'hasNewsitemWeblink'] = [
+        weblinkVal
+      ];
+    }
+
+    createResource.properties = props;
+
+    return this.knoraApiConnection.v2.res.createResource(createResource).pipe(
+      map((res: ReadResource) => {
+        return res.id;
+      }),
+      catchError((error: ApiResponseError) => {
+        return of('error'); }
+      )
+    );
   }
 
   /**

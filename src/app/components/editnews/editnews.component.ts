@@ -7,6 +7,8 @@ import {finalize} from 'rxjs/operators';
 import * as ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import {combineLatest} from 'rxjs';
 import {ActivatedRoute} from '@angular/router';
+import { DateAdapter } from '@angular/material/core';
+import { MomentDateModule, MomentDateAdapter } from '@angular/material-moment-adapter';
 
 interface ValInfo {
   id?: string;
@@ -198,8 +200,10 @@ export class EditnewsComponent implements OnInit {
   constructor(public knoraService: KnoraService,
               private http: HttpClient,
               private fb: FormBuilder,
-              public route: ActivatedRoute) {
+              public route: ActivatedRoute,
+              private dateAdapter: DateAdapter<Date>) {
     this.inData = {};
+    this.dateAdapter.setLocale('de'); //dd/MM/yyyy
   }
 
   @Input()
@@ -373,6 +377,16 @@ export class EditnewsComponent implements OnInit {
 
   save() {
     console.log(this.form.value);
+    if (this.inData.articleIri === undefined) {
+      //
+      // we create a new article
+      //
+      this.knoraService.createNews(this.form.value).subscribe(
+        res => {
+          console.log('CREATE_RESULT:', res);
+        },
+      );
+    }
   }
 
 }
