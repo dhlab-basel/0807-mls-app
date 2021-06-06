@@ -40,7 +40,14 @@ import {
   CreateListValue,
   UpdateResourceMetadata,
   UpdateResourceMetadataResponse,
-  UpdateListValue, UpdateLinkValue, CreateUriValue, UpdateUriValue, CreateStillImageFileValue, CreateDateValue
+  UpdateListValue,
+  UpdateLinkValue,
+  CreateUriValue,
+  UpdateUriValue,
+  CreateStillImageFileValue,
+  CreateDateValue,
+  ReadStillImageFileValue,
+  ReadDateValue, ReadUriValue
 } from '@dasch-swiss/dsp-js';
 
 import {AppInitService} from '../app-init.service';
@@ -138,13 +145,40 @@ export class LinkPropertyData extends PropertyData {
   }
 }
 
+export class StillImagePropertyData extends PropertyData {
+  public dimX: number;
+  public dimY: number;
+  filename: string;
+  fileUrl: string;
+  iiifBase: string;
 
+  constructor(propname: string,
+              label: string,
+              dimX: number,
+              dimY: number,
+              filename: string,
+              fileUrl: string,
+              iiifBase: string,
+              values: Array<string>,
+              ids: Array<string>,
+              comments: Array<string | undefined>,
+              permissions: Array<string>) {
+    super(propname, label, values, ids, comments, permissions);
+    this.dimX = dimX;
+    this.dimY = dimY;
+    this.filename = filename;
+    this.fileUrl = fileUrl;
+    this.iiifBase = iiifBase;
+  }
+
+}
 /**
  *  Data structure for representing a resource (instance)
  */
 export interface ResourceData {
   id: string; /** Id (iri) of the resource */
   label: string; /** Label of the resource */
+  arkUrl?: string;
   permission: string; /** permission of the current user */
   lastmod: string; /** last modification date of resource */
   properties: Array<PropertyData>; /** Array of properties with associated value(s) */
@@ -157,6 +191,7 @@ export interface LemmaData {
   arkUrl: string;
   properties: {[index: string]: {label: string, values: Array<string>}};
 }
+
 
 /**
  * Data structure representing the information about the property definitions of resource class
@@ -313,7 +348,43 @@ export class KnoraService {
     const propdata: Array<PropertyData> = [];
     for (const prop in data.properties) {
       if (data.properties.hasOwnProperty(prop)) {
+        console.log('*****>', data.getValues(prop)[0].type);
         switch (data.getValues(prop)[0].type) {
+          case Constants.StillImageFileValue: {
+            const val = data.getValuesAs(prop, ReadStillImageFileValue)[0];
+            const label: string = val.propertyLabel || '?';
+            const dimX: number = val.dimX;
+            const dimY: number = val.dimY;
+            const filename: string = val.filename;
+            const fileUrl: string = val.fileUrl;
+            const iiifBase = val.iiifBaseUrl;
+            const values: Array<string> = [];
+            const ids: Array<string> = [];
+            const comments: Array<string | undefined> = [val.valueHasComment];
+            const permissions: Array<string> = [val.userHasPermission];
+            propdata.push(new StillImagePropertyData(prop, label, dimX, dimY, filename, fileUrl, iiifBase, values, ids, comments, permissions));
+            break;
+          }
+          case Constants.DateValue: {
+            const vals = data.getValuesAs(prop, ReadDateValue);
+            const label: string = vals[0].propertyLabel || '?';
+            const values: Array<string> = vals.map(v => v.strval || '?');
+            const ids: Array<string> = vals.map(v => v.id);
+            const comments: Array<string | undefined> = vals.map(v => v.valueHasComment);
+            const permissions: Array<string> = vals.map(v => v.userHasPermission);
+            propdata.push(new PropertyData(prop, label, values, ids, comments, permissions));
+            break;
+          }
+          case Constants.UriValue: {
+            const vals = data.getValuesAs(prop, ReadUriValue);
+            const label: string = vals[0].propertyLabel || '?';
+            const values: Array<string> = vals.map(v => v.uri);
+            const ids: Array<string> = vals.map(v => v.id);
+            const comments: Array<string | undefined> = vals.map(v => v.valueHasComment);
+            const permissions: Array<string> = vals.map(v => v.userHasPermission);
+            propdata.push(new PropertyData(prop, label, values, ids, comments, permissions));
+            break;
+          }
           case Constants.TextValue: {
             const vals = data.getValuesAs(prop, ReadTextValueAsString);
             const label: string = vals[0].propertyLabel || '?';
@@ -374,6 +445,7 @@ export class KnoraService {
   private processSearchResult(datas: Array<ReadResource>, fields: Array<string>): Array<Array<string>> {
     const result: Array<Array<string>> = [];
     datas.map((data: ReadResource) => {
+      console.log('=====---->', data);
       const proparr: Array<string> = [];
       let idx: number;
       idx = fields.indexOf('arkUrl');
@@ -407,7 +479,24 @@ export class KnoraService {
     return result;
   }
 
-  login(email: string, password: string): Observable<{success: boolean, token: string, user: string}> {
+  private simplifySearchResult(datas: Array<ReadResource>): Array<ResourceData> {
+    const results: Array<ResourceData> = [];
+    datas.map((data: ReadResource) => {
+      const res: ResourceData = {
+        id: data.id,
+        label: data.label,
+        arkUrl: data.arkUrl,
+        permission: data.hasPermissions,
+        lastmod: data.lastModificationDate || '',
+        properties: this.processResourceProperties(data)
+      };
+      results.push(res);
+    });
+    return results;
+  }
+
+
+    login(email: string, password: string): Observable<{success: boolean, token: string, user: string}> {
     return this.knoraApiConnection.v2.auth.login('email', email, password)
       .pipe(
         catchError((err) => {
@@ -522,6 +611,16 @@ export class KnoraService {
       map((data: ReadResourceSequence) => {
         return this.processSearchResult(data.resources, fields);
       }));
+  }
+
+  gravsearchQueryObj(queryname: string, params: {[index: string]: string}): Observable<Array<ResourceData>> {
+    params.ontology = this.appInitService.getSettings().ontologyPrefix;
+    const query = this.queryTemplates[queryname](params);
+    return this.knoraApiConnection.v2.search.doExtendedSearch(query)
+      .pipe(
+        map((data: ReadResourceSequence) => {
+          return this.simplifySearchResult(data.resources);
+        }));
   }
 
   private processLemmaProperties(data: ReadResource): {[index: string]: {label: string, values: Array<string>}} {

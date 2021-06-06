@@ -13,6 +13,7 @@ import {EditartComponent} from './components/editart/editart.component';
 import {EditlemComponent} from './components/editlem/editlem.component';
 import {EditlexComponent} from './components/editlex/editlex.component';
 import {EditnewsComponent} from './components/editnews/editnews.component';
+import {NewsItemsComponent} from './components/news-items/news-items.component';
 
 const routes: Routes = [{
   path: 'home',
@@ -59,6 +60,9 @@ const routes: Routes = [{
 }, {
   path: 'editnews',
   component: EditnewsComponent
+}, {
+  path: 'allnews',
+  component: NewsItemsComponent
 }, {
   path: 'about',
   component: AboutComponent

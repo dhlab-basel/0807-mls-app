@@ -1,6 +1,6 @@
 import {Component, ElementRef, Input, OnInit, ViewChild} from '@angular/core';
 import {FormBuilder, FormGroup} from '@angular/forms';
-import {ArticleData, KnoraService, News} from '../../services/knora.service';
+import {ArticleData, KnoraService, News, StillImagePropertyData} from '../../services/knora.service';
 import {AppComponent} from '../../app.component';
 import {HttpClient, HttpEventType} from '@angular/common/http';
 import {finalize} from 'rxjs/operators';
@@ -9,6 +9,7 @@ import {combineLatest} from 'rxjs';
 import {ActivatedRoute} from '@angular/router';
 import { DateAdapter } from '@angular/material/core';
 import { MomentDateModule, MomentDateAdapter } from '@angular/material-moment-adapter';
+import {Constants} from '@dasch-swiss/dsp-js';
 
 interface ValInfo {
   id?: string;
@@ -71,8 +72,7 @@ class NewsIds {
 
         <mat-form-field [style.width.px]=400>
           <div>
-            <img #image src="{{ temporaryUrl || '/assets/dummy-256x256.jpg'}}">
-            <br/>
+            <div><img #image [src]="temporaryUrl | safe: 'url'"></div>
             <input type="file" class="file-input" #fileUpload (change)="onFileSelected($event)">
             {{filename || "No file uploaded yet."}} &nbsp;
             <button type="submit" class="mat-raised-button"  (click)="fileUpload.click()">Upload</button>
@@ -195,6 +195,8 @@ export class EditnewsComponent implements OnInit {
   public valIds: NewsIds = new NewsIds();
   data: News = new News('', '', '', '', '', '');
   options: Array<{id: string, label: string}> = [];
+  resId: string;
+  lastmod: string;
 
 
   constructor(public knoraService: KnoraService,
@@ -203,7 +205,8 @@ export class EditnewsComponent implements OnInit {
               public route: ActivatedRoute,
               private dateAdapter: DateAdapter<Date>) {
     this.inData = {};
-    this.dateAdapter.setLocale('de'); //dd/MM/yyyy
+    this.dateAdapter.setLocale('de'); // dd/MM/yyyy
+    this.temporaryUrl = '/assets/dummy-256x256.jpg';
   }
 
   @Input()
@@ -222,7 +225,41 @@ export class EditnewsComponent implements OnInit {
       if (arr[0].iri !== undefined) {
         this.inData.newsItemIri = arr[0].iri;
       }
-      if (this.inData.articleIri !== undefined) {
+      if (this.inData.newsItemIri !== undefined) {
+       this.knoraService.getResource(this.inData.newsItemIri).subscribe((data) => {
+         console.log('ITEM-RESDATA:', data);
+         this.resId = data.id;
+         this.lastmod = data.lastmod;
+         this.form.controls.label.setValue(data.label);
+         this.valIds.label = {id: data.label, changed: false, toBeDeleted: false};
+         this.data.label = data.label;
+         for (const ele of data.properties) {
+           switch (ele.propname) {
+             case this.knoraService.mlsOntology + 'hasNewsTitle': {
+               this.form.controls.title.setValue(ele.values[0]);
+               this.valIds.title = {id: ele.ids[0], changed: false, toBeDeleted: false};
+               this.data.title = ele.values[0];
+               break;
+             }
+             case Constants.HasStillImageFileValue: {
+               const e = ele as StillImagePropertyData;
+               this.form.controls.imageid.setValue(e.filename);
+               this.temporaryUrl = e.iiifBase + '/' + e.filename + '/full/^!256,256/0/default.jpg';
+               // this.fileUpload.nativeElement.value = 'ORIG.IMG';
+               this.valIds.imageid = {id: undefined, changed: false, toBeDeleted: false};
+               this.data.imageid = e.filename;
+               break;
+             }
+             case this.knoraService.mlsOntology + 'hasNewsText': {
+               this.form.controls.text.setValue(ele.values[0]);
+               this.valIds.text = {id: ele.ids[0], changed: false, toBeDeleted: false};
+               this.data.text = ele.values[0];
+               break;
+             }
+
+           }
+         }
+       });
       }
       this.form = this.fb.group({
         label: [this.data.label, []],
