@@ -170,8 +170,9 @@ export class StillImagePropertyData extends PropertyData {
     this.fileUrl = fileUrl;
     this.iiifBase = iiifBase;
   }
-
 }
+
+
 /**
  *  Data structure for representing a resource (instance)
  */

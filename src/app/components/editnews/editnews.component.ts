@@ -1,6 +1,6 @@
 import {Component, ElementRef, Input, OnInit, ViewChild} from '@angular/core';
 import {FormBuilder, FormGroup} from '@angular/forms';
-import {ArticleData, KnoraService, News, StillImagePropertyData} from '../../services/knora.service';
+import {ArticleData, KnoraService, LinkPropertyData, News, StillImagePropertyData} from '../../services/knora.service';
 import {AppComponent} from '../../app.component';
 import {HttpClient, HttpEventType} from '@angular/common/http';
 import {finalize} from 'rxjs/operators';
@@ -115,11 +115,6 @@ class NewsIds {
         <button *ngIf="valIds.activeDate.changed" mat-mini-fab (click)="_handleUndo('activeDate')">
           <mat-icon color="warn">cached</mat-icon>
         </button>
-        &nbsp;
-        <button *ngIf="valIds.activeDate.id !== undefined" mat-mini-fab (click)="_handleDelete('activeDate')">
-          <mat-icon *ngIf="!valIds.activeDate.toBeDeleted">delete</mat-icon>
-          <mat-icon *ngIf="valIds.activeDate.toBeDeleted" color="warn">delete</mat-icon>
-        </button>
         <br/>
 
         <mat-form-field [style.width.px]=400>
@@ -145,6 +140,11 @@ class NewsIds {
         &nbsp;
         <button *ngIf="valIds.lemma.changed" mat-mini-fab (click)="_handleUndo('lemma')">
           <mat-icon color="warn">cached</mat-icon>
+        </button>
+        &nbsp;
+        <button *ngIf="valIds.lemma.id !== undefined" mat-mini-fab (click)="_handleDelete('lemma')">
+          <mat-icon *ngIf="!valIds.lemma.toBeDeleted">delete</mat-icon>
+          <mat-icon *ngIf="valIds.lemma.toBeDeleted" color="warn">delete</mat-icon>
         </button>
         <br/>
 
@@ -226,40 +226,72 @@ export class EditnewsComponent implements OnInit {
         this.inData.newsItemIri = arr[0].iri;
       }
       if (this.inData.newsItemIri !== undefined) {
-       this.knoraService.getResource(this.inData.newsItemIri).subscribe((data) => {
-         console.log('ITEM-RESDATA:', data);
-         this.resId = data.id;
-         this.lastmod = data.lastmod;
-         this.form.controls.label.setValue(data.label);
-         this.valIds.label = {id: data.label, changed: false, toBeDeleted: false};
-         this.data.label = data.label;
-         for (const ele of data.properties) {
-           switch (ele.propname) {
-             case this.knoraService.mlsOntology + 'hasNewsTitle': {
-               this.form.controls.title.setValue(ele.values[0]);
-               this.valIds.title = {id: ele.ids[0], changed: false, toBeDeleted: false};
-               this.data.title = ele.values[0];
-               break;
-             }
-             case Constants.HasStillImageFileValue: {
-               const e = ele as StillImagePropertyData;
-               this.form.controls.imageid.setValue(e.filename);
-               this.temporaryUrl = e.iiifBase + '/' + e.filename + '/full/^!256,256/0/default.jpg';
-               // this.fileUpload.nativeElement.value = 'ORIG.IMG';
-               this.valIds.imageid = {id: undefined, changed: false, toBeDeleted: false};
-               this.data.imageid = e.filename;
-               break;
-             }
-             case this.knoraService.mlsOntology + 'hasNewsText': {
-               this.form.controls.text.setValue(ele.values[0]);
-               this.valIds.text = {id: ele.ids[0], changed: false, toBeDeleted: false};
-               this.data.text = ele.values[0];
-               break;
-             }
-
-           }
-         }
-       });
+        this.knoraService.getResource(this.inData.newsItemIri).subscribe((data) => {
+          console.log('ITEM-RESDATA:', data);
+          this.resId = data.id;
+          this.lastmod = data.lastmod;
+          this.form.controls.label.setValue(data.label);
+          this.valIds.label = {id: data.label, changed: false, toBeDeleted: false};
+          this.data.label = data.label;
+          for (const ele of data.properties) {
+            switch (ele.propname) {
+              case this.knoraService.mlsOntology + 'hasNewsTitle': {
+                this.form.controls.title.setValue(ele.values[0]);
+                this.valIds.title = {id: ele.ids[0], changed: false, toBeDeleted: false};
+                this.data.title = ele.values[0];
+                break;
+              }
+              case Constants.HasStillImageFileValue: {
+                const e = ele as StillImagePropertyData;
+                this.form.controls.imageid.setValue(e.filename);
+                this.temporaryUrl = e.iiifBase + '/' + e.filename + '/full/^!256,256/0/default.jpg';
+                // this.fileUpload.nativeElement.value = 'ORIG.IMG';
+                this.valIds.imageid = {id: undefined, changed: false, toBeDeleted: false};
+                this.data.imageid = e.filename;
+                break;
+              }
+              case this.knoraService.mlsOntology + 'hasNewsText': {
+                this.form.controls.text.setValue(ele.values[0]);
+                this.valIds.text = {id: ele.ids[0], changed: false, toBeDeleted: false};
+                this.data.text = ele.values[0];
+                break;
+              }
+              case this.knoraService.mlsOntology + 'hasNewitemActiveDate': {
+                const regex = 'GREGORIAN:([0-9]{4})-([0-9]{2})-([0-9]{2}) CE:([0-9]{4})-([0-9]{2})-([0-9]{2}) CE';
+                const found = ele.values[0].match(regex);
+                if (found !== null) {
+                  const startYear = parseInt(found[1], 10);
+                  const startMonth = parseInt(found[2], 10) - 1;
+                  const startDay = parseInt(found[3], 10);
+                  const startDate = new Date(startYear, startMonth, startDay);
+                  this.form.controls.activeDateStart.setValue(startDate);
+                  const endYear = parseInt(found[4], 10);
+                  const endMonth = parseInt(found[5], 10) - 1;
+                  const endDay = parseInt(found[6], 10);
+                  const endDate = new Date(endYear, endMonth, endDay);
+                  this.form.controls.activeDateEnd.setValue(endDate);
+                }
+                this.valIds.activeDate = {id: ele.ids[0], changed: false, toBeDeleted: false};
+                break;
+              }
+              case this.knoraService.mlsOntology + 'hasNewsitemLinkToLemmaValue': {
+                const tmp = ele as LinkPropertyData;
+                this.form.controls.lemmaIri.setValue(tmp.resourceIris[0]);
+                this.form.controls.lemma.setValue(tmp.values[0]);
+                this.valIds.lemma = {id: tmp.ids[0], changed: false, toBeDeleted: false};
+                this.data.lemmaIri = tmp.resourceIris[0];
+                this.data.lemma = tmp.values[0];
+                break;
+              }
+              case this.knoraService.mlsOntology + 'hasNewsitemWeblink': {
+                this.form.controls.weblink.setValue(ele.values[0]);
+                this.valIds.weblink = {id: ele.ids[0], changed: false, toBeDeleted: false};
+                this.data.weblink = ele.values[0];
+                break;
+              }
+            }
+          }
+        });
       }
       this.form = this.fb.group({
         label: [this.data.label, []],
@@ -414,6 +446,7 @@ export class EditnewsComponent implements OnInit {
 
   save() {
     console.log(this.form.value);
+    return;
     if (this.inData.articleIri === undefined) {
       //
       // we create a new article
