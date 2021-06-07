@@ -1,10 +1,11 @@
-import {Component, OnInit, Pipe, PipeTransform} from '@angular/core';
+import {AfterContentInit, Component, OnInit, Pipe, PipeTransform, ViewChild} from '@angular/core';
 import { DatePipe } from '@angular/common';
 import {KnoraService, LinkPropertyData, PropertyData, ResourceData, StillImagePropertyData} from '../../services/knora.service';
 import {Constants, ReadDateValue} from '@dasch-swiss/dsp-js';
 import {AppInitService} from '../../app-init.service';
 import {Router} from '@angular/router';
-
+import { MediaChange, MediaObserver } from '@angular/flex-layout';
+import {MatGridList} from '@angular/material/grid-list';
 interface ItemData {
   id: string;
   title?: string;
@@ -19,7 +20,7 @@ interface ItemData {
 @Component({
   selector: 'app-news-items',
   template: `
-    <mat-grid-list cols="3" rowHeight="1:1.5">
+    <mat-grid-list #grid cols="3" rowHeight="1:1.5">
         <mat-grid-tile *ngFor="let x of newsItems">
           <mat-grid-tile-header>
             {{x.title}}
@@ -49,16 +50,25 @@ interface ItemData {
   ]
 })
 
-export class NewsItemsComponent implements OnInit {
+export class NewsItemsComponent implements OnInit, AfterContentInit {
+  @ViewChild('grid') grid: MatGridList;
   mlsOntology: string;
   today: string;
   newsItems: Array<ItemData> = [];
   showall: boolean;
+  gridByBreakpoint = {
+    xl: 4,
+    lg: 3,
+    md: 2,
+    sm: 1,
+    xs: 1
+  };
 
   constructor(private appInitService: AppInitService,
               private knoraService: KnoraService,
               private datePipe: DatePipe,
-              private router: Router) {
+              private router: Router,
+              private observableMedia: MediaObserver) {
     const myDate = new Date();
     this.today = 'GREGORIAN:' + this.datePipe.transform(myDate, 'yyyy-MM-dd');
     this.mlsOntology = appInitService.getSettings().ontologyPrefix + '/ontology/0807/mls/v2#';
@@ -108,6 +118,7 @@ export class NewsItemsComponent implements OnInit {
               case Constants.HasStillImageFileValue: {
                 const pp = p as StillImagePropertyData;
                 gaga.iiifImageUrl = pp.iiifBase + '/' + pp.filename + '/full/^!1024,1024/0/default.jpg';
+                break;
               }
               case this.mlsOntology + 'hasNewitemActiveDate': {
                 gaga.date = p.values[0];
@@ -125,6 +136,11 @@ export class NewsItemsComponent implements OnInit {
     this.getNewsItems();
   }
 
+  ngAfterContentInit() {
+    this.observableMedia.asObservable().subscribe((change: Array<MediaChange>) => {
+      this.grid.cols = this.gridByBreakpoint[change[0].mqAlias];
+    });
+  }
   gotoLemma(id) {
     this.router.navigate(['/lemma', id]);
   }
