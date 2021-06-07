@@ -1,5 +1,5 @@
 import {Component, Input, OnInit, Optional, Self} from '@angular/core';
-import {ControlValueAccessor, FormBuilder, FormGroup, NgControl} from '@angular/forms';
+import {ControlValueAccessor, FormBuilder, FormGroup, NgControl, Validators} from '@angular/forms';
 import {KnoraService, LexiconData, LinkPropertyData, ListPropertyData} from '../../services/knora.service';
 import {ActivatedRoute} from '@angular/router';
 import {Location} from '@angular/common';
@@ -51,11 +51,13 @@ class LexiconIds {
       <mat-card-title>Lexicon Editor</mat-card-title>
       <mat-card-content [formGroup]="form">
         <mat-form-field [style.width.px]=400>
-          <input matInput required
+          <input matInput
                  class="full-width"
                  placeholder="Label"
                  formControlName="label"
                  (input)="_handleInput('label')">
+          <mat-error *ngIf="form.controls.label.errors?.required">Label erforderlich!</mat-error>
+          <mat-error *ngIf="form.controls.label.errors?.minlength">Label muss mindestens aus 3 Buchstaben bestehen!</mat-error>
         </mat-form-field>
         <button *ngIf="valIds.label.changed" mat-mini-fab (click)="_handleUndo('label')">
           <mat-icon color="warn">cached</mat-icon>
@@ -63,11 +65,13 @@ class LexiconIds {
         <br/>
 
         <mat-form-field [style.width.px]=400>
-          <input matInput required
+          <input matInput
                  class="full-width"
                  placeholder="Kürzel"
                  formControlName="shortname"
                  (input)="_handleInput('shortname')">
+          <mat-error *ngIf="form.controls.shortname.errors?.required">Kürzel erforderlich!</mat-error>
+          <mat-error *ngIf="form.controls.shortname.errors?.minlength">Kürzel muss mindestens aus 3 Buchstaben bestehen!</mat-error>
         </mat-form-field>
         <button *ngIf="valIds.shortname.changed" mat-mini-fab (click)="_handleUndo('shortname')">
           <mat-icon color="warn">cached</mat-icon>
@@ -80,7 +84,7 @@ class LexiconIds {
                     placeholder="Zitierform"
                     formControlName="citationForm"
                     (input)="_handleInput('citationForm')"></textarea>
-
+          <mat-error *ngIf="form.controls.citationForm.errors?.required">Zitierform erforderlich!</mat-error>
         </mat-form-field>
         <button *ngIf="valIds.citationForm.changed" mat-mini-fab (click)="_handleUndo('citationForm')">
           <mat-icon color="warn">cached</mat-icon>
@@ -93,6 +97,7 @@ class LexiconIds {
                  placeholder="Kommentar"
                  formControlName="comment"
                  (input)="_handleInput('comment')">
+          <mat-error *ngIf="form.controls.comment.errors?.required">Kommentar erforderlich!</mat-error>
         </mat-form-field>
         <button *ngIf="valIds.comment.changed" mat-mini-fab (click)="_handleUndo('comment')">
           <mat-icon color="warn">cached</mat-icon>
@@ -105,6 +110,8 @@ class LexiconIds {
                  placeholder="Jahr"
                  formControlName="year"
                  (input)="_handleInput('year')">
+          <mat-error *ngIf="form.controls.year.errors?.required">Jahr erforderlich!</mat-error>
+          <mat-error *ngIf="form.controls.year.errors?.pattern">Ungültiges Jahr</mat-error>
         </mat-form-field>
         <button *ngIf="valIds.year.changed" mat-mini-fab (click)="_handleUndo('year')">
           <mat-icon color="warn">cached</mat-icon>
@@ -117,6 +124,7 @@ class LexiconIds {
                  formControlName="weblink"
                  (change)="_handleInput('weblink')"
                  (input)="_handleInput('weblink')">
+          <mat-error *ngIf="form.controls.weblink.errors?.pattern">Ungültiger HTTP-Link</mat-error>
         </mat-form-field>
         &nbsp;
         <button *ngIf="valIds.weblink.changed" mat-mini-fab (click)="_handleUndo('weblink')">
@@ -389,13 +397,15 @@ export class EditlexComponent implements ControlValueAccessor, OnInit {
           }
         });
       }
+      const reg1 = '[0-9]{4}';
+      const reg2 = '(https?://)?([\\da-z.-]+)\\.([a-z.]{2,6})[/\\w .-]*/?';
       this.form = this.fb.group({
-        label: [this.data.label, []],
-        shortname: [this.data.shortname, []],
-        citationForm: [this.data.citationForm, []],
-        comment: [this.data.comment, []],
-        year: [this.data.year, []],
-        weblink: [this.data.weblink, []],
+        label: [this.data.label, [Validators.required, Validators.minLength(3)]],
+        shortname: [this.data.shortname, [Validators.required, Validators.minLength(5)]],
+        citationForm: [this.data.citationForm, [Validators.required]],
+        comment: [this.data.comment, [Validators.required]],
+        year: [this.data.year, [Validators.required, Validators.pattern(reg1)]],
+        weblink: [this.data.weblink, [Validators.pattern(reg2)]],
         library: [this.data.library, []],
         libraryIri: [this.data.libraryIri, []],
         scanFinished: [this.data.scanFinished, []],

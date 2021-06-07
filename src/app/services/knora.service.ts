@@ -291,8 +291,8 @@ export class News {
     public title: string, // mls:hasNewsTitle: TextValue
     public imageid: string,
     public text: string, // mls:hasNewsText: TextValue
-    public activeDateStart: string, // mls:hasNewitemActiveDate: DateValue
-    public activeDateEnd: string, // mls:hasNewitemActiveDate: DateValue
+    public activeDateStart: Date, // mls:hasNewitemActiveDate: DateValue
+    public activeDateEnd: Date, // mls:hasNewitemActiveDate: DateValue
     public lemma?: string,  // mls:hasNewsitemLinkToLemmaValue: LinkValue -> mls:Lemma
     public lemmaIri?: string,
     public weblink?: string, // mls:hasNewsitemWeblink: UriValue
@@ -1103,16 +1103,16 @@ export class KnoraService {
         textVal
       ];
     }
-    if (data.activeDateStart !== null && data.activeDateStart !== undefined && data.activeDateStart !== '' &&
-      data.activeDateEnd !== null && data.activeDateEnd !== undefined && data.activeDateEnd !== '') {
+    if (data.activeDateStart !== null && data.activeDateStart !== undefined &&
+      data.activeDateEnd !== null && data.activeDateEnd !== undefined) {
       const dateVal = new CreateDateValue();
-      const start: Date = new Date(Date.parse(data.activeDateStart));
+      const start: Date = data.activeDateStart;
       dateVal.calendar = 'GREGORIAN';
       dateVal.startYear = start.getFullYear();
       dateVal.startMonth = start.getMonth() + 1;
       dateVal.startDay = start.getDate();
       dateVal.startEra = 'CE';
-      const end: Date = new Date(Date.parse(data.activeDateEnd));
+      const end: Date = data.activeDateEnd;
       dateVal.endYear = end.getFullYear();
       dateVal.endMonth = end.getMonth() + 1;
       dateVal.endDay = end.getDate();

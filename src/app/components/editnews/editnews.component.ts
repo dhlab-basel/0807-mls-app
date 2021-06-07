@@ -10,7 +10,7 @@ import {ActivatedRoute} from '@angular/router';
 import { DateAdapter } from '@angular/material/core';
 import { MomentDateModule, MomentDateAdapter } from '@angular/material-moment-adapter';
 import {Constants} from '@dasch-swiss/dsp-js';
-import {Location} from "@angular/common";
+import {Location} from '@angular/common';
 import {MatAutocompleteModule} from '@angular/material/autocomplete';
 
 interface ValInfo {
@@ -48,11 +48,13 @@ class NewsIds {
       </mat-card-title>
       <mat-card-content [formGroup]="form">
         <mat-form-field [style.width.px]=400>
-          <input matInput required
+          <input matInput
                  class="full-width"
                  placeholder="Label"
                  formControlName="label"
                  (input)="_handleInput('label')">
+          <mat-error *ngIf="form.controls.label.errors?.required">Label erforderlich!</mat-error>
+          <mat-error *ngIf="form.controls.label.errors?.minlength">Label muss mindestens aus 3 Buchstaben bestehen!</mat-error>
         </mat-form-field>
         <button *ngIf="valIds.label.changed" mat-mini-fab (click)="_handleUndo('label')">
           <mat-icon color="warn">cached</mat-icon>
@@ -60,11 +62,13 @@ class NewsIds {
         <br/>
 
         <mat-form-field [style.width.px]=400>
-          <input matInput required
+          <input matInput
                  class="full-width"
                  placeholder="Titel"
                  formControlName="title"
                  (input)="_handleInput('title')">
+          <mat-error *ngIf="form.controls.title.errors?.required">Titel erforderlich!</mat-error>
+          <mat-error *ngIf="form.controls.title.errors?.minlength">Titel muss mindestens aus 5 Buchstaben bestehen!</mat-error>
         </mat-form-field>
         &nbsp;
         <button *ngIf="valIds.title.changed" mat-mini-fab (click)="_handleUndo('title')">
@@ -77,13 +81,14 @@ class NewsIds {
           <div>
             <div><img #image [src]="temporaryUrl | safe: 'url'"></div>
             <input type="file" class="file-input" #fileUpload (change)="onFileSelected($event)">
-            {{filename || "No file uploaded yet."}} &nbsp;
+            {{filename || "Noch kein Bild hochgeladen..."}} &nbsp;
             <button type="submit" class="mat-raised-button"  (click)="fileUpload.click()">Upload</button>
           </div>
           &nbsp;
-          <input matInput disabled
+          <input matInput disabled required
                  placeholder="Image-ID"
                  formControlName="imageid">
+          <mat-error *ngIf="form.controls.imageid.errors?.required">Es muss ein Bild hochgeladen werden!</mat-error>
         </mat-form-field>
         <button *ngIf="valIds.imageid.changed" mat-mini-fab (click)="_handleUndo('imageid')">
           <mat-icon color="warn">cached</mat-icon>
@@ -92,7 +97,7 @@ class NewsIds {
         <br/>
         <mat-divider></mat-divider>
 
-        <mat-label>News-text</mat-label><br/>
+        <mat-label>News-Text</mat-label><br/>
         <ckeditor matInput #editor [editor]="Editor" formControlName="text" (change)="_handleInput('text')"></ckeditor>
         <button *ngIf="valIds.text.changed" mat-mini-fab (click)="_handleUndo('text')">
           <mat-icon color="warn">cached</mat-icon>
@@ -103,21 +108,22 @@ class NewsIds {
 
         <mat-form-field appearance="fill" [style.width.px]=400>
           <mat-label>Enter a date range</mat-label>
-          <mat-date-range-input [rangePicker]="picker" (change)="_handleInput('activeDate')">
+          <mat-date-range-input [rangePicker]="picker" (change)="_handleInput('activeDate')" required>
             <input matStartDate required
                    class="full-width"
-                   placeholder="Start date"
+                   placeholder="Startdatum"
                    formControlName="activeDateStart"
                    (dateChange)="_handleInput('activeDate')">
             <input matEndDate required
                    class="full-width"
-                   placeholder="End date"
+                   placeholder="Enddatum"
                    formControlName="activeDateEnd"
                    (dateChange)="_handleInput('activeDate')">
           </mat-date-range-input>
           <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
           <mat-date-range-picker #picker></mat-date-range-picker>
-        </mat-form-field>
+          <mat-error *ngIf="form.controls.activeDateStart.errors?.required">Ungültiges Startdatum</mat-error>
+          <mat-error *ngIf="form.controls.activeDateEnd.errors?.required">Ungültiges Enddatum</mat-error>        </mat-form-field>
         &nbsp;
         <button *ngIf="valIds.activeDate.changed" mat-mini-fab (click)="_handleUndo('activeDate')">
           <mat-icon color="warn">cached</mat-icon>
@@ -156,10 +162,12 @@ class NewsIds {
         <br/>
 
         <mat-form-field [style.width.px]=400>
-          <input matInput class="full-width"
+          <input matInput type="url"
+                 class="full-width"
                  placeholder="Weblink"
                  formControlName="weblink"
                  (input)="_handleInput('weblink')">
+          <mat-error *ngIf="form.controls.weblink.errors?.pattern">Ungültiger HTTP-Link</mat-error>
         </mat-form-field>
         &nbsp;
         <button *ngIf="valIds.weblink.changed" mat-mini-fab (click)="_handleUndo('weblink')">
@@ -200,7 +208,7 @@ export class EditnewsComponent implements OnInit {
   temporaryUrl?: string;
   public Editor = ClassicEditor;
   public valIds: NewsIds = new NewsIds();
-  data: News = new News('', '', '', '', '', '');
+  data: News = new News('', '', '', '', new Date(), new Date());
   options: Array<{id: string, label: string}> = [];
   resId: string;
   lastmod: string;
@@ -224,7 +232,7 @@ export class EditnewsComponent implements OnInit {
   }
   set value(knoraVal: News | null) {
     const {label, title, imageid, text, activeDateStart, activeDateEnd, lemma, lemmaIri, weblink}
-      = knoraVal || new News('', '', '', '', '', '');
+      = knoraVal || new News('', '', '', '', new Date(), new Date());
     this.form.setValue({label, title, imageid, text, activeDateStart, activeDateEnd, lemma, lemmaIri, weblink});
   }
 
@@ -278,6 +286,8 @@ export class EditnewsComponent implements OnInit {
                   const endDay = parseInt(found[6], 10);
                   const endDate = new Date(endYear, endMonth, endDay);
                   this.form.controls.activeDateEnd.setValue(endDate);
+                  this.data.activeDateStart = startDate;
+                  this.data.activeDateEnd = endDate;
                 }
                 this.valIds.activeDate = {id: ele.ids[0], changed: false, toBeDeleted: false};
                 break;
@@ -288,7 +298,7 @@ export class EditnewsComponent implements OnInit {
                 this.form.controls.lemma.setValue(tmp.values[0]);
                 this.valIds.lemma = {id: tmp.ids[0], changed: false, toBeDeleted: false};
                 this.data.lemmaIri = tmp.resourceIris[0];
-                this.data.lemma = tmp.values[0];
+                this.data.lemma = tmp.values[0] || '';
                 break;
               }
               case this.knoraService.mlsOntology + 'hasNewsitemWeblink': {
@@ -301,16 +311,17 @@ export class EditnewsComponent implements OnInit {
           }
         });
       }
+      const reg = '(https?://)?([\\da-z.-]+)\\.([a-z.]{2,6})[/\\w .-]*/?';
       this.form = this.fb.group({
-        label: [this.data.label, []],
-        title: [this.data.title, []],
-        imageid: [this.data.imageid, []],
-        text: [this.data.text, []],
-        activeDateStart: [this.data.activeDateStart, []],
-        activeDateEnd: [this.data.activeDateEnd, []],
+        label: [this.data.label, [Validators.required, Validators.minLength(3)]],
+        title: [this.data.title, [Validators.required, Validators.minLength(5)]],
+        imageid: [this.data.imageid, [Validators.required]],
+        text: [this.data.text, [Validators.required]],
+        activeDateStart: [this.data.activeDateStart, [Validators.required]],
+        activeDateEnd: [this.data.activeDateEnd, [Validators.required]],
         lemma: [this.data.lemma, []],
         lemmaIri: [this.data.lemmaIri, []],
-        weblink: [this.data.weblink, []],
+        weblink: [this.data.weblink, [Validators.pattern(reg)]],
       });
 
     });

@@ -3,7 +3,7 @@ import {MatCardModule} from '@angular/material/card';
 import * as ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import {KnoraService, ArticleData, ResourceData, IntPropertyData, LinkPropertyData} from '../../services/knora.service';
 import {CKEditorComponent} from '@ckeditor/ckeditor5-angular';
-import {ControlValueAccessor, FormBuilder, FormGroup, NgControl} from '@angular/forms';
+import {ControlValueAccessor, FormBuilder, FormGroup, NgControl, Validators} from '@angular/forms';
 import {EditResourceComponent} from '../knora/edit-resource/edit-resource.component';
 import {ActivatedRoute} from '@angular/router';
 import {LemmataComponent} from '../lemmata/lemmata.component';
@@ -65,11 +65,13 @@ class ArticleIds {
       </mat-card-title>
       <mat-card-content [formGroup]="form">
         <mat-form-field [style.width.px]=400>
-          <input matInput required
+          <input matInput
                  class="full-width"
                  placeholder="Label"
                  formControlName="label"
                  (input)="_handleInput('label')">
+          <mat-error *ngIf="form.controls.label.errors?.required">Label erforderlich!</mat-error>
+          <mat-error *ngIf="form.controls.label.errors?.minlength">Label muss mindestens aus 3 Buchstaben bestehen!</mat-error>
         </mat-form-field>
         <button *ngIf="valIds.label.changed" mat-mini-fab (click)="_handleUndo('label')">
           <mat-icon color="warn">cached</mat-icon>
@@ -78,13 +80,13 @@ class ArticleIds {
 
         <mat-form-field *ngIf="inData.lemmaIri === undefined" [style.width.px]=400>
           <input matInput [matAutocomplete]="auto"
-                 required
                  class="knora-link-input-element klnkie-val"
                  placeholder="Lemma"
                  formControlName="lemma"
                  aria-label="Value"
                  (input)="_handleLinkInput('lemma')">
           <input matInput style="width: 100%" [hidden]="true" formControlName="lemmaIri">
+          <mat-error *ngIf="form.controls.lemma.errors?.required">Label erforderlich!</mat-error>
           <mat-autocomplete #auto="matAutocomplete" (optionSelected)="_optionSelected($event.option.value)">
             <mat-option *ngFor="let option of options" [value]="option.label">
               {{ option.label }}
@@ -101,13 +103,14 @@ class ArticleIds {
         <br/>
 
         <mat-form-field *ngIf="inData.articleIri === undefined" [style.width.px]=400>
-          <mat-select matInput required
+          <mat-select matInput
                       placeholder="Select lexicon"
                       formControlName="lexiconIri"
                       (selectionChange)="_handleInput('lexicon')">
             <mat-option *ngFor="let lex of lexica" [value]="lex.iri">
               {{lex.name}}
             </mat-option>
+            <mat-error *ngIf="form.controls.lexiconIri.errors?.required">Auswahl Lexikon erforderlich!!</mat-error>
           </mat-select>
         </mat-form-field>
         <mat-form-field *ngIf="inData.articleIri !== undefined" [style.width.px]=400>
@@ -154,7 +157,7 @@ class ArticleIds {
 
         <mat-form-field [style.width.px]=400>
           <input matInput class="full-width"
-                 placeholder="Fonoteca code"
+                 placeholder="Fonoteca Code"
                  formControlName="fonoteca"
                  (input)="_handleInput('fonoteca')">
         </mat-form-field>
@@ -171,7 +174,7 @@ class ArticleIds {
 
         <mat-form-field [style.width.px]=400>
           <input matInput class="full-width"
-                 placeholder="HLS code"
+                 placeholder="HLS Code"
                  formControlName="hls"
                  (input)="_handleInput('hls')">
         </mat-form-field>
@@ -188,7 +191,7 @@ class ArticleIds {
 
         <mat-form-field [style.width.px]=400>
           <input matInput class="full-width"
-                 placeholder="OEM code"
+                 placeholder="OEM Code"
                  formControlName="oem"
                  (input)="_handleInput('oem')">
         </mat-form-field>
@@ -205,7 +208,7 @@ class ArticleIds {
 
         <mat-form-field [style.width.px]=400>
           <input matInput class="full-width"
-                 placeholder="Theatrelexicon code"
+                 placeholder="Theatrelexikon-Code"
                  formControlName="theatre"
                  (input)="_handleInput('theatre')">
         </mat-form-field>
@@ -222,7 +225,7 @@ class ArticleIds {
 
         <mat-form-field [style.width.px]=400>
           <input matInput class="full-width"
-                 placeholder="Ticinolexcon code"
+                 placeholder="'Ticinolexikon' Code"
                  formControlName="ticino"
                  (input)="_handleInput('ticino')">
         </mat-form-field>
@@ -239,9 +242,10 @@ class ArticleIds {
 
         <mat-form-field [style.width.px]=400>
           <input matInput class="full-width"
-                 placeholder="WEB code"
+                 placeholder="Weblink"
                  formControlName="web"
                  (input)="_handleInput('web')">
+          <mat-error *ngIf="form.controls.web.errors?.pattern">Ungültiger HTTP-Link</mat-error>
         </mat-form-field>
         &nbsp;
         <button *ngIf="valIds.web.changed" mat-mini-fab (click)="_handleUndo('web')">
@@ -396,11 +400,12 @@ export class EditartComponent implements ControlValueAccessor, OnInit {
           }
         });
       }
+      const reg = '(https?://)?([\\da-z.-]+)\\.([a-z.]{2,6})[/\\w .-]*/?';
       this.form = this.fb.group({
-        label: [this.data.label, []],
-        lemma: [this.data.lemma, []],
+        label: [this.data.label, [Validators.required, Validators.minLength(3)]],
+        lemma: [this.data.lemma, [Validators.required]],
         lemmaIri: [this.data.lemmaIri, []],
-        lexiconIri: [this.data.lexiconIri, []],
+        lexiconIri: [this.data.lexiconIri, [Validators.required]],
         article: [this.data.article, []],
         pages: [this.data.pages, []],
         fonoteca: [this.data.fonoteca, []],
@@ -408,7 +413,7 @@ export class EditartComponent implements ControlValueAccessor, OnInit {
         oem: [this.data.oem, []],
         theatre: [this.data.theatre, []],
         ticino: [this.data.ticino, []],
-        web: [this.data.web, []],
+        web: [this.data.web, [Validators.pattern(reg)]],
       });
 
       if (this.inData.lemmaIri !== undefined) {

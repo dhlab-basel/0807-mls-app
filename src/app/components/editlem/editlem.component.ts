@@ -1,6 +1,6 @@
 import {Component, Inject, Input, OnInit, Optional, Self} from '@angular/core';
 import {ArticleData, KnoraService, Lemma, ListData, ListPropertyData, OptionType} from '../../services/knora.service';
-import {FormBuilder, FormGroup, NgControl} from '@angular/forms';
+import {FormBuilder, FormGroup, NgControl, Validators} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
 import {combineLatest, forkJoin, Observable} from 'rxjs';
 import {Location} from '@angular/common';
@@ -65,11 +65,13 @@ class LemmaIds {
       </mat-card-title>
       <mat-card-content [formGroup]="form">
         <mat-form-field [style.width.px]=400>
-          <input matInput required
+          <input matInput
                  class="full-width"
                  placeholder="Label"
                  formControlName="label"
                  (input)="_handleInput('label')">
+          <mat-error *ngIf="form.controls.label.errors?.required">Label erforderlich!</mat-error>
+          <mat-error *ngIf="form.controls.label.errors?.minlength">Label muss mindestens aus 3 Buchstaben bestehen!</mat-error>
         </mat-form-field>
         <button *ngIf="valIds.label.changed" mat-mini-fab (click)="_handleUndo('label')">
           <mat-icon color="warn">cached</mat-icon>
@@ -77,11 +79,12 @@ class LemmaIds {
         <br/>
 
         <mat-form-field [style.width.px]=400>
-          <input matInput required
+          <input matInput
                  class="full-width"
                  placeholder="Lemma"
                  formControlName="text"
                  (input)="_handleInput('text')">
+          <mat-error *ngIf="form.controls.text.errors?.required">Lemma erforderlich!</mat-error>
         </mat-form-field>
         <button *ngIf="valIds.text.changed" mat-mini-fab (click)="_handleUndo('text')">
           <mat-icon color="warn">cached</mat-icon>
@@ -89,7 +92,7 @@ class LemmaIds {
         <br/>
 
         <mat-form-field [style.width.px]=400>
-          <mat-select matInput required
+          <mat-select matInput
                       placeholder="Lemmatyp"
                       formControlName="typeIri"
                       (selectionChange)="_handleInput('type')">
@@ -97,6 +100,7 @@ class LemmaIds {
               {{lt.name}}
             </mat-option>
           </mat-select>
+          <mat-error *ngIf="form.controls.typeIri.errors?.required">Lemmatyp erforderlich!</mat-error>
         </mat-form-field>
         <button *ngIf="valIds.type.changed" mat-mini-fab (click)="_handleUndo('type')">
           <mat-icon color="warn">cached</mat-icon>
@@ -105,11 +109,12 @@ class LemmaIds {
 
 
         <mat-form-field [style.width.px]=400>
-          <input matInput required
+          <input matInput
                  class="full-width"
                  placeholder="Vorname"
                  formControlName="givenName"
                  (input)="_handleInput('givenName')">
+          <mat-error *ngIf="form.controls.givenName.errors?.required">Vorname erforderlich!</mat-error>
         </mat-form-field>
         <button *ngIf="valIds.givenName.changed" mat-mini-fab (click)="_handleUndo('givenName')">
           <mat-icon color="warn">cached</mat-icon>
@@ -117,11 +122,12 @@ class LemmaIds {
         <br/>
 
         <mat-form-field [style.width.px]=400>
-          <input matInput required
+          <input matInput
                  class="full-width"
                  placeholder="Nachname"
                  formControlName="familyName"
                  (input)="_handleInput('familyName')">
+          <mat-error *ngIf="form.controls.familyName.errors?.required">Nachname erforderlich!</mat-error>
         </mat-form-field>
         <button *ngIf="valIds.familyName.changed" mat-mini-fab (click)="_handleUndo('familyName')">
           <mat-icon color="warn">cached</mat-icon>
@@ -493,11 +499,11 @@ export class EditlemComponent implements OnInit {
       }
 
       this.form = this.fb.group({
-        label: [this.data.label, []],
-        text: [this.data.text, []],
-        typeIri: [this.data.typeIri, []],
-        givenName: [this.data.givenName, []],
-        familyName: [this.data.familyName, []],
+        label: [this.data.label, [Validators.required, Validators.minLength(3)]],
+        text: [this.data.text, [Validators.required]],
+        typeIri: [this.data.typeIri, [Validators.required]],
+        givenName: [this.data.givenName, [Validators.required]],
+        familyName: [this.data.familyName, [Validators.required]],
         pseudonym: [this.data.pseudonym, []],
         century: [this.data.century, []],
         deceasedIri: [this.data.deceasedIri, []],
@@ -923,7 +929,8 @@ export class EditlemComponent implements OnInit {
           this.knoraService.mlsOntology + 'Lemma',
           this.valIds.century.id as string,
           this.knoraService.mlsOntology + 'hasCentury');
-        obs.push(gaga);} else if (this.valIds.century.changed) {
+        obs.push(gaga);
+      } else if (this.valIds.century.changed) {
         let gaga: Observable<string>;
         if (this.valIds.century.id === undefined) {
           gaga = this.knoraService.createTextValue(
