@@ -30,7 +30,7 @@ interface ItemData {
             </mat-card-title>
             <mat-card-content >
               <div flex [innerHTML]="x.text | safe: 'html'"></div>
-              <div>Lemma: <span> (click)="gotoLemma(x.lemmaId)">{{x.lemmaName}}</span></div>
+              <div>Lemma: <button mat-button (click)="gotoLemma(x.lemmaId)">{{x.lemmaName}}</button></div>
               <div *ngIf="showall">Periode: {{x.date}}</div>
             </mat-card-content>
             <mat-card-actions *ngIf="showall && knoraService.loggedin">
@@ -83,7 +83,6 @@ export class NewsItemsComponent implements OnInit {
 
     this.knoraService.gravsearchQueryObj('newsitem_search', params).subscribe(
       (datas) => {
-        console.log('###########', datas);
         for (const data of datas) {
           const gaga: ItemData = {id: data.id};
           for (const p of data.properties) {
@@ -102,7 +101,6 @@ export class NewsItemsComponent implements OnInit {
               }
               case this.mlsOntology + 'hasNewsitemLinkToLemmaValue': {
                 const pp = p as LinkPropertyData;
-                console.log('=======>=>=>=>', pp.resourceIris[0]);
                 gaga.lemmaId = pp.resourceIris[0];
                 gaga.lemmaName = pp.values[0];
                 break;
@@ -113,7 +111,6 @@ export class NewsItemsComponent implements OnInit {
               }
               case this.mlsOntology + 'hasNewitemActiveDate': {
                 gaga.date = p.values[0];
-                console.log('XXXX', gaga.date);
                 break;
               }
             }

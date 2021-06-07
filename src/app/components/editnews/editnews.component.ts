@@ -1,5 +1,5 @@
 import {Component, ElementRef, Input, OnInit, ViewChild} from '@angular/core';
-import {FormBuilder, FormGroup} from '@angular/forms';
+import {FormBuilder, FormGroup, Validators} from '@angular/forms';
 import {ArticleData, KnoraService, LinkPropertyData, News, StillImagePropertyData} from '../../services/knora.service';
 import {AppComponent} from '../../app.component';
 import {HttpClient, HttpEventType} from '@angular/common/http';
@@ -11,6 +11,7 @@ import { DateAdapter } from '@angular/material/core';
 import { MomentDateModule, MomentDateAdapter } from '@angular/material-moment-adapter';
 import {Constants} from '@dasch-swiss/dsp-js';
 import {Location} from "@angular/common";
+import {MatAutocompleteModule} from '@angular/material/autocomplete';
 
 interface ValInfo {
   id?: string;
@@ -59,7 +60,8 @@ class NewsIds {
         <br/>
 
         <mat-form-field [style.width.px]=400>
-          <input matInput required class="full-width"
+          <input matInput required
+                 class="full-width"
                  placeholder="Titel"
                  formControlName="title"
                  (input)="_handleInput('title')">
@@ -102,10 +104,14 @@ class NewsIds {
         <mat-form-field appearance="fill" [style.width.px]=400>
           <mat-label>Enter a date range</mat-label>
           <mat-date-range-input [rangePicker]="picker" (change)="_handleInput('activeDate')">
-            <input matStartDate class="full-width" placeholder="Start date"
+            <input matStartDate required
+                   class="full-width"
+                   placeholder="Start date"
                    formControlName="activeDateStart"
                    (dateChange)="_handleInput('activeDate')">
-            <input matEndDate class="full-width" placeholder="End date"
+            <input matEndDate required
+                   class="full-width"
+                   placeholder="End date"
                    formControlName="activeDateEnd"
                    (dateChange)="_handleInput('activeDate')">
           </mat-date-range-input>
@@ -119,11 +125,11 @@ class NewsIds {
         <br/>
 
         <mat-form-field [style.width.px]=400>
-          <input matInput [matAutocomplete]="auto"
+          <input type="text" matInput [matAutocomplete]="auto"
                  class="knora-link-input-element klnkie-val"
                  placeholder="Lemma"
                  formControlName="lemma"
-                 aria-label="Value"
+                 aria-label="Lemma"
                  (input)="_handleLinkInput('lemma')">
           <input matInput style="width: 100%" [hidden]="true" formControlName="lemmaIri">
           <mat-autocomplete #auto="matAutocomplete" (optionSelected)="_optionSelected($event.option.value)">
