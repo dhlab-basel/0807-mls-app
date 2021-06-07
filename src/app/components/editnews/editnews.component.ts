@@ -5,11 +5,12 @@ import {AppComponent} from '../../app.component';
 import {HttpClient, HttpEventType} from '@angular/common/http';
 import {finalize} from 'rxjs/operators';
 import * as ClassicEditor from '@ckeditor/ckeditor5-build-classic';
-import {combineLatest, Observable} from 'rxjs';
+import {combineLatest, forkJoin, Observable} from 'rxjs';
 import {ActivatedRoute} from '@angular/router';
 import { DateAdapter } from '@angular/material/core';
 import { MomentDateModule, MomentDateAdapter } from '@angular/material-moment-adapter';
 import {Constants} from '@dasch-swiss/dsp-js';
+import {Location} from "@angular/common";
 
 interface ValInfo {
   id?: string;
@@ -203,7 +204,8 @@ export class EditnewsComponent implements OnInit {
               private http: HttpClient,
               private fb: FormBuilder,
               public route: ActivatedRoute,
-              private dateAdapter: DateAdapter<Date>) {
+              private dateAdapter: DateAdapter<Date>,
+              private location: Location) {
     this.inData = {};
     this.dateAdapter.setLocale('de'); // dd/MM/yyyy
     this.temporaryUrl = '/assets/dummy-256x256.jpg';
@@ -445,8 +447,7 @@ export class EditnewsComponent implements OnInit {
   }
 
   save() {
-    let reload = false;
-    if (this.inData.articleIri === undefined) {
+    if (this.inData.newsItemIri === undefined) {
       //
       // we create a new article
       //
@@ -456,6 +457,7 @@ export class EditnewsComponent implements OnInit {
         },
       );
     } else {
+      console.log('???????>', this.form.value);
       const obs: Array<Observable<string>> = [];
 
       if (this.valIds.label.changed) {
@@ -465,17 +467,43 @@ export class EditnewsComponent implements OnInit {
           this.lastmod,
           this.form.value.label);
         obs.push(gaga);
-        reload = true;
       }
 
       if (this.valIds.title.toBeDeleted && this.valIds.title.id !== undefined) {
+        let gaga: Observable<string>;
+        gaga = this.knoraService.deleteTextValue(
+          this.resId,
+          this.knoraService.mlsOntology + 'Newsitem',
+          this.valIds.title.id as string,
+          this.knoraService.mlsOntology + 'hasNewsTitle');
+        obs.push(gaga);
+      } else if (this.valIds.title.changed) {
+        let gaga: Observable<string>;
+        if (this.valIds.title.id === undefined) {
+          gaga = this.knoraService.createTextValue(
+            this.resId,
+            this.knoraService.mlsOntology + 'Newsitem',
+            this.knoraService.mlsOntology + 'hasNewsTitle',
+            this.form.value.title);
+        } else {
+          gaga = this.knoraService.updateTextValue(
+            this.resId,
+            this.knoraService.mlsOntology + 'Newsitem',
+            this.valIds.title.id as string,
+            this.knoraService.mlsOntology + 'hasNewsTitle',
+            this.form.value.title);
+        }
+        obs.push(gaga);
+      }
+
+
+      if (this.valIds.imageid.toBeDeleted && this.valIds.imageid.id !== undefined) {
         let gaga: Observable<string>;
         gaga = this.knoraService.deleteStillImageValue(
           this.resId,
           this.knoraService.mlsOntology + 'Newsitem',
           this.valIds.imageid.id as string);
         obs.push(gaga);
-        reload = true;
       } else if (this.valIds.imageid.changed) {
         let gaga: Observable<string>;
         if (this.valIds.imageid.id === undefined) {
@@ -487,11 +515,10 @@ export class EditnewsComponent implements OnInit {
           gaga = this.knoraService.updateStillImageValue(
             this.resId,
             this.knoraService.mlsOntology + 'Newsitem',
-            this.valIds.title.id as string,
+            this.valIds.imageid.id as string,
             this.form.value.imageid);
         }
         obs.push(gaga);
-        reload = true;
       }
 
       if (this.valIds.text.toBeDeleted && this.valIds.text.id !== undefined) {
@@ -502,7 +529,6 @@ export class EditnewsComponent implements OnInit {
           this.valIds.text.id as string,
           this.knoraService.mlsOntology + 'hasNewsText');
         obs.push(gaga);
-        reload = true;
       } else if (this.valIds.text.changed) {
         let gaga: Observable<string>;
         if (this.valIds.text.id === undefined) {
@@ -520,7 +546,6 @@ export class EditnewsComponent implements OnInit {
             this.form.value.text);
         }
         obs.push(gaga);
-        reload = true;
       }
 
       if (this.valIds.activeDate.toBeDeleted && this.valIds.activeDate.id !== undefined) {
@@ -531,36 +556,89 @@ export class EditnewsComponent implements OnInit {
           this.valIds.activeDate.id as string,
           this.knoraService.mlsOntology + 'hasNewitemActiveDate');
         obs.push(gaga);
-        reload = true;
       } else if (this.valIds.activeDate.changed) {
         let gaga: Observable<string>;
         if (this.valIds.activeDate.id === undefined) {
-          //const regex = 'GREGORIAN:([0-9]{4})-([0-9]{2})-([0-9]{2}) CE:([0-9]{4})-([0-9]{2})-([0-9]{2}) CE';//rgs455
-          // const found = ele.values[0].match(regex);
-/*
+          const start: Date = new Date(Date.parse(this.form.value.activeDateStart));
+          const end: Date = new Date(Date.parse(this.form.value.activeDateEnd));
           gaga = this.knoraService.createDateValue(
             this.resId,
             this.knoraService.mlsOntology + 'Newsitem',
             this.knoraService.mlsOntology + 'hasNewitemActiveDate',
-            this.form.value.activeDate);
-
- */
+            start.getDate(), start.getMonth() + 1, start.getFullYear(),
+            end.getDate(), end.getMonth() + 1, end.getFullYear());
         } else {
-          /*
+          const start: Date = new Date(Date.parse(this.form.value.activeDateStart));
+          const end: Date = new Date(Date.parse(this.form.value.activeDateEnd));
           gaga = this.knoraService.updateDateValue(
             this.resId,
             this.knoraService.mlsOntology + 'Newsitem',
-            this.valIds.text.id as string,
+            this.valIds.activeDate.id as string,
             this.knoraService.mlsOntology + 'hasNewitemActiveDate',
-            this.form.value.activeDate);
-            
-           */
+            start.getDate(), start.getMonth() + 1, start.getFullYear(),
+            end.getDate(), end.getMonth() + 1, end.getFullYear());
         }
         obs.push(gaga);
-        reload = true;
       }
 
+      if (this.valIds.lemma.toBeDeleted && this.valIds.lemma.id !== undefined) {
+        let gaga: Observable<string>;
+        gaga = this.knoraService.deleteLinkValue(
+          this.resId,
+          this.knoraService.mlsOntology + 'Newsitem',
+          this.valIds.lemma.id as string,
+          this.knoraService.mlsOntology + 'hasNewsitemLinkToLemmaValue');
+        obs.push(gaga);
+      } else if (this.valIds.lemma.changed) {
+        let gaga: Observable<string>;
+        if (this.valIds.lemma.id === undefined) {
+          gaga = this.knoraService.createLinkValue(
+            this.resId,
+            this.knoraService.mlsOntology + 'Newsitem',
+            this.knoraService.mlsOntology + 'hasNewsitemLinkToLemmaValue',
+            this.form.value.lemmaIri);
+        } else {
+          gaga = this.knoraService.updateLinkValue(
+            this.resId,
+            this.knoraService.mlsOntology + 'Newsitem',
+            this.valIds.lemma.id as string,
+            this.knoraService.mlsOntology + 'hasNewsitemLinkToLemmaValue',
+            this.form.value.lemmaIri);
+        }
+        obs.push(gaga);
+      }
 
+      if (this.valIds.weblink.toBeDeleted && this.valIds.weblink.id !== undefined) {
+        let gaga: Observable<string>;
+        gaga = this.knoraService.deleteUriValue(
+          this.resId,
+          this.knoraService.mlsOntology + 'Newsitem',
+          this.valIds.weblink.id as string,
+          this.knoraService.mlsOntology + 'hasNewsitemWeblink');
+        obs.push(gaga);
+      } else if (this.valIds.weblink.changed) {
+        let gaga: Observable<string>;
+        if (this.valIds.weblink.id === undefined) {
+          gaga = this.knoraService.createUriValue(
+            this.resId,
+            this.knoraService.mlsOntology + 'Newsitem',
+            this.knoraService.mlsOntology + 'hasNewsitemWeblink',
+            this.form.value.weblink);
+        } else {
+          gaga = this.knoraService.updateUriValue(
+            this.resId,
+            this.knoraService.mlsOntology + 'Newsitem',
+            this.valIds.weblink.id as string,
+            this.knoraService.mlsOntology + 'hasNewsitemWeblink',
+            this.form.value.weblink);
+        }
+        obs.push(gaga);
+      }
+
+      forkJoin(obs).subscribe(res => {
+        console.log('forkJoin:', res);
+      });
+      this.location.back();
     }
   }
 
