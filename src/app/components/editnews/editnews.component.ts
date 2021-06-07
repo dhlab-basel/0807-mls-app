@@ -5,7 +5,7 @@ import {AppComponent} from '../../app.component';
 import {HttpClient, HttpEventType} from '@angular/common/http';
 import {finalize} from 'rxjs/operators';
 import * as ClassicEditor from '@ckeditor/ckeditor5-build-classic';
-import {combineLatest} from 'rxjs';
+import {combineLatest, Observable} from 'rxjs';
 import {ActivatedRoute} from '@angular/router';
 import { DateAdapter } from '@angular/material/core';
 import { MomentDateModule, MomentDateAdapter } from '@angular/material-moment-adapter';
@@ -246,7 +246,7 @@ export class EditnewsComponent implements OnInit {
                 this.form.controls.imageid.setValue(e.filename);
                 this.temporaryUrl = e.iiifBase + '/' + e.filename + '/full/^!256,256/0/default.jpg';
                 // this.fileUpload.nativeElement.value = 'ORIG.IMG';
-                this.valIds.imageid = {id: undefined, changed: false, toBeDeleted: false};
+                this.valIds.imageid = {id: ele.ids[0], changed: false, toBeDeleted: false};
                 this.data.imageid = e.filename;
                 break;
               }
@@ -445,8 +445,7 @@ export class EditnewsComponent implements OnInit {
   }
 
   save() {
-    console.log(this.form.value);
-    return;
+    let reload = false;
     if (this.inData.articleIri === undefined) {
       //
       // we create a new article
@@ -456,6 +455,112 @@ export class EditnewsComponent implements OnInit {
           console.log('CREATE_RESULT:', res);
         },
       );
+    } else {
+      const obs: Array<Observable<string>> = [];
+
+      if (this.valIds.label.changed) {
+        const gaga: Observable<string> = this.knoraService.updateLabel(
+          this.resId,
+          this.knoraService.mlsOntology + 'Newsitem',
+          this.lastmod,
+          this.form.value.label);
+        obs.push(gaga);
+        reload = true;
+      }
+
+      if (this.valIds.title.toBeDeleted && this.valIds.title.id !== undefined) {
+        let gaga: Observable<string>;
+        gaga = this.knoraService.deleteStillImageValue(
+          this.resId,
+          this.knoraService.mlsOntology + 'Newsitem',
+          this.valIds.imageid.id as string);
+        obs.push(gaga);
+        reload = true;
+      } else if (this.valIds.imageid.changed) {
+        let gaga: Observable<string>;
+        if (this.valIds.imageid.id === undefined) {
+          gaga = this.knoraService.createStillImageValue(
+            this.resId,
+            this.knoraService.mlsOntology + 'Newsitem',
+            this.form.value.imageid);
+        } else {
+          gaga = this.knoraService.updateStillImageValue(
+            this.resId,
+            this.knoraService.mlsOntology + 'Newsitem',
+            this.valIds.title.id as string,
+            this.form.value.imageid);
+        }
+        obs.push(gaga);
+        reload = true;
+      }
+
+      if (this.valIds.text.toBeDeleted && this.valIds.text.id !== undefined) {
+        let gaga: Observable<string>;
+        gaga = this.knoraService.deleteTextValue(
+          this.resId,
+          this.knoraService.mlsOntology + 'Newsitem',
+          this.valIds.text.id as string,
+          this.knoraService.mlsOntology + 'hasNewsText');
+        obs.push(gaga);
+        reload = true;
+      } else if (this.valIds.text.changed) {
+        let gaga: Observable<string>;
+        if (this.valIds.text.id === undefined) {
+          gaga = this.knoraService.createTextValue(
+            this.resId,
+            this.knoraService.mlsOntology + 'Newsitem',
+            this.knoraService.mlsOntology + 'hasNewsText',
+            this.form.value.text);
+        } else {
+          gaga = this.knoraService.updateTextValue(
+            this.resId,
+            this.knoraService.mlsOntology + 'Newsitem',
+            this.valIds.text.id as string,
+            this.knoraService.mlsOntology + 'hasNewsText',
+            this.form.value.text);
+        }
+        obs.push(gaga);
+        reload = true;
+      }
+
+      if (this.valIds.activeDate.toBeDeleted && this.valIds.activeDate.id !== undefined) {
+        let gaga: Observable<string>;
+        gaga = this.knoraService.deleteDateValue(
+          this.resId,
+          this.knoraService.mlsOntology + 'Newsitem',
+          this.valIds.activeDate.id as string,
+          this.knoraService.mlsOntology + 'hasNewitemActiveDate');
+        obs.push(gaga);
+        reload = true;
+      } else if (this.valIds.activeDate.changed) {
+        let gaga: Observable<string>;
+        if (this.valIds.activeDate.id === undefined) {
+          //const regex = 'GREGORIAN:([0-9]{4})-([0-9]{2})-([0-9]{2}) CE:([0-9]{4})-([0-9]{2})-([0-9]{2}) CE';//rgs455
+          // const found = ele.values[0].match(regex);
+/*
+          gaga = this.knoraService.createDateValue(
+            this.resId,
+            this.knoraService.mlsOntology + 'Newsitem',
+            this.knoraService.mlsOntology + 'hasNewitemActiveDate',
+            this.form.value.activeDate);
+
+ */
+        } else {
+          /*
+          gaga = this.knoraService.updateDateValue(
+            this.resId,
+            this.knoraService.mlsOntology + 'Newsitem',
+            this.valIds.text.id as string,
+            this.knoraService.mlsOntology + 'hasNewitemActiveDate',
+            this.form.value.activeDate);
+            
+           */
+        }
+        obs.push(gaga);
+        reload = true;
+      }
+
+
     }
   }
 

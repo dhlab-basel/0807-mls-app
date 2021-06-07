@@ -47,7 +47,7 @@ import {
   CreateStillImageFileValue,
   CreateDateValue,
   ReadStillImageFileValue,
-  ReadDateValue, ReadUriValue
+  ReadDateValue, ReadUriValue, UpdateStillImageFileValue, UpdateDateValue
 } from '@dasch-swiss/dsp-js';
 
 import {AppInitService} from '../app-init.service';
@@ -349,7 +349,6 @@ export class KnoraService {
     const propdata: Array<PropertyData> = [];
     for (const prop in data.properties) {
       if (data.properties.hasOwnProperty(prop)) {
-        console.log('*****>', data.getValues(prop)[0].type);
         switch (data.getValues(prop)[0].type) {
           case Constants.StillImageFileValue: {
             const val = data.getValuesAs(prop, ReadStillImageFileValue)[0];
@@ -360,10 +359,11 @@ export class KnoraService {
             const fileUrl: string = val.fileUrl;
             const iiifBase = val.iiifBaseUrl;
             const values: Array<string> = [];
-            const ids: Array<string> = [];
+            const ids: Array<string> = [val.id];
             const comments: Array<string | undefined> = [val.valueHasComment];
             const permissions: Array<string> = [val.userHasPermission];
-            propdata.push(new StillImagePropertyData(prop, label, dimX, dimY, filename, fileUrl, iiifBase, values, ids, comments, permissions));
+            propdata.push(new StillImagePropertyData(prop, label, dimX, dimY, filename,
+              fileUrl, iiifBase, values, ids, comments, permissions));
             break;
           }
           case Constants.DateValue: {
@@ -446,7 +446,6 @@ export class KnoraService {
   private processSearchResult(datas: Array<ReadResource>, fields: Array<string>): Array<Array<string>> {
     const result: Array<Array<string>> = [];
     datas.map((data: ReadResource) => {
-      console.log('=====---->', data);
       const proparr: Array<string> = [];
       let idx: number;
       idx = fields.indexOf('arkUrl');
@@ -585,6 +584,7 @@ export class KnoraService {
   getResource(iri: string): Observable<ResourceData> {
     return this.knoraApiConnection.v2.res.getResource(iri).pipe(
       map((data: ReadResource) => {
+        console.log(':::::::::', data);
         return {
           id: data.id,
           label: data.label,
@@ -1208,7 +1208,7 @@ export class KnoraService {
     const deleteVal = new DeleteValue();
 
     deleteVal.id = valId;
-    deleteVal.type = 'http://api.knora.org/ontology/knora-api/v2#TextValue';
+    deleteVal.id = Constants.TextValue;
 
     const updateResource = new UpdateResource<DeleteValue>();
     updateResource.id = resId;
@@ -1271,7 +1271,7 @@ export class KnoraService {
     const deleteVal = new DeleteValue();
 
     deleteVal.id = valId;
-    deleteVal.type = 'http://api.knora.org/ontology/knora-api/v2#UriValue';
+    deleteVal.type = Constants.UriValue;
 
     const updateResource = new UpdateResource<DeleteValue>();
     updateResource.id = resId;
@@ -1334,7 +1334,7 @@ export class KnoraService {
     const deleteVal = new DeleteValue();
 
     deleteVal.id = valId;
-    deleteVal.type = 'http://api.knora.org/ontology/knora-api/v2#LinkValue';
+    deleteVal.type = Constants.LinkValue;
 
     const updateResource = new UpdateResource<DeleteValue>();
     updateResource.id = resId;
@@ -1397,7 +1397,7 @@ export class KnoraService {
     const deleteVal = new DeleteValue();
 
     deleteVal.id = valId;
-    deleteVal.type = 'http://api.knora.org/ontology/knora-api/v2#IntValue';
+    deleteVal.type = Constants.IntValue;
 
     const updateResource = new UpdateResource<DeleteValue>();
     updateResource.id = resId;
@@ -1460,7 +1460,153 @@ export class KnoraService {
     const deleteVal = new DeleteValue();
 
     deleteVal.id = valId;
-    deleteVal.type = 'http://api.knora.org/ontology/knora-api/v2#ListValue';
+    deleteVal.type = Constants.ListValue;
+
+    const updateResource = new UpdateResource<DeleteValue>();
+    updateResource.id = resId;
+    updateResource.type = resType;
+    updateResource.property = property;
+    updateResource.value = deleteVal;
+
+    return this.knoraApiConnection.v2.values.deleteValue(updateResource).pipe(
+      map((res: DeleteValueResponse) => {
+        return 'OK';
+      }),
+      catchError((error: ApiResponseError) => {
+        return of('ERROR');
+      })
+    );
+  }
+
+  createStillImageValue(resId: string, resType: string, imageId: string): Observable<string> {
+    const createStillImageVal = new CreateStillImageFileValue();
+    createStillImageVal.filename = imageId;
+
+    const createResource = new UpdateResource<CreateValue>();
+    createResource.id = resId;
+    createResource.type = resType;
+    createResource.property = Constants.HasStillImageFileValue;
+    createResource.value = createStillImageVal;
+
+    return this.knoraApiConnection.v2.values.createValue(createResource).pipe(
+      map((res: WriteValueResponse) => {
+        return 'OK';
+      }),
+      catchError((error: ApiResponseError) => {
+        return of('error');
+      })
+    );
+  }
+
+  updateStillImageValue(resId: string, resType: string, valId: string, imageId: string): Observable<string> {
+    const updateStillImageVal = new UpdateStillImageFileValue();
+    updateStillImageVal.id = valId;
+    updateStillImageVal.filename = imageId;
+
+    const updateResource = new UpdateResource<UpdateValue>();
+    updateResource.id = resId;
+    updateResource.type = resType;
+    updateResource.property = Constants.HasStillImageFileValue;
+    updateResource.value = updateStillImageVal;
+
+    return this.knoraApiConnection.v2.values.updateValue(updateResource).pipe(
+      map((res: WriteValueResponse) => {
+        return 'OK';
+      }),
+      catchError((error: ApiResponseError) => {
+        return of('error');
+      })
+    );
+  }
+
+  deleteStillImageValue(resId: string, resType: string, valId: string, ): Observable<string> {
+    const deleteVal = new DeleteValue();
+
+    deleteVal.id = valId;
+    deleteVal.type = Constants.StillImageFileValue;
+
+    const updateResource = new UpdateResource<DeleteValue>();
+    updateResource.id = resId;
+    updateResource.type = resType;
+    updateResource.property = Constants.HasStillImageFileValue;
+    updateResource.value = deleteVal;
+
+    return this.knoraApiConnection.v2.values.deleteValue(updateResource).pipe(
+      map((res: DeleteValueResponse) => {
+        return 'OK';
+      }),
+      catchError((error: ApiResponseError) => {
+        return of('ERROR');
+      })
+    );
+  }
+
+  createDateValue(resId: string, resType: string, property: string,
+                  startDay: number, startMonth: number, startYear: number,
+                  endDay?: number, endMonth?: number, endYear?: number): Observable<string> {
+    const createDateVal = new CreateDateValue();
+    createDateVal.calendar = 'GREGORIAN';
+    createDateVal.startYear = startYear;
+    if (startMonth !== undefined) { createDateVal.startMonth = startMonth; }
+    if (startDay !== undefined) { createDateVal.startDay = startDay; }
+    createDateVal.startEra = 'CE';
+    if (endYear !== undefined) { createDateVal.endYear = endYear; }
+    if (endMonth !== undefined) { createDateVal.endMonth = endMonth; }
+    if (endDay !== undefined) { createDateVal.endDay = endDay; }
+    createDateVal.endEra = 'CE';
+
+    const createResource = new UpdateResource<CreateValue>();
+    createResource.id = resId;
+    createResource.type = resType;
+    createResource.property = property;
+    createResource.value = createDateVal;
+
+    return this.knoraApiConnection.v2.values.createValue(createResource).pipe(
+      map((res: WriteValueResponse) => {
+        return 'OK';
+      }),
+      catchError((error: ApiResponseError) => {
+        return of('error');
+      })
+    );
+  }
+
+  updateDateValue(resId: string, resType: string, valId: string, property: string,
+                  startDay: number, startMonth: number, startYear: number,
+                  endDay?: number, endMonth?: number, endYear?: number): Observable<string> {
+    const updateDateVal = new UpdateDateValue();
+    updateDateVal.id = valId;
+    updateDateVal.calendar = 'GREGORIAN';
+    updateDateVal.startYear = startYear;
+    if (startMonth !== undefined) { updateDateVal.startMonth = startMonth; }
+    if (startDay !== undefined) { updateDateVal.startDay = startDay; }
+    updateDateVal.startEra = 'CE';
+    if (endYear !== undefined) { updateDateVal.endYear = endYear; }
+    if (endMonth !== undefined) { updateDateVal.endMonth = endMonth; }
+    if (endDay !== undefined) { updateDateVal.endDay = endDay; }
+    updateDateVal.endEra = 'CE';
+
+    const updateResource = new UpdateResource<UpdateValue>();
+    updateResource.id = resId;
+    updateResource.type = resType;
+    updateResource.property = property;
+    updateResource.value = updateDateVal;
+
+    return this.knoraApiConnection.v2.values.updateValue(updateResource).pipe(
+      map((res: WriteValueResponse) => {
+        return 'OK';
+      }),
+      catchError((error: ApiResponseError) => {
+        return of('error');
+      })
+    );
+  }
+
+  deleteDateValue(resId: string, resType: string, valId: string, property: string): Observable<string> {
+    const deleteVal = new DeleteValue();
+
+    deleteVal.id = valId;
+    deleteVal.type = Constants.DateValue;
 
     const updateResource = new UpdateResource<DeleteValue>();
     updateResource.id = resId;
