@@ -640,7 +640,6 @@ export class EditartComponent implements ControlValueAccessor, OnInit {
         const gaga: Observable<string> = this.knoraService.updateLabel(
           this.resId,
           this.knoraService.mlsOntology + 'Article',
-          this.lastmod,
           this.form.value.label);
         obs.push(gaga);
       }

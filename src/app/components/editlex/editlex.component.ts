@@ -628,7 +628,6 @@ export class EditlexComponent implements ControlValueAccessor, OnInit {
         const gaga: Observable<string> = this.knoraService.updateLabel(
           this.resId,
           this.knoraService.mlsOntology + 'Lexicon',
-          this.lastmod,
           this.form.value.label);
         obs.push(gaga);
       }

@@ -23,15 +23,13 @@ interface ItemData {
     <div  *ngIf="knoraService.loggedin" class="with-margin">
       <button mat-raised-button (click)="addNewsItem()">Neuer News-Beitrag</button>
     </div>
-    <mat-grid-list #grid cols="3" rowHeight="1:1.5">
+    <mat-grid-list #grid rowHeight="1:1.5">
         <mat-grid-tile *ngFor="let x of newsItems">
-          <mat-grid-tile-header>
-            {{x.title}}
-          </mat-grid-tile-header>
-          <mat-card role="main">
+          <mat-card layout-fill >
             <mat-card-title>
-              <img mat-card-image layout-fill [src]="x.iiifImageUrl | safe: 'url'"/>
+              {{x.title}}
             </mat-card-title>
+            <img mat-card-image [src]="x.iiifImageUrl | safe: 'url'"/>
             <mat-card-content >
               <div flex [innerHTML]="x.text | safe: 'html'"></div>
               <div>Lemma: <button mat-button (click)="gotoLemma(x.lemmaId)">{{x.lemmaName}}</button></div>
@@ -41,16 +39,14 @@ interface ItemData {
               <button type="submit" class="mat-raised-button mat-primary" (click)="editNewsItem(x.id)">Edit</button>
             </mat-card-actions>
             </mat-card>
-
         </mat-grid-tile>
     </mat-grid-list>
   `,
   styles: [
-    '.mat-grid-list {margin-left: 50px; margin-right: 50px;}',
-    '.mat-card-title {font-size: 12pt; max-height: 300px}',
+    '.mat-card {margin: 3em;}',
+    '.mat-card-title {font-size: 14pt;}',
     '.mat-card-content { max-height: 200px; overflow-y: auto; }',
-    '.newimg {max-width: 512px; max-height: 512px;}',
-    '.with-margin {margin-left: 50px; margin-top: 20px; margin-bottom: 10px;}'
+    '.with-margin {margin-left: 50px; margin-top: 20px; margin-bottom: 10px;}',
   ]
 })
 
@@ -61,10 +57,10 @@ export class NewsItemsComponent implements OnInit, AfterContentInit {
   newsItems: Array<ItemData> = [];
   showall: boolean;
   gridByBreakpoint = {
-    xl: 4,
-    lg: 3,
-    md: 2,
-    sm: 1,
+    xl: 5,
+    lg: 4,
+    md: 3,
+    sm: 2,
     xs: 1
   };
 
@@ -147,6 +143,10 @@ export class NewsItemsComponent implements OnInit, AfterContentInit {
   }
   gotoLemma(id) {
     this.router.navigate(['/lemma', id]);
+  }
+
+  gotoNewsItem(id) {
+    this.router.navigate(['/newsitem', id]);
   }
 
   editNewsItem(id) {

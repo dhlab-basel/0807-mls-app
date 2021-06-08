@@ -385,6 +385,8 @@ export class EditlemComponent implements OnInit {
       if (arr[0].iri !== undefined) {
         this.inData.lemmaIri = arr[0].iri;
         this.knoraService.getResource(this.inData.lemmaIri).subscribe((data) => {
+          console.log('====>', data);
+          console.log('=====>data.lastmod', data.lastmod);
           this.resId = data.id;
           this.lastmod = data.lastmod;
           this.form.controls.label.setValue(data.label);
@@ -755,7 +757,6 @@ export class EditlemComponent implements OnInit {
         const gaga: Observable<string> = this.knoraService.updateLabel(
           this.resId,
           this.knoraService.mlsOntology + 'Lemma',
-          this.lastmod,
           this.form.value.label);
         obs.push(gaga);
       }

@@ -60,6 +60,7 @@ import { MatFileUploadModule } from 'angular-material-fileupload';
 import {MatDatepickerModule} from '@angular/material/datepicker';
 import {MatNativeDateModule} from '@angular/material/core';
 import {SafePipe} from './pipes/safe.pipe';
+import { NewsitemViewerComponent } from './components/newsitem-viewer/newsitem-viewer.component';
 
 export function initializeApp(appInitService: AppInitService) {
   return (): Promise<any> => {
@@ -99,6 +100,7 @@ export function initializeApp(appInitService: AppInitService) {
     EditlexComponent,
     EditnewsComponent,
     SafePipe,
+    NewsitemViewerComponent,
   ],
   entryComponents: [
     LoginComponent,

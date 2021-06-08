@@ -475,14 +475,12 @@ export class EditnewsComponent implements OnInit {
         },
       );
     } else {
-      console.log('???????>', this.form.value);
       const obs: Array<Observable<string>> = [];
 
       if (this.valIds.label.changed) {
         const gaga: Observable<string> = this.knoraService.updateLabel(
           this.resId,
           this.knoraService.mlsOntology + 'Newsitem',
-          this.lastmod,
           this.form.value.label);
         obs.push(gaga);
       }
