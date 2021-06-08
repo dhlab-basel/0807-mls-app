@@ -1121,11 +1121,14 @@ export class KnoraService {
         dateVal
       ];
     }
-    const lemmaVal = new CreateLinkValue();
-    lemmaVal.linkedResourceIri = data.lemmaIri || '';
-    props[this.mlsOntology + 'hasNewsitemLinkToLemmaValue'] = [
-      lemmaVal
-    ];
+
+    if (data.lemmaIri !== null && data.lemmaIri !== undefined && data.lemmaIri !== '') {
+      const lemmaVal = new CreateLinkValue();
+      lemmaVal.linkedResourceIri = data.lemmaIri;
+      props[this.mlsOntology + 'hasNewsitemLinkToLemmaValue'] = [
+        lemmaVal
+      ];
+    }
 
     if (data.weblink !== null && data.weblink !== undefined && data.weblink !== '') {
       const weblinkVal = new CreateUriValue();

@@ -20,6 +20,9 @@ interface ItemData {
 @Component({
   selector: 'app-news-items',
   template: `
+    <div  *ngIf="knoraService.loggedin" class="with-margin">
+      <button mat-raised-button (click)="addNewsItem()">Neuer News-Beitrag</button>
+    </div>
     <mat-grid-list #grid cols="3" rowHeight="1:1.5">
         <mat-grid-tile *ngFor="let x of newsItems">
           <mat-grid-tile-header>
@@ -46,7 +49,8 @@ interface ItemData {
     '.mat-grid-list {margin-left: 50px; margin-right: 50px;}',
     '.mat-card-title {font-size: 12pt; max-height: 300px}',
     '.mat-card-content { max-height: 200px; overflow-y: auto; }',
-    '.newimg {max-width: 512px; max-height: 512px;}'
+    '.newimg {max-width: 512px; max-height: 512px;}',
+    '.with-margin {margin-left: 50px; margin-top: 20px; margin-bottom: 10px;}'
   ]
 })
 
@@ -65,7 +69,7 @@ export class NewsItemsComponent implements OnInit, AfterContentInit {
   };
 
   constructor(private appInitService: AppInitService,
-              private knoraService: KnoraService,
+              public knoraService: KnoraService,
               private datePipe: DatePipe,
               private router: Router,
               private observableMedia: MediaObserver) {
@@ -147,6 +151,10 @@ export class NewsItemsComponent implements OnInit, AfterContentInit {
 
   editNewsItem(id) {
     this.router.navigate(['/editnews', id]);
+  }
+
+  addNewsItem() {
+    this.router.navigate(['/editnews']);
   }
 
 }

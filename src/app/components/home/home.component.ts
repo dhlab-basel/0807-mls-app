@@ -1,5 +1,6 @@
 import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
 import {Router} from '@angular/router';
+import {KnoraService} from "../../services/knora.service";
 
 @Component({
   selector: 'app-home',
@@ -40,7 +41,8 @@ export class HomeComponent implements OnInit {
 
   searchterm: string = '';
 
-  constructor(private router: Router) {
+  constructor(private router: Router,
+              public knoraService: KnoraService) {
   }
 
   searchEvent(event): boolean {

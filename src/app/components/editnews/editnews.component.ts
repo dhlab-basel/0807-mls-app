@@ -80,9 +80,10 @@ class NewsIds {
         <mat-form-field [style.width.px]=400>
           <div>
             <div><img #image [src]="temporaryUrl | safe: 'url'"></div>
-            <input type="file" class="file-input" #fileUpload (change)="onFileSelected($event)">
+            <div><input type="file" class="file-input" #fileUpload (change)="onFileSelected($event)">
             {{filename || "Noch kein Bild hochgeladen..."}} &nbsp;
             <button type="submit" class="mat-raised-button"  (click)="fileUpload.click()">Upload</button>
+            </div>
           </div>
           &nbsp;
           <input matInput disabled required
@@ -97,7 +98,7 @@ class NewsIds {
         <br/>
         <mat-divider></mat-divider>
 
-        <mat-label>News-Text</mat-label><br/>
+        News-Text<br/>
         <ckeditor matInput #editor [editor]="Editor" formControlName="text" (change)="_handleInput('text')"></ckeditor>
         <button *ngIf="valIds.text.changed" mat-mini-fab (click)="_handleUndo('text')">
           <mat-icon color="warn">cached</mat-icon>
