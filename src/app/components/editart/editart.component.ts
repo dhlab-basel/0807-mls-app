@@ -4,7 +4,6 @@ import * as ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import {KnoraService, ArticleData, ResourceData, IntPropertyData, LinkPropertyData} from '../../services/knora.service';
 import {CKEditorComponent} from '@ckeditor/ckeditor5-angular';
 import {ControlValueAccessor, FormBuilder, FormGroup, NgControl, Validators} from '@angular/forms';
-import {EditResourceComponent} from '../knora/edit-resource/edit-resource.component';
 import {ActivatedRoute} from '@angular/router';
 import {LemmataComponent} from '../lemmata/lemmata.component';
 import {LemmaselectComponent} from '../lemmaselect/lemmaselect.component';
@@ -12,7 +11,6 @@ import {concatMap, map} from 'rxjs/operators';
 import {combineLatest} from 'rxjs';
 import {Constants, DeleteValue, ReadResourceSequence, UpdateResource, UpdateResourceMetadata} from '@dasch-swiss/dsp-js';
 import {forkJoin, from, Observable, Subject} from 'rxjs';
-import {KnoraLinkVal} from '../knora/knora-link-input/knora-link-input.component';
 import {MatIconModule} from '@angular/material/icon';
 import {Location} from '@angular/common';
 

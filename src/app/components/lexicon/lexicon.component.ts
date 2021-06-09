@@ -2,7 +2,6 @@ import {Component, Input, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {KnoraService, ResourceData} from '../../services/knora.service';
 import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
-import {EditResourceComponent} from '../knora/edit-resource/edit-resource.component';
 
 @Component({
   selector: 'app-lexicon',
@@ -93,20 +92,6 @@ export class LexiconComponent implements OnInit {
         this.lexicon = data;
       });
     });
-  }
-
-  openEditDialog() {
-    this.route.params.subscribe(params => {
-      const editConfig = new MatDialogConfig();
-      editConfig.autoFocus = true;
-      editConfig.width = '800px';
-      editConfig.data = {
-        resIri: this.lexiconIri,
-        resClassIri: this.knoraService.mlsOntology + 'Lexicon'
-      };
-      const dialogRef = this.dialog.open(EditResourceComponent, editConfig);
-    });
-
   }
 
   editLexicon() {

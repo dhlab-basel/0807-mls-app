@@ -2,8 +2,6 @@ import {Component, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {KnoraService, LemmaData} from '../../services/knora.service';
 import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
-import {EditResourceComponent} from '../knora/edit-resource/edit-resource.component';
-import {CreateResourceComponent} from '../knora/create-resource/create-resource/create-resource.component';
 import {EditartComponent} from '../editart/editart.component';
 import {EditlemComponent} from '../editlem/editlem.component';
 import {ClipboardModule} from '@angular/cdk/clipboard';
@@ -108,20 +106,6 @@ export class LemmaComponent implements OnInit {
 
   getArk(): string {
     return this.lemma.arkUrl;
-  }
-
-  openEditDialog() {
-    this.route.params.subscribe(params => {
-      const editConfig = new MatDialogConfig();
-      editConfig.autoFocus = true;
-      editConfig.width = '800px';
-      editConfig.data = {
-        resIri: params.iri,
-        resClassIri: this.knoraService.mlsOntology + 'Lemma'
-      };
-      const dialogRef = this.dialog.open(EditResourceComponent, editConfig);
-    });
-
   }
 
   openEditLemmaDialog() {

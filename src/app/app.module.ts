@@ -40,15 +40,7 @@ import {NewsItemsComponent} from './components/news-items/news-items.component';
 import {DatePipe} from '@angular/common';
 import {LoginComponent} from './components/login/login.component';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {EditResourceComponent} from './components/knora/edit-resource/edit-resource.component';
-import {ValueEditComponent} from './components/knora/value-edit/value-edit.component';
 import {TheprojectComponent} from './components/theproject/theproject.component';
-import {KnoraStringInputComponent} from './components/knora/knora-string-input/knora-string-input.component';
-import {KnoraListInputComponent} from './components/knora/knora-list-input/knora-list-input.component';
-import {ConfirmDialogComponent} from './components/knora/confirm-dialog/confirm-dialog.component';
-import {KnoraLinkInputComponent} from './components/knora/knora-link-input/knora-link-input.component';
-import {CreateResourceComponent} from './components/knora/create-resource/create-resource/create-resource.component';
-import {KnoraTextInputComponent} from './components/knora/knora-text-input/knora-text-input.component';
 import { EditartComponent } from './components/editart/editart.component';
 import { CKEditorModule } from '@ckeditor/ckeditor5-angular';
 import { LemmaselectComponent } from './components/lemmaselect/lemmaselect.component';
@@ -85,16 +77,7 @@ export function initializeApp(appInitService: AppInitService) {
     AboutComponent,
     NewsItemsComponent,
     LoginComponent,
-    EditResourceComponent,
-    ValueEditComponent,
     TheprojectComponent,
-    KnoraStringInputComponent,
-    ConfirmDialogComponent,
-    KnoraStringInputComponent,
-    KnoraListInputComponent,
-    KnoraLinkInputComponent,
-    CreateResourceComponent,
-    KnoraTextInputComponent,
     EditartComponent,
     LemmaselectComponent,
     EditlemComponent,
@@ -105,9 +88,6 @@ export function initializeApp(appInitService: AppInitService) {
   ],
   entryComponents: [
     LoginComponent,
-    EditResourceComponent,
-    CreateResourceComponent,
-    ConfirmDialogComponent,
   ],
   imports: [
     BrowserModule,
@@ -147,7 +127,6 @@ export function initializeApp(appInitService: AppInitService) {
     {
       provide: APP_INITIALIZER, useFactory: initializeApp, deps: [AppInitService], multi: true
     },
-    {provide: MatFormFieldControl, useExisting: KnoraStringInputComponent},
     SparqlPrep,
     DatePipe,
     SafePipe
