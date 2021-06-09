@@ -7,22 +7,35 @@ Dizionario della musica in Svizzera
 Dictionary of Music in Switzerland
 ">
   </button>
-  <a mat-button *ngIf="knoraService.loggedin" (click)="logout()">{{ knoraService.useremail }}</a>
+  <!-- <a mat-button *ngIf="knoraService.loggedin" (click)="logout()">{{ knoraService.useremail }}</a> -->
+  <button  *ngIf="!knoraService.loggedin" mat-icon-button matTooltip="Benutzer an- und abmelden" (click)="account()"><mat-icon >account_box</mat-icon></button>
+  <button  *ngIf="knoraService.loggedin" color="warn" mat-icon-button [matTooltip]="knoraService.useremail + ' (abmelden...)'" (click)="account()" ><mat-icon >account_box</mat-icon></button>
   <span class="fill-remaining-space"></span>
-  <mat-icon appBackButton matTooltip="zurück" class="clickable">arrow_back</mat-icon>
-  <a mat-button routerLink="lexica">Quellen (Lexika)</a>
-  <a mat-button routerLink="lemmata">Stichworte</a>
-  <a mat-button routerLink="info">Das MLS</a>
-  <a mat-button routerLink="theproject">Das Projekt</a>
-  <a mat-button routerLink="about">Über uns</a>
-  <a *ngIf="knoraService.loggedin" mat-button routerLink="allnews">News...</a>
-  <button mat-icon-button matTooltip="Benutzer an- und abmelden" (click)="account()"><mat-icon >account_box</mat-icon></button>
-  <button mat-icon-button matTooltip="Zurück zum Startbildschirm" routerLink="home"><mat-icon>home</mat-icon></button>
+  <div fxHide.lt-md>
+    <mat-icon appBackButton matTooltip="zurück" class="clickable">arrow_back</mat-icon>
+    <a mat-button routerLink="lexica">Quellen (Lexika)</a>
+    <a mat-button routerLink="lemmata">Stichworte</a>
+    <a mat-button routerLink="info">Das MLS</a>
+    <a mat-button routerLink="theproject">Das Projekt</a>
+    <a mat-button routerLink="about">Über uns</a>
+    <a *ngIf="knoraService.loggedin" mat-button routerLink="allnews">News...</a>
+    <!-- <button mat-icon-button matTooltip="Zurück zum Startbildschirm" routerLink="home"><mat-icon>home</mat-icon></button> -->
+  </div>
+  <div fxHide.gt-sm>
+    <!--<a mat-button (click)="drawer.toggle()">Show Side Menu</a>-->
+    <button mat-icon-button [matMenuTriggerFor]="menu"matTooltip="Auswahl der Aktionen"><mat-icon>reorder</mat-icon></button>
+    <mat-menu #menu="matMenu">
+      <button mat-menu-item routerLink="lexica">Quellen (Lexika)</button>
+      <button mat-menu-item routerLink="lemmata">Stichworte</button>
+      <button mat-menu-item routerLink="info">Das MLS</button>
+      <button mat-menu-item routerLink="theproject">Das Projekt</button>
+      <!--<a mat-button routerLink="about">Über uns</a>-->
+      <button *ngIf="knoraService.loggedin" mat-button routerLink="allnews">News...</button>
+    </mat-menu>
+  </div>
 </mat-toolbar>
 
-<router-outlet>
-
-</router-outlet>
+<router-outlet></router-outlet>
 <footer>
   <a href="https://www.smg-ssm.ch/smg-ssm/">
     <img src="../assets/musikforschendegesellschaft-logo.png" style="max-height: 50px; padding-right: 50px;"/>

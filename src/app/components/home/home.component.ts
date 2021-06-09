@@ -8,19 +8,33 @@ import {KnoraService} from '../../services/knora.service';
   template: `
     <mat-card [ngStyle]="{background: 'url(' + imgname + ') center'}" class="bgimg gaga">
       <mat-card-actions style="text-align: center;" class="gugus">
-          <form (submit)="searchEvent($event)" (keyup.enter)="searchEvent($event)">
-              <mat-form-field class="iswhite">
-                  <input #searchField
-                         name="searchterm"
-                         [value]="searchterm"
-                         matInput
-                         type="search"
-                         placeholder="Suche nach..." />
-                  <mat-icon matSuffix class="clickable" (click)="searchEvent($event)">search</mat-icon>
-                  <mat-icon matSuffix class="clickable" (click)="searchCancel($event)">cancel</mat-icon>
-                  <!-- <mat-hint>Stichwort, nach dem gesucht werden soll, eingeben</mat-hint> -->
-              </mat-form-field>
-          </form>
+        <form (submit)="searchEvent($event)" (keyup.enter)="searchEvent($event)">
+          <mat-form-field fxHide fxShow.lt-md class="iswhite200">
+            <input #searchField
+                   name="searchterm"
+                   [value]="searchterm"
+                   matInput
+                   type="search"
+                   placeholder="Suche nach..."/>
+
+            <mat-icon matSuffix class="clickable" (click)="searchEvent($event)">search</mat-icon>
+            <mat-icon matSuffix class="clickable" (click)="searchCancel($event)">cancel</mat-icon>
+            <!-- <mat-hint>Stichwort, nach dem gesucht werden soll, eingeben</mat-hint> -->
+          </mat-form-field>
+          <mat-form-field fxShow fxHide.lt-md class="iswhite400">
+            <input #searchField
+                   name="searchterm"
+                   [value]="searchterm"
+                   matInput
+                   type="search"
+                   placeholder="Suche nach..."/>
+
+            <mat-icon matSuffix class="clickable" (click)="searchEvent($event)">search</mat-icon>
+            <mat-icon matSuffix class="clickable" (click)="searchCancel($event)">cancel</mat-icon>
+            <!-- <mat-hint>Stichwort, nach dem gesucht werden soll, eingeben</mat-hint> -->
+          </mat-form-field>
+
+        </form>
       </mat-card-actions>
     </mat-card>
     <app-news-items></app-news-items>
@@ -30,7 +44,8 @@ import {KnoraService} from '../../services/knora.service';
     '.bgimg {background-repeat: no-repeat; background-size: cover; background-position: center; margin-left: 50px; margin-right: 50px;}',
     '.gaga {min-height: max-content;}',
     '.gugus {min-height: 400px;}',
-    '.iswhite {background-color: white; min-width: 400px;}'
+    '.iswhite200 {background-color: white; min-width: 200px;}',
+    '.iswhite400 {background-color: white; min-width: 400px;}',
   ]
 })
 
