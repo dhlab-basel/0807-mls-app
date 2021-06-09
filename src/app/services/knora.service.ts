@@ -300,6 +300,17 @@ export class News {
   }
 }
 
+export interface ItemData {
+  id: string;
+  title?: string;
+  iiifImageUrl?: string;
+  text?: string;
+  lemmaName?: string;
+  lemmaId?: string;
+  weblink?: string;
+  date?: string;
+}
+
 export interface OptionType {
   iri: string;
   name: string;

@@ -1,11 +1,20 @@
 import {AfterContentInit, Component, OnInit, Pipe, PipeTransform, ViewChild} from '@angular/core';
 import { DatePipe } from '@angular/common';
-import {KnoraService, LinkPropertyData, PropertyData, ResourceData, StillImagePropertyData} from '../../services/knora.service';
+import {
+  ItemData,
+  KnoraService,
+  LinkPropertyData,
+  PropertyData,
+  ResourceData,
+  StillImagePropertyData
+} from '../../services/knora.service';
 import {Constants, ReadDateValue} from '@dasch-swiss/dsp-js';
 import {AppInitService} from '../../app-init.service';
 import {Router} from '@angular/router';
 import { MediaChange, MediaObserver } from '@angular/flex-layout';
 import {MatGridList} from '@angular/material/grid-list';
+
+/*
 interface ItemData {
   id: string;
   title?: string;
@@ -16,7 +25,7 @@ interface ItemData {
   weblink?: string;
   date?: string;
 }
-
+*/
 @Component({
   selector: 'app-news-items',
   template: `
@@ -29,16 +38,17 @@ interface ItemData {
             <mat-card-title>
               {{x.title}}
             </mat-card-title>
-            <img mat-card-image [src]="x.iiifImageUrl | safe: 'url'"/>
+            <img mat-card-image [src]="x.iiifImageUrl | safe: 'url'" (click)="gotoNewsItem(x.id)" class="clickable" />
             <mat-card-content >
               <div flex [innerHTML]="x.text | safe: 'html'"></div>
-              <div>Lemma: <button mat-button (click)="gotoLemma(x.lemmaId)">{{x.lemmaName}}</button></div>
+              <div *ngIf="x.lemmaId">Lemma: <button mat-button (click)="gotoLemma(x.lemmaId)">{{x.lemmaName}}</button></div>
+              <div *ngIf="x.weblink">Weblink: <a [href]="x.weblink">{{x.weblink}}</a></div>
               <div *ngIf="showall">Periode: {{x.date}}</div>
             </mat-card-content>
             <mat-card-actions *ngIf="showall && knoraService.loggedin">
               <button type="submit" class="mat-raised-button mat-primary" (click)="editNewsItem(x.id)">Edit</button>
             </mat-card-actions>
-            </mat-card>
+          </mat-card>
         </mat-grid-tile>
     </mat-grid-list>
   `,
@@ -47,6 +57,7 @@ interface ItemData {
     '.mat-card-title {font-size: 14pt;}',
     '.mat-card-content { max-height: 200px; overflow-y: auto; }',
     '.with-margin {margin-left: 50px; margin-top: 20px; margin-bottom: 10px;}',
+    '.clickable {cursor: pointer;}'
   ]
 })
 
