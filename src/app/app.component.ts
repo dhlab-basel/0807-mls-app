@@ -1,7 +1,9 @@
-import {Component} from '@angular/core';
+import {Component, ElementRef, ViewChild} from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { LoginComponent } from './components/login/login.component';
 import { KnoraService } from './services/knora.service';
+import { FlexLayoutModule } from '@angular/flex-layout';
+import {MatMenuModule} from '@angular/material/menu';
 
 @Component({
   selector: 'app-root',
@@ -11,12 +13,15 @@ import { KnoraService } from './services/knora.service';
 })
 
 export class AppComponent {
+  @ViewChild('drawer')
+  myDrawer: ElementRef;
   title = 'Musikalisches Lexikon der Schweiz (MLS)';
   logininfo = '';
   loggedin = false;
 
   constructor(public dialog: MatDialog,
-              public knoraService: KnoraService) {}
+              public knoraService: KnoraService) {
+  }
 
   private openLoginDialog(): void {
     const loginConfig = new MatDialogConfig();
@@ -54,6 +59,11 @@ export class AppComponent {
     } else {
       this.openLoginDialog();
     }
+  }
+
+  testit() {
+    console.log(this.myDrawer);
+    this.myDrawer.nativeElement.toggle();
   }
 }
 

@@ -1,50 +1,59 @@
-import { Component, OnInit } from '@angular/core';
-import {ActivatedRoute} from '@angular/router';
+import {Component, OnInit, Pipe, PipeTransform, SecurityContext} from '@angular/core';
+import {ActivatedRoute, Router} from '@angular/router';
 import {KnoraService} from '../../services/knora.service';
 import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
-import {EditResourceComponent} from '../knora/edit-resource/edit-resource.component';
 import {EditartComponent} from '../editart/editart.component';
+import {SafePipe} from '../../pipes/safe.pipe';
 
 @Component({
   selector: 'app-article',
   template: `
-    <mat-card class="maxw">
+    <div class="maindiv" layout-fill>
+      <mat-card class="maxw">
         <mat-card-title>
-            Artikel
+          Artikel
         </mat-card-title>
-      <div [innerHTML]="article.arttext"></div>
-      (Seite: {{ article.npages }})
-    </mat-card>
-    <mat-card>
-        <mat-card-title>
+        <mat-card-content>
+          <div [innerHTML]="article.arttext | safe: 'html'"></div>
+          (Seite: {{ article.npages }})<br/>
+          <mat-divider></mat-divider>
+          <br/>
+          <mat-card-subtitle>
             Links
-        </mat-card-title>
-        <table>
+          </mat-card-subtitle>
+          <table>
             <tr *ngIf="article.fonotecacode"><td>Fonoteca</td><td>:</td><td>{{ article.fonotecacode }}</td></tr>
             <tr *ngIf="article.hlscode"><td>HLS</td><td>:</td><td>{{ article.hlscode }}</td></tr>
             <tr *ngIf="article.oemlcode"><td>OEML</td><td>:</td><td>{{ article.oemlcode }}</td></tr>
             <tr *ngIf="article.theaterlexcode"><td>Theaterlexikon</td><td>:</td><td><a href="{{ 'http://tls.theaterwissenschaft.ch/wiki/' + article.theaterlexcode }}">{{ article.theaterlexcode }}</a></td></tr>
             <tr *ngIf="article.ticinolexcode"><td>Ticino Lexikon</td><td>:</td><td>{{ article.ticinolexcode }}</td></tr>
             <tr *ngIf="article.weblink"><td>Weblink</td><td>:</td><td><a href="{{article.weblink}}" target="_blank">{{ article.weblink }}</a></td></tr>
-        </table>
+          </table>
+          <mat-card-actions *ngIf="knoraService.loggedin">
+            <button mat-raised-button (click)="editArticle()">edit</button>
+          </mat-card-actions>
 
-    </mat-card>
-    <mat-card-actions *ngIf="knoraService.loggedin">
-      <button mat-raised-button (click)="openEditDialog()">edit</button>
-    </mat-card-actions>
+        </mat-card-content>
+
+      </mat-card>
+     </div>
   `,
   styles: [
-    '.maxw { max-width: 500px; }',
+    '.maindiv {display: flex; justify-content: center; align-items: center;}',
+    '.mat-card {max-width: 800px; margin: 3em;}',
+    '.mat-card-subtitle {font-size: 16px; font-weight: bold;}',
     '.clickable {cursor: pointer;}'
   ]
 })
+
 export class ArticleComponent implements OnInit {
   articleIri: string;
   article: {[index: string]: string} = {};
 
   constructor(private route: ActivatedRoute,
               public dialog: MatDialog,
-              public knoraService: KnoraService) {
+              public knoraService: KnoraService,
+              private router: Router) {
 
   }
 
@@ -56,7 +65,10 @@ export class ArticleComponent implements OnInit {
         for (const ele of data.properties) {
           switch (ele.propname) {
             case this.knoraService.mlsOntology + 'hasArticleText': {
+              const regex = /<oembed.+?url="https?:\/\/www\.youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})"><\/oembed>/g;
               articledata.arttext = ele.values[0].replace(/\\n/g, '<br />');
+              articledata.arttext = articledata.arttext.replace(regex, '<iframe width="560" height="315" src="https://www.youtube.com/embed/$1" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>');
+              console.log(articledata.arttext);
               break;
             }
             case this.knoraService.mlsOntology + 'hasPages': {
@@ -71,8 +83,16 @@ export class ArticleComponent implements OnInit {
               articledata.hlscode = ele.values[0];
               break;
             }
+            case this.knoraService.mlsOntology + 'hasOemlCode': {
+              articledata.oemlexcode = ele.values[0];
+              break;
+            }
             case this.knoraService.mlsOntology + 'hasTheaterLexCode': {
               articledata.theaterlexcode = ele.values[0];
+              break;
+            }
+            case this.knoraService.mlsOntology + 'hasTicinoLexCode': {
+              articledata.ticinolexcode = ele.values[0];
               break;
             }
             case this.knoraService.mlsOntology + 'hasWebLink': {
@@ -105,7 +125,20 @@ export class ArticleComponent implements OnInit {
 
   }
 
-  ngOnInit() {
+  editArticle(): void {
+    let url: string;
+    url = 'editart/' + encodeURIComponent(this.articleIri);
+    this.router.navigateByUrl(url).then(e => {
+      if (e) {
+        console.log('Navigation is successful!');
+      } else {
+        console.log('Navigation has failed!');
+      }
+    });
+  }
+
+
+  ngOnInit(): void {
     this.getArticle();
   }
 

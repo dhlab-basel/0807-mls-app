@@ -10,6 +10,11 @@ import {InfoComponent} from './components/info/info.component';
 import {AboutComponent} from './components/about/about.component';
 import {TheprojectComponent} from './components/theproject/theproject.component';
 import {EditartComponent} from './components/editart/editart.component';
+import {EditlemComponent} from './components/editlem/editlem.component';
+import {EditlexComponent} from './components/editlex/editlex.component';
+import {EditnewsComponent} from './components/editnews/editnews.component';
+import {NewsItemsComponent} from './components/news-items/news-items.component';
+import {NewsitemViewerComponent} from './components/newsitem-viewer/newsitem-viewer.component';
 
 const routes: Routes = [{
   path: 'home',
@@ -38,6 +43,30 @@ const routes: Routes = [{
 }, {
   path: 'editart',
   component: EditartComponent
+}, {
+  path: 'editlem/:iri',
+  component: EditlemComponent
+}, {
+  path: 'editlem',
+  component: EditlemComponent
+}, {
+  path: 'editlex/:iri',
+  component: EditlexComponent
+}, {
+  path: 'editlex',
+  component: EditlexComponent
+}, {
+  path: 'editnews/:iri',
+  component: EditnewsComponent
+}, {
+  path: 'editnews',
+  component: EditnewsComponent
+}, {
+  path: 'allnews',
+  component: NewsItemsComponent
+}, {
+  path: 'newsitem/:iri',
+  component: NewsitemViewerComponent
 }, {
   path: 'about',
   component: AboutComponent

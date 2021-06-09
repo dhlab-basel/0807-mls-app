@@ -40,20 +40,20 @@ import {NewsItemsComponent} from './components/news-items/news-items.component';
 import {DatePipe} from '@angular/common';
 import {LoginComponent} from './components/login/login.component';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {EditResourceComponent} from './components/knora/edit-resource/edit-resource.component';
-import {ValueEditComponent} from './components/knora/value-edit/value-edit.component';
 import {TheprojectComponent} from './components/theproject/theproject.component';
-import {KnoraStringInputComponent} from './components/knora/knora-string-input/knora-string-input.component';
-import {KnoraListInputComponent} from './components/knora/knora-list-input/knora-list-input.component';
-import {ConfirmDialogComponent} from './components/knora/confirm-dialog/confirm-dialog.component';
-import {KnoraLinkInputComponent} from './components/knora/knora-link-input/knora-link-input.component';
-import {CreateResourceComponent} from './components/knora/create-resource/create-resource/create-resource.component';
-import {KnoraTextInputComponent} from './components/knora/knora-text-input/knora-text-input.component';
 import { EditartComponent } from './components/editart/editart.component';
 import { CKEditorModule } from '@ckeditor/ckeditor5-angular';
 import { LemmaselectComponent } from './components/lemmaselect/lemmaselect.component';
 import { EditlemComponent } from './components/editlem/editlem.component';
 import {ClipboardModule} from '@angular/cdk/clipboard';
+import { EditlexComponent } from './components/editlex/editlex.component';
+import { EditnewsComponent } from './components/editnews/editnews.component';
+import { MatFileUploadModule } from 'angular-material-fileupload';
+import {MatDatepickerModule} from '@angular/material/datepicker';
+import {MatNativeDateModule} from '@angular/material/core';
+import {SafePipe} from './pipes/safe.pipe';
+import { NewsitemViewerComponent } from './components/newsitem-viewer/newsitem-viewer.component';
+import { FlexLayoutModule } from '@angular/flex-layout';
 
 export function initializeApp(appInitService: AppInitService) {
   return (): Promise<any> => {
@@ -77,25 +77,17 @@ export function initializeApp(appInitService: AppInitService) {
     AboutComponent,
     NewsItemsComponent,
     LoginComponent,
-    EditResourceComponent,
-    ValueEditComponent,
     TheprojectComponent,
-    KnoraStringInputComponent,
-    ConfirmDialogComponent,
-    KnoraStringInputComponent,
-    KnoraListInputComponent,
-    KnoraLinkInputComponent,
-    CreateResourceComponent,
-    KnoraTextInputComponent,
     EditartComponent,
     LemmaselectComponent,
     EditlemComponent,
+    EditlexComponent,
+    EditnewsComponent,
+    SafePipe,
+    NewsitemViewerComponent,
   ],
   entryComponents: [
     LoginComponent,
-    EditResourceComponent,
-    CreateResourceComponent,
-    ConfirmDialogComponent,
   ],
   imports: [
     BrowserModule,
@@ -125,15 +117,19 @@ export function initializeApp(appInitService: AppInitService) {
     MatAutocompleteModule,
     CKEditorModule,
     ClipboardModule,
+    MatFileUploadModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
+    FlexLayoutModule
   ],
   providers: [
     AppInitService,
     {
       provide: APP_INITIALIZER, useFactory: initializeApp, deps: [AppInitService], multi: true
     },
-    {provide: MatFormFieldControl, useExisting: KnoraStringInputComponent},
     SparqlPrep,
-    DatePipe
+    DatePipe,
+    SafePipe
   ],
   bootstrap: [AppComponent]
 })

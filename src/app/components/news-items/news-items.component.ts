@@ -1,63 +1,171 @@
-import { Component, OnInit } from '@angular/core';
+import {AfterContentInit, Component, OnInit, Pipe, PipeTransform, ViewChild} from '@angular/core';
 import { DatePipe } from '@angular/common';
-import {KnoraService} from '../../services/knora.service';
-import {Constants} from '@dasch-swiss/dsp-js';
+import {
+  ItemData,
+  KnoraService,
+  LinkPropertyData,
+  PropertyData,
+  ResourceData,
+  StillImagePropertyData
+} from '../../services/knora.service';
+import {Constants, ReadDateValue} from '@dasch-swiss/dsp-js';
+import {AppInitService} from '../../app-init.service';
+import {Router} from '@angular/router';
+import { MediaChange, MediaObserver } from '@angular/flex-layout';
+import {MatGridList} from '@angular/material/grid-list';
 
-
+/*
+interface ItemData {
+  id: string;
+  title?: string;
+  iiifImageUrl?: string;
+  text?: string;
+  lemmaName?: string;
+  lemmaId?: string;
+  weblink?: string;
+  date?: string;
+}
+*/
 @Component({
   selector: 'app-news-items',
   template: `
-    <mat-grid-list cols="6" rowHeight="1:1.5">
-        <mat-grid-tile *ngFor="let x of items">
-            <mat-card>
-                <mat-card-title>
-                {{x[1]}}
-                </mat-card-title>
-                <img class="newimg" mat-card-image src="{{x[3]}}"/>
-                <mat-card-content>
-                    <p>{{x[2]}}</p>
-                </mat-card-content>
-            </mat-card>
+    <div  *ngIf="knoraService.loggedin" class="with-margin">
+      <button mat-raised-button (click)="addNewsItem()">Neuer News-Beitrag</button>
+    </div>
+    <mat-grid-list #grid rowHeight="1:1.5">
+        <mat-grid-tile *ngFor="let x of newsItems">
+          <mat-card layout-fill >
+            <mat-card-title>
+              {{x.title}}
+            </mat-card-title>
+            <img mat-card-image [src]="x.iiifImageUrl | safe: 'url'" (click)="gotoNewsItem(x.id)" class="clickable" />
+            <mat-card-content >
+              <div flex [innerHTML]="x.text | safe: 'html'"></div>
+              <div *ngIf="x.lemmaId">Lemma: <button mat-button (click)="gotoLemma(x.lemmaId)">{{x.lemmaName}}</button></div>
+              <div *ngIf="x.weblink">Weblink: <a [href]="x.weblink">{{x.weblink}}</a></div>
+              <div *ngIf="showall">Periode: {{x.date}}</div>
+            </mat-card-content>
+            <mat-card-actions *ngIf="showall && knoraService.loggedin">
+              <button type="submit" class="mat-raised-button mat-primary" (click)="editNewsItem(x.id)">Edit</button>
+            </mat-card-actions>
+          </mat-card>
         </mat-grid-tile>
     </mat-grid-list>
   `,
   styles: [
-    '.mat-grid-list {margin-left: 50px; margin-right: 50px;}',
-    '.mat-card-title {font-size: 12pt;}',
-    '.newimg {max-width: 150px; max-height: 150px;}'
+    '.mat-card {margin: 3em;}',
+    '.mat-card-title {font-size: 14pt;}',
+    '.mat-card-content { max-height: 200px; overflow-y: auto; }',
+    '.with-margin {margin-left: 50px; margin-top: 20px; margin-bottom: 10px;}',
+    '.clickable {cursor: pointer;}'
   ]
 })
-export class NewsItemsComponent implements OnInit {
-  today: string;
-  items: Array<Array<string>> = [];
 
-  constructor(private knoraService: KnoraService,
-              private datePipe: DatePipe) {
+export class NewsItemsComponent implements OnInit, AfterContentInit {
+  @ViewChild('grid') grid: MatGridList;
+  mlsOntology: string;
+  today: string;
+  newsItems: Array<ItemData> = [];
+  showall: boolean;
+  gridByBreakpoint = {
+    xl: 5,
+    lg: 4,
+    md: 3,
+    sm: 2,
+    xs: 1
+  };
+
+  constructor(private appInitService: AppInitService,
+              public knoraService: KnoraService,
+              private datePipe: DatePipe,
+              private router: Router,
+              private observableMedia: MediaObserver) {
     const myDate = new Date();
     this.today = 'GREGORIAN:' + this.datePipe.transform(myDate, 'yyyy-MM-dd');
+    this.mlsOntology = appInitService.getSettings().ontologyPrefix + '/ontology/0807/mls/v2#';
+    this.showall = this.router.url === '/allnews';
   }
 
   getNewsItems() {
-    const params =  {
-      today: this.today
-    };
+    const a = {};
+    const b = { today: this.today };
+    const params = (this.showall) ? {} : b;
+
     const fields: Array<string> = [
       'id',
       this.knoraService.mlsOntology + 'hasNewsTitle',
       this.knoraService.mlsOntology + 'hasNewsText',
-      Constants.KnoraApiV2 + Constants.HashDelimiter + 'hasStillImageFileValue'
+      Constants.HasStillImageFileValue,
+      Constants.StillImageFileValueHasIIIFBaseUrl,
+      this.knoraService.mlsOntology + 'hasNewsitemLinkToLemmaValue',
+      this.knoraService.mlsOntology + 'hasNewsitemWeblink',
+      this.knoraService.mlsOntology + 'hasNewitemActiveDate'
     ];
 
-    this.knoraService.gravsearchQuery('newsitem_search', params, fields).subscribe(
-      (data) => {
-        console.log(data);
-        this.items = data;
+    this.knoraService.gravsearchQueryObj('newsitem_search', params).subscribe(
+      (datas) => {
+        for (const data of datas) {
+          const gaga: ItemData = {id: data.id};
+          for (const p of data.properties) {
+            switch (p.propname) {
+              case this.mlsOntology + 'hasNewsTitle': {
+                gaga.title = p.values[0];
+                break;
+              }
+              case this.mlsOntology + 'hasNewsText': {
+                gaga.text = p.values[0];
+                break;
+              }
+              case this.mlsOntology + 'hasNewsitemWeblink': {
+                gaga.weblink = p.values[0];
+                break;
+              }
+              case this.mlsOntology + 'hasNewsitemLinkToLemmaValue': {
+                const pp = p as LinkPropertyData;
+                gaga.lemmaId = pp.resourceIris[0];
+                gaga.lemmaName = pp.values[0];
+                break;
+              }
+              case Constants.HasStillImageFileValue: {
+                const pp = p as StillImagePropertyData;
+                gaga.iiifImageUrl = pp.iiifBase + '/' + pp.filename + '/full/^!1024,1024/0/default.jpg';
+                break;
+              }
+              case this.mlsOntology + 'hasNewitemActiveDate': {
+                gaga.date = p.values[0];
+                break;
+              }
+            }
+          }
+          this.newsItems.push(gaga);
+        }
       }
     );
   }
 
   ngOnInit() {
     this.getNewsItems();
+  }
+
+  ngAfterContentInit() {
+    this.observableMedia.asObservable().subscribe((change: Array<MediaChange>) => {
+      this.grid.cols = this.gridByBreakpoint[change[0].mqAlias];
+    });
+  }
+  gotoLemma(id) {
+    this.router.navigate(['/lemma', id]);
+  }
+
+  gotoNewsItem(id) {
+    this.router.navigate(['/newsitem', id]);
+  }
+
+  editNewsItem(id) {
+    this.router.navigate(['/editnews', id]);
+  }
+
+  addNewsItem() {
+    this.router.navigate(['/editnews']);
   }
 
 }

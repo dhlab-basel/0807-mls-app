@@ -40,7 +40,14 @@ import {
   CreateListValue,
   UpdateResourceMetadata,
   UpdateResourceMetadataResponse,
-  UpdateListValue
+  UpdateListValue,
+  UpdateLinkValue,
+  CreateUriValue,
+  UpdateUriValue,
+  CreateStillImageFileValue,
+  CreateDateValue,
+  ReadStillImageFileValue,
+  ReadDateValue, ReadUriValue, UpdateStillImageFileValue, UpdateDateValue
 } from '@dasch-swiss/dsp-js';
 
 import {AppInitService} from '../app-init.service';
@@ -138,6 +145,33 @@ export class LinkPropertyData extends PropertyData {
   }
 }
 
+export class StillImagePropertyData extends PropertyData {
+  public dimX: number;
+  public dimY: number;
+  filename: string;
+  fileUrl: string;
+  iiifBase: string;
+
+  constructor(propname: string,
+              label: string,
+              dimX: number,
+              dimY: number,
+              filename: string,
+              fileUrl: string,
+              iiifBase: string,
+              values: Array<string>,
+              ids: Array<string>,
+              comments: Array<string | undefined>,
+              permissions: Array<string>) {
+    super(propname, label, values, ids, comments, permissions);
+    this.dimX = dimX;
+    this.dimY = dimY;
+    this.filename = filename;
+    this.fileUrl = fileUrl;
+    this.iiifBase = iiifBase;
+  }
+}
+
 
 /**
  *  Data structure for representing a resource (instance)
@@ -145,6 +179,7 @@ export class LinkPropertyData extends PropertyData {
 export interface ResourceData {
   id: string; /** Id (iri) of the resource */
   label: string; /** Label of the resource */
+  arkUrl?: string;
   permission: string; /** permission of the current user */
   lastmod: string; /** last modification date of resource */
   properties: Array<PropertyData>; /** Array of properties with associated value(s) */
@@ -157,6 +192,7 @@ export interface LemmaData {
   arkUrl: string;
   properties: {[index: string]: {label: string, values: Array<string>}};
 }
+
 
 /**
  * Data structure representing the information about the property definitions of resource class
@@ -201,6 +237,26 @@ export class ArticleData {
   }
 }
 
+export class LexiconData {
+  constructor(
+    public label: string,
+    public shortname: string, // mls:hasShortname
+    public citationForm: string, // mls:hasCitationForm
+    public comment: string, // mls:hasLexiconComment
+    public year: string, // mls:hasYear
+    public weblink?: string, // mls:hasLexiconWeblink
+    public library?: string, // mls:hasLibrary
+    public libraryIri?: string,
+    public scanFinished?: string, // mls:hasScanFinished
+    public scanVendor?: string, // mls:hasScanVendor
+    public ocrFinished?: string, // mls:hasOCRFinished
+    public ocrVendor?: string, // mls:hasOCRVendor
+    public editFinished?: string, // mls:hasEditFinished
+    public editVendor?: string, // mls:hasEditVendor
+  ) {
+  }
+}
+
 export class Lemma {
   constructor(
     public label: string,
@@ -226,8 +282,33 @@ export class Lemma {
     public viaf: string, // mls:hasViaf: TextValue
     public comment: string, // mls:haslemmaComment: TextValue
   ) {
-
   }
+}
+
+export class News {
+  constructor(
+    public label: string,
+    public title: string, // mls:hasNewsTitle: TextValue
+    public imageid: string,
+    public text: string, // mls:hasNewsText: TextValue
+    public activeDateStart: Date, // mls:hasNewitemActiveDate: DateValue
+    public activeDateEnd: Date, // mls:hasNewitemActiveDate: DateValue
+    public lemma?: string,  // mls:hasNewsitemLinkToLemmaValue: LinkValue -> mls:Lemma
+    public lemmaIri?: string,
+    public weblink?: string, // mls:hasNewsitemWeblink: UriValue
+  ) {
+  }
+}
+
+export interface ItemData {
+  id: string;
+  title?: string;
+  iiifImageUrl?: string;
+  text?: string;
+  lemmaName?: string;
+  lemmaId?: string;
+  weblink?: string;
+  date?: string;
 }
 
 export interface OptionType {
@@ -245,6 +326,7 @@ export class KnoraService {
   mlsOntology: string;
   loggedin: boolean;
   useremail: string;
+  token?: string;
   listAdminCache: ListAdminCache;
 
   lemmaTypeListIri: string;
@@ -279,6 +361,42 @@ export class KnoraService {
     for (const prop in data.properties) {
       if (data.properties.hasOwnProperty(prop)) {
         switch (data.getValues(prop)[0].type) {
+          case Constants.StillImageFileValue: {
+            const val = data.getValuesAs(prop, ReadStillImageFileValue)[0];
+            const label: string = val.propertyLabel || '?';
+            const dimX: number = val.dimX;
+            const dimY: number = val.dimY;
+            const filename: string = val.filename;
+            const fileUrl: string = val.fileUrl;
+            const iiifBase = val.iiifBaseUrl;
+            const values: Array<string> = [];
+            const ids: Array<string> = [val.id];
+            const comments: Array<string | undefined> = [val.valueHasComment];
+            const permissions: Array<string> = [val.userHasPermission];
+            propdata.push(new StillImagePropertyData(prop, label, dimX, dimY, filename,
+              fileUrl, iiifBase, values, ids, comments, permissions));
+            break;
+          }
+          case Constants.DateValue: {
+            const vals = data.getValuesAs(prop, ReadDateValue);
+            const label: string = vals[0].propertyLabel || '?';
+            const values: Array<string> = vals.map(v => v.strval || '?');
+            const ids: Array<string> = vals.map(v => v.id);
+            const comments: Array<string | undefined> = vals.map(v => v.valueHasComment);
+            const permissions: Array<string> = vals.map(v => v.userHasPermission);
+            propdata.push(new PropertyData(prop, label, values, ids, comments, permissions));
+            break;
+          }
+          case Constants.UriValue: {
+            const vals = data.getValuesAs(prop, ReadUriValue);
+            const label: string = vals[0].propertyLabel || '?';
+            const values: Array<string> = vals.map(v => v.uri);
+            const ids: Array<string> = vals.map(v => v.id);
+            const comments: Array<string | undefined> = vals.map(v => v.valueHasComment);
+            const permissions: Array<string> = vals.map(v => v.userHasPermission);
+            propdata.push(new PropertyData(prop, label, values, ids, comments, permissions));
+            break;
+          }
           case Constants.TextValue: {
             const vals = data.getValuesAs(prop, ReadTextValueAsString);
             const label: string = vals[0].propertyLabel || '?';
@@ -372,7 +490,24 @@ export class KnoraService {
     return result;
   }
 
-  login(email: string, password: string): Observable<{success: boolean, token: string, user: string}> {
+  private simplifySearchResult(datas: Array<ReadResource>): Array<ResourceData> {
+    const results: Array<ResourceData> = [];
+    datas.map((data: ReadResource) => {
+      const res: ResourceData = {
+        id: data.id,
+        label: data.label,
+        arkUrl: data.arkUrl,
+        permission: data.hasPermissions,
+        lastmod: data.lastModificationDate || '',
+        properties: this.processResourceProperties(data)
+      };
+      results.push(res);
+    });
+    return results;
+  }
+
+
+    login(email: string, password: string): Observable<{success: boolean, token: string, user: string}> {
     return this.knoraApiConnection.v2.auth.login('email', email, password)
       .pipe(
         catchError((err) => {
@@ -383,6 +518,7 @@ export class KnoraService {
             const apiResponse = response as ApiResponseData<LoginResponse>;
             this.loggedin = true;
             this.useremail = email;
+            this.token = apiResponse.body.token;
             return {success: true, token: apiResponse.body.token, user: email};
           } else {
             return {success: false, token: response, user: '-'};
@@ -400,6 +536,7 @@ export class KnoraService {
           const apiResponse = response as ApiResponseData<LogoutResponse>;
           this.loggedin = false;
           this.useremail = '';
+          this.token = undefined;
           return apiResponse.body.message;
         } else {
           return response;
@@ -458,6 +595,7 @@ export class KnoraService {
   getResource(iri: string): Observable<ResourceData> {
     return this.knoraApiConnection.v2.res.getResource(iri).pipe(
       map((data: ReadResource) => {
+        console.log(':::::::::', data);
         return {
           id: data.id,
           label: data.label,
@@ -485,6 +623,16 @@ export class KnoraService {
       map((data: ReadResourceSequence) => {
         return this.processSearchResult(data.resources, fields);
       }));
+  }
+
+  gravsearchQueryObj(queryname: string, params: {[index: string]: string}): Observable<Array<ResourceData>> {
+    params.ontology = this.appInitService.getSettings().ontologyPrefix;
+    const query = this.queryTemplates[queryname](params);
+    return this.knoraApiConnection.v2.search.doExtendedSearch(query)
+      .pipe(
+        map((data: ReadResourceSequence) => {
+          return this.simplifySearchResult(data.resources);
+        }));
   }
 
   private processLemmaProperties(data: ReadResource): {[index: string]: {label: string, values: Array<string>}} {
@@ -819,6 +967,200 @@ export class KnoraService {
     );
   }
 
+  createLexicon(data: LexiconData): Observable<string> {
+    const createResource = new CreateResource();
+    createResource.label = data.label;
+    createResource.type = this.mlsOntology + 'Lexicon';
+    createResource.attachedToProject = 'http://rdfh.ch/projects/0807';
+
+    const props = {};
+
+    if (data.shortname !== null && data.shortname !== undefined && data.shortname !== '') {
+      const shortnameVal = new CreateTextValueAsString();
+      shortnameVal.text = data.shortname;
+      props[this.mlsOntology + 'hasShortname'] = [
+        shortnameVal
+      ];
+    }
+
+    if (data.citationForm !== null && data.citationForm !== undefined && data.citationForm !== '') {
+      const citationFormVal = new CreateTextValueAsString();
+      citationFormVal.text = data.citationForm;
+      props[this.mlsOntology + 'hasCitationForm'] = [
+        citationFormVal
+      ];
+    }
+
+    if (data.comment !== null && data.comment !== undefined && data.comment !== '') {
+      const commentVal = new CreateTextValueAsString();
+      commentVal.text = data.comment;
+      props[this.mlsOntology + 'hasLexiconComment'] = [
+        commentVal
+      ];
+    }
+
+    if (data.year !== null && data.year !== undefined && data.year !== '') {
+      const yearVal = new CreateTextValueAsString();
+      yearVal.text = data.year;
+      props[this.mlsOntology + 'hasYear'] = [
+        yearVal
+      ];
+    }
+
+    if (data.weblink !== null && data.weblink !== undefined && data.weblink !== '') {
+      const weblinkVal = new CreateUriValue();
+      weblinkVal.uri = data.weblink;
+      props[this.mlsOntology + 'hasLexiconWeblink'] = [
+        weblinkVal
+      ];
+    }
+
+    if (data.library !== null && data.library !== undefined &&
+        data.library !== '' && data.libraryIri !== undefined) {
+      const libraryVal = new CreateLinkValue();
+      libraryVal.linkedResourceIri = data.libraryIri;
+      props[this.mlsOntology + 'hasLibrary'] = [
+        libraryVal
+      ];
+    }
+
+    if (data.scanFinished !== null && data.scanFinished !== undefined && data.scanFinished !== '') {
+      const scanFinishedVal = new CreateTextValueAsString();
+      scanFinishedVal.text = data.scanFinished;
+      props[this.mlsOntology + 'hasScanFinished'] = [
+        scanFinishedVal
+      ];
+    }
+
+    if (data.scanVendor !== null && data.scanVendor !== undefined && data.scanVendor !== '') {
+      const scanVendorVal = new CreateTextValueAsString();
+      scanVendorVal.text = data.scanVendor;
+      props[this.mlsOntology + 'hasScanVendor'] = [
+        scanVendorVal
+      ];
+    }
+
+    if (data.ocrFinished !== null && data.ocrFinished !== undefined && data.ocrFinished !== '') {
+      const ocrFinishedVal = new CreateTextValueAsString();
+      ocrFinishedVal.text = data.ocrFinished;
+      props[this.mlsOntology + 'hasOCRFinished'] = [
+        ocrFinishedVal
+      ];
+    }
+
+    if (data.ocrVendor !== null && data.ocrVendor !== undefined && data.ocrVendor !== '') {
+      const ocrVendorVal = new CreateTextValueAsString();
+      ocrVendorVal.text = data.ocrVendor;
+      props[this.mlsOntology + 'hasOCRVendor'] = [
+        ocrVendorVal
+      ];
+    }
+
+    if (data.editFinished !== null && data.editFinished !== undefined && data.editFinished !== '') {
+      const editFinishedVal = new CreateTextValueAsString();
+      editFinishedVal.text = data.editFinished;
+      props[this.mlsOntology + 'hasEditFinished'] = [
+        editFinishedVal
+      ];
+    }
+
+    if (data.editVendor !== null && data.editVendor !== undefined && data.editVendor !== '') {
+      const editVendorVal = new CreateTextValueAsString();
+      editVendorVal.text = data.editVendor;
+      props[this.mlsOntology + 'hasEditFinished'] = [
+        editVendorVal
+      ];
+    }
+
+    createResource.properties = props;
+
+    return this.knoraApiConnection.v2.res.createResource(createResource).pipe(
+      map((res: ReadResource) => {
+        return res.id;
+      }),
+      catchError((error: ApiResponseError) => {
+        return of('error'); }
+      )
+    );
+
+  }
+
+  createNews(data: News): Observable<string> {
+    const createResource = new CreateResource();
+    createResource.label = data.label;
+    createResource.type = this.mlsOntology + 'Newsitem';
+    createResource.attachedToProject = 'http://rdfh.ch/projects/0807';
+
+    const props = {};
+
+    if (data.title !== null && data.title !== undefined && data.title !== '') {
+      const textVal = new CreateTextValueAsString();
+      textVal.text = data.title;
+      props[this.mlsOntology + 'hasNewsTitle'] = [
+        textVal
+      ];
+    }
+
+    const stillImageValue = new CreateStillImageFileValue();
+    stillImageValue.filename = data.imageid;
+    props[Constants.HasStillImageFileValue] = [
+      stillImageValue
+    ];
+
+    if (data.text !== null && data.text !== undefined && data.text !== '') {
+      const textVal = new CreateTextValueAsString();
+      textVal.text = data.text;
+      props[this.mlsOntology + 'hasNewsText'] = [
+        textVal
+      ];
+    }
+    if (data.activeDateStart !== null && data.activeDateStart !== undefined &&
+      data.activeDateEnd !== null && data.activeDateEnd !== undefined) {
+      const dateVal = new CreateDateValue();
+      const start: Date = data.activeDateStart;
+      dateVal.calendar = 'GREGORIAN';
+      dateVal.startYear = start.getFullYear();
+      dateVal.startMonth = start.getMonth() + 1;
+      dateVal.startDay = start.getDate();
+      dateVal.startEra = 'CE';
+      const end: Date = data.activeDateEnd;
+      dateVal.endYear = end.getFullYear();
+      dateVal.endMonth = end.getMonth() + 1;
+      dateVal.endDay = end.getDate();
+      dateVal.endEra = 'CE';
+      props[this.mlsOntology + 'hasNewitemActiveDate'] = [
+        dateVal
+      ];
+    }
+
+    if (data.lemmaIri !== null && data.lemmaIri !== undefined && data.lemmaIri !== '') {
+      const lemmaVal = new CreateLinkValue();
+      lemmaVal.linkedResourceIri = data.lemmaIri;
+      props[this.mlsOntology + 'hasNewsitemLinkToLemmaValue'] = [
+        lemmaVal
+      ];
+    }
+
+    if (data.weblink !== null && data.weblink !== undefined && data.weblink !== '') {
+      const weblinkVal = new CreateUriValue();
+      weblinkVal.uri = data.weblink;
+      props[this.mlsOntology + 'hasNewsitemWeblink'] = [
+        weblinkVal
+      ];
+    }
+
+    createResource.properties = props;
+
+    return this.knoraApiConnection.v2.res.createResource(createResource).pipe(
+      map((res: ReadResource) => {
+        return res.id;
+      }),
+      catchError((error: ApiResponseError) => {
+        return of('error'); }
+      )
+    );
+  }
+
   /**
    * creates a new text value
    * @param resId Resource id (IRI)
@@ -880,7 +1222,133 @@ export class KnoraService {
     const deleteVal = new DeleteValue();
 
     deleteVal.id = valId;
-    deleteVal.type = 'http://api.knora.org/ontology/knora-api/v2#TextValue';
+    deleteVal.id = Constants.TextValue;
+
+    const updateResource = new UpdateResource<DeleteValue>();
+    updateResource.id = resId;
+    updateResource.type = resType;
+    updateResource.property = property;
+    updateResource.value = deleteVal;
+
+    return this.knoraApiConnection.v2.values.deleteValue(updateResource).pipe(
+      map((res: DeleteValueResponse) => {
+        return 'OK';
+      }),
+      catchError((error: ApiResponseError) => {
+        return of('ERROR');
+      })
+    );
+  }
+
+  createUriValue(resId: string, resType: string, property: string, uri: string): Observable<string> {
+    const createUriVal = new CreateUriValue();
+    createUriVal.uri = uri;
+
+    const createResource = new UpdateResource<CreateValue>();
+    createResource.id = resId;
+    createResource.type = resType;
+    createResource.property = property;
+    createResource.value = createUriVal;
+
+    return this.knoraApiConnection.v2.values.createValue(createResource).pipe(
+      map((res: WriteValueResponse) => {
+        return 'OK';
+      }),
+      catchError((error: ApiResponseError) => {
+        return of('ERROR');
+      })
+    );
+  }
+
+  updateUriValue(resId: string, resType: string, valId: string, property: string, uri: string): Observable<string> {
+    const updateUriVal = new UpdateUriValue();
+    updateUriVal.id = valId;
+    updateUriVal.uri = uri;
+
+    const updateResource = new UpdateResource<UpdateValue>();
+    updateResource.id = resId;
+    updateResource.type = resType;
+    updateResource.property = property;
+    updateResource.value = updateUriVal;
+
+    return this.knoraApiConnection.v2.values.updateValue(updateResource).pipe(
+      map((res: WriteValueResponse) => {
+        return 'OK';
+      }),
+      catchError((error: ApiResponseError) => {
+        return of('ERROR');
+      })
+    );
+  }
+
+  deleteUriValue(resId: string, resType: string, valId: string, property: string): Observable<string> {
+    const deleteVal = new DeleteValue();
+
+    deleteVal.id = valId;
+    deleteVal.type = Constants.UriValue;
+
+    const updateResource = new UpdateResource<DeleteValue>();
+    updateResource.id = resId;
+    updateResource.type = resType;
+    updateResource.property = property;
+    updateResource.value = deleteVal;
+
+    return this.knoraApiConnection.v2.values.deleteValue(updateResource).pipe(
+      map((res: DeleteValueResponse) => {
+        return 'OK';
+      }),
+      catchError((error: ApiResponseError) => {
+        return of('ERROR');
+      })
+    );
+  }
+
+  createLinkValue(resId: string, resType: string, property: string, iri: string): Observable<string> {
+    const createLinkVal = new CreateLinkValue();
+    createLinkVal.linkedResourceIri = iri;
+
+    const updateResource = new UpdateResource<CreateValue>();
+    updateResource.id = resId;
+    updateResource.type = resType;
+    updateResource.property = property;
+    updateResource.value = createLinkVal;
+
+    return this.knoraApiConnection.v2.values.createValue(updateResource).pipe(
+      map((res: WriteValueResponse) => {
+        return 'OK';
+      }),
+      catchError((error: ApiResponseError) => {
+        return of('ERROR');
+      })
+    );
+  }
+
+  updateLinkValue(resId: string, resType: string, valId: string, property: string, iri: string): Observable<string> {
+    const updateLinkVal = new UpdateLinkValue();
+    updateLinkVal.id = valId;
+    updateLinkVal.linkedResourceIri = iri;
+
+    const updateResource = new UpdateResource<UpdateValue>();
+    updateResource.id = resId;
+    updateResource.type = resType;
+    updateResource.property = property;
+    updateResource.value = updateLinkVal;
+
+    return this.knoraApiConnection.v2.values.updateValue(updateResource).pipe(
+      map((res: WriteValueResponse) => {
+        return 'OK';
+      }),
+      catchError((error: ApiResponseError) => {
+        return of('ERROR');
+      })
+    );
+  }
+
+  deleteLinkValue(resId: string, resType: string, valId: string, property: string): Observable<string> {
+    const deleteVal = new DeleteValue();
+
+    deleteVal.id = valId;
+    deleteVal.type = Constants.LinkValue;
 
     const updateResource = new UpdateResource<DeleteValue>();
     updateResource.id = resId;
@@ -943,7 +1411,7 @@ export class KnoraService {
     const deleteVal = new DeleteValue();
 
     deleteVal.id = valId;
-    deleteVal.type = 'http://api.knora.org/ontology/knora-api/v2#IntValue';
+    deleteVal.type = Constants.IntValue;
 
     const updateResource = new UpdateResource<DeleteValue>();
     updateResource.id = resId;
@@ -1006,7 +1474,7 @@ export class KnoraService {
     const deleteVal = new DeleteValue();
 
     deleteVal.id = valId;
-    deleteVal.type = 'http://api.knora.org/ontology/knora-api/v2#ListValue';
+    deleteVal.type = Constants.ListValue;
 
     const updateResource = new UpdateResource<DeleteValue>();
     updateResource.id = resId;
@@ -1024,11 +1492,156 @@ export class KnoraService {
     );
   }
 
-  updateLabel(resId: string, resType: string, lastmod: string, label: string) {
+  createStillImageValue(resId: string, resType: string, imageId: string): Observable<string> {
+    const createStillImageVal = new CreateStillImageFileValue();
+    createStillImageVal.filename = imageId;
+
+    const createResource = new UpdateResource<CreateValue>();
+    createResource.id = resId;
+    createResource.type = resType;
+    createResource.property = Constants.HasStillImageFileValue;
+    createResource.value = createStillImageVal;
+
+    return this.knoraApiConnection.v2.values.createValue(createResource).pipe(
+      map((res: WriteValueResponse) => {
+        return 'OK';
+      }),
+      catchError((error: ApiResponseError) => {
+        return of('error');
+      })
+    );
+  }
+
+  updateStillImageValue(resId: string, resType: string, valId: string, imageId: string): Observable<string> {
+    const updateStillImageVal = new UpdateStillImageFileValue();
+    updateStillImageVal.id = valId;
+    updateStillImageVal.filename = imageId;
+
+    const updateResource = new UpdateResource<UpdateValue>();
+    updateResource.id = resId;
+    updateResource.type = resType;
+    updateResource.property = Constants.HasStillImageFileValue;
+    updateResource.value = updateStillImageVal;
+
+    return this.knoraApiConnection.v2.values.updateValue(updateResource).pipe(
+      map((res: WriteValueResponse) => {
+        return 'OK';
+      }),
+      catchError((error: ApiResponseError) => {
+        return of('error');
+      })
+    );
+  }
+
+  deleteStillImageValue(resId: string, resType: string, valId: string, ): Observable<string> {
+    const deleteVal = new DeleteValue();
+
+    deleteVal.id = valId;
+    deleteVal.type = Constants.StillImageFileValue;
+
+    const updateResource = new UpdateResource<DeleteValue>();
+    updateResource.id = resId;
+    updateResource.type = resType;
+    updateResource.property = Constants.HasStillImageFileValue;
+    updateResource.value = deleteVal;
+
+    return this.knoraApiConnection.v2.values.deleteValue(updateResource).pipe(
+      map((res: DeleteValueResponse) => {
+        return 'OK';
+      }),
+      catchError((error: ApiResponseError) => {
+        return of('ERROR');
+      })
+    );
+  }
+
+  createDateValue(resId: string, resType: string, property: string,
+                  startDay: number, startMonth: number, startYear: number,
+                  endDay?: number, endMonth?: number, endYear?: number): Observable<string> {
+    const createDateVal = new CreateDateValue();
+    createDateVal.calendar = 'GREGORIAN';
+    createDateVal.startYear = startYear;
+    if (startMonth !== undefined) { createDateVal.startMonth = startMonth; }
+    if (startDay !== undefined) { createDateVal.startDay = startDay; }
+    createDateVal.startEra = 'CE';
+    if (endYear !== undefined) { createDateVal.endYear = endYear; }
+    if (endMonth !== undefined) { createDateVal.endMonth = endMonth; }
+    if (endDay !== undefined) { createDateVal.endDay = endDay; }
+    createDateVal.endEra = 'CE';
+
+    const createResource = new UpdateResource<CreateValue>();
+    createResource.id = resId;
+    createResource.type = resType;
+    createResource.property = property;
+    createResource.value = createDateVal;
+
+    return this.knoraApiConnection.v2.values.createValue(createResource).pipe(
+      map((res: WriteValueResponse) => {
+        return 'OK';
+      }),
+      catchError((error: ApiResponseError) => {
+        return of('error');
+      })
+    );
+  }
+
+  updateDateValue(resId: string, resType: string, valId: string, property: string,
+                  startDay: number, startMonth: number, startYear: number,
+                  endDay?: number, endMonth?: number, endYear?: number): Observable<string> {
+    const updateDateVal = new UpdateDateValue();
+    updateDateVal.id = valId;
+    updateDateVal.calendar = 'GREGORIAN';
+    updateDateVal.startYear = startYear;
+    if (startMonth !== undefined) { updateDateVal.startMonth = startMonth; }
+    if (startDay !== undefined) { updateDateVal.startDay = startDay; }
+    updateDateVal.startEra = 'CE';
+    if (endYear !== undefined) { updateDateVal.endYear = endYear; }
+    if (endMonth !== undefined) { updateDateVal.endMonth = endMonth; }
+    if (endDay !== undefined) { updateDateVal.endDay = endDay; }
+    updateDateVal.endEra = 'CE';
+
+    const updateResource = new UpdateResource<UpdateValue>();
+    updateResource.id = resId;
+    updateResource.type = resType;
+    updateResource.property = property;
+    updateResource.value = updateDateVal;
+
+    return this.knoraApiConnection.v2.values.updateValue(updateResource).pipe(
+      map((res: WriteValueResponse) => {
+        return 'OK';
+      }),
+      catchError((error: ApiResponseError) => {
+        return of('error');
+      })
+    );
+  }
+
+  deleteDateValue(resId: string, resType: string, valId: string, property: string): Observable<string> {
+    const deleteVal = new DeleteValue();
+
+    deleteVal.id = valId;
+    deleteVal.type = Constants.DateValue;
+
+    const updateResource = new UpdateResource<DeleteValue>();
+    updateResource.id = resId;
+    updateResource.type = resType;
+    updateResource.property = property;
+    updateResource.value = deleteVal;
+
+    return this.knoraApiConnection.v2.values.deleteValue(updateResource).pipe(
+      map((res: DeleteValueResponse) => {
+        return 'OK';
+      }),
+      catchError((error: ApiResponseError) => {
+        return of('ERROR');
+      })
+    );
+  }
+
+  updateLabel(resId: string, resType: string, label: string) {
     const updateResourceMetadata = new UpdateResourceMetadata();
     updateResourceMetadata.id = resId;
     updateResourceMetadata.type = resType;
-    updateResourceMetadata.lastModificationDate = lastmod;
     updateResourceMetadata.label = label;
 
     return this.knoraApiConnection.v2.res.updateResourceMetadata(updateResourceMetadata).pipe(

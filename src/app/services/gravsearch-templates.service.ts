@@ -238,7 +238,9 @@ export class GravsearchTemplatesService {
         ?newsitem knora-api:hasStillImageFileValue ?image .
         ?newsitem mls:hasNewsText ?text .
         ?newsitem mls:hasNewitemActiveDate ?date .
+        {{ #if today }}
         FILTER(?date = "{{ today }}"^^knora-api:Date) .
+        {{ #endif }}
         OPTIONAL { ?newsitem mls:hasNewsitemLinkToLemma ?lemma . }
         OPTIONAL { ?newsitem mls:hasNewsitemWeblink ?weblink . }
     } ORDER BY ?date
