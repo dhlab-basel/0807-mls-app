@@ -54,6 +54,8 @@ import {MatNativeDateModule} from '@angular/material/core';
 import {SafePipe} from './pipes/safe.pipe';
 import { NewsitemViewerComponent } from './components/newsitem-viewer/newsitem-viewer.component';
 import { FlexLayoutModule } from '@angular/flex-layout';
+import {MatSnackBarModule} from '@angular/material/snack-bar';
+import {MatProgressSpinnerModule} from "@angular/material/progress-spinner";
 
 export function initializeApp(appInitService: AppInitService) {
   return (): Promise<any> => {
@@ -120,7 +122,9 @@ export function initializeApp(appInitService: AppInitService) {
     MatFileUploadModule,
     MatDatepickerModule,
     MatNativeDateModule,
-    FlexLayoutModule
+    FlexLayoutModule,
+    MatSnackBarModule,
+    MatProgressSpinnerModule
   ],
   providers: [
     AppInitService,

@@ -56,6 +56,11 @@ import {catchError, map} from 'rxjs/operators';
 import {GravsearchTemplatesService} from './gravsearch-templates.service';
 import {insertAfterLastOccurrence} from '@angular/cdk/schematics';
 
+export interface UserData {
+  user: string;
+  token: string;
+}
+
 export class LangString {
   data: {[index: string]: string};
 
@@ -519,6 +524,8 @@ export class KnoraService {
             this.loggedin = true;
             this.useremail = email;
             this.token = apiResponse.body.token;
+            localStorage.setItem('useremail', email);
+            localStorage.setItem('token', apiResponse.body.token);
             return {success: true, token: apiResponse.body.token, user: email};
           } else {
             return {success: false, token: response, user: '-'};
@@ -537,11 +544,30 @@ export class KnoraService {
           this.loggedin = false;
           this.useremail = '';
           this.token = undefined;
+          localStorage.removeItem('useremail');
+          localStorage.removeItem('token');
           return apiResponse.body.message;
         } else {
           return response;
         }
       }));
+  }
+
+  restoreToken(): UserData | undefined {
+    const user = localStorage.getItem('useremail');
+    if (user === null) {
+      return undefined;
+    }
+    const token = localStorage.getItem('token');
+    if (token === null) {
+      return undefined;
+    }
+    this.knoraApiConnection.v2.auth.jsonWebToken = token;
+    this.loggedin = true;
+    this.useremail = user;
+    this.token = token;
+
+    return {user, token};
   }
 
   getOntology(iri: string): Observable<ReadOntology> {
@@ -1154,10 +1180,7 @@ export class KnoraService {
     return this.knoraApiConnection.v2.res.createResource(createResource).pipe(
       map((res: ReadResource) => {
         return res.id;
-      }),
-      catchError((error: ApiResponseError) => {
-        return of('error'); }
-      )
+      })
     );
   }
 

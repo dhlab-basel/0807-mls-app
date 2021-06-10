@@ -1,8 +1,8 @@
 {
-  "protocol": "http",
-  "server": "http://0.0.0.0:3333",
-  "ontologyPrefix": "http://0.0.0.0:3333",
-  "servername": "0.0.0.0",
+  "protocol": "https",
+  "server": "https://api.staging.dasch.swiss:443",
+  "ontologyPrefix": "http://api.staging.dasch.swiss",
+  "servername": "api.staging.dasch.swiss",
   "project": "http://rdfh.ch/projects/0807",
-  "port": 3333
+  "port": 443
 }
