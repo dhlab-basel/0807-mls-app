@@ -625,6 +625,7 @@ export class KnoraService {
         return {
           id: data.id,
           label: data.label,
+          arkUrl: data.arkUrl,
           permission: data.userHasPermission,
           lastmod: data.lastModificationDate || '',
           properties: this.processResourceProperties(data)};
@@ -1245,7 +1246,7 @@ export class KnoraService {
     const deleteVal = new DeleteValue();
 
     deleteVal.id = valId;
-    deleteVal.id = Constants.TextValue;
+    deleteVal.type = Constants.TextValue;
 
     const updateResource = new UpdateResource<DeleteValue>();
     updateResource.id = resId;

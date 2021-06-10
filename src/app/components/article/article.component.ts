@@ -11,14 +11,22 @@ import {SafePipe} from '../../pipes/safe.pipe';
     <div class="maindiv" layout-fill>
       <mat-card class="maxw">
         <mat-card-title>
-          Artikel
+          {{article.lemma}}
         </mat-card-title>
+        <mat-card-subtitle>
+          (Aus "{{article.lexicon}}")
+        </mat-card-subtitle>
         <mat-card-content>
+          <div *ngIf="article.arkUrl" style="padding-top: 10px;">
+            ARK-ID: {{article.arkUrl}} &nbsp;
+            <button mat-raised-button [cdkCopyToClipboard]="article.arkUrl" matTooltip="In Zwischenablage kopieren"><mat-icon>content_copy</mat-icon></button>
+          </div>
+
           <div [innerHTML]="article.arttext | safe: 'html'"></div>
-          (Seite: {{ article.npages }})<br/>
+          <div *ngIf="article.npages">(Seite: {{ article.npages }})</div>
           <mat-divider></mat-divider>
           <br/>
-          <mat-card-subtitle>
+          <mat-card-subtitle *ngIf="article.fonotecacode || article.hlscode || article.oemlcode || article.theaterlexcode || article.ticinolexcode || article.weblink">
             Links
           </mat-card-subtitle>
           <table>
@@ -30,6 +38,7 @@ import {SafePipe} from '../../pipes/safe.pipe';
             <tr *ngIf="article.weblink"><td>Weblink</td><td>:</td><td><a href="{{article.weblink}}" target="_blank">{{ article.weblink }}</a></td></tr>
           </table>
           <mat-card-actions *ngIf="knoraService.loggedin">
+            <mat-divider></mat-divider>
             <button mat-raised-button (click)="editArticle()">edit</button>
           </mat-card-actions>
 
@@ -62,8 +71,17 @@ export class ArticleComponent implements OnInit {
       this.articleIri = params.iri;
       this.knoraService.getResource(this.articleIri).subscribe((data) => {
         const articledata: {[index: string]: string} = {};
+        articledata.arkUrl = data.arkUrl || '';
         for (const ele of data.properties) {
           switch (ele.propname) {
+            case this.knoraService.mlsOntology + 'hasALinkToLemmaValue': {
+              articledata.lemma = ele.values[0];
+              break;
+            }
+            case this.knoraService.mlsOntology + 'hasALinkToLexiconValue': {
+              articledata.lexicon = ele.values[0];
+              break;
+            }
             case this.knoraService.mlsOntology + 'hasArticleText': {
               const regex = /<oembed.+?url="https?:\/\/www\.youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})"><\/oembed>/g;
               articledata.arttext = ele.values[0].replace(/\\n/g, '<br />');
