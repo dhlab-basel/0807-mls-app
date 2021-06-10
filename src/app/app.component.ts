@@ -21,13 +21,6 @@ export class AppComponent implements OnInit {
 
   constructor(public dialog: MatDialog,
               public knoraService: KnoraService) {
-    console.log('app.component.constructor() !!!!');
-    const udata = this.knoraService.restoreToken();
-    console.log('udata=', udata);
-    if (udata !== undefined) {
-      this.logininfo = udata.user;
-      this.loggedin = true;
-    }
   }
 
   private openLoginDialog(): void {
@@ -56,9 +49,7 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit() {
-    console.log('app.component.ngOnInit() !!!!');
     const udata = this.knoraService.restoreToken();
-    console.log('udata=', udata);
     if (udata !== undefined) {
       this.logininfo = udata.user;
       this.loggedin = true;

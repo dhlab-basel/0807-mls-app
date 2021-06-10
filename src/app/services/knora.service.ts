@@ -524,8 +524,8 @@ export class KnoraService {
             this.loggedin = true;
             this.useremail = email;
             this.token = apiResponse.body.token;
-            localStorage.setItem('useremail', email);
-            localStorage.setItem('token', apiResponse.body.token);
+            sessionStorage.setItem('useremail', email);
+            sessionStorage.setItem('token', apiResponse.body.token);
             return {success: true, token: apiResponse.body.token, user: email};
           } else {
             return {success: false, token: response, user: '-'};
@@ -544,8 +544,8 @@ export class KnoraService {
           this.loggedin = false;
           this.useremail = '';
           this.token = undefined;
-          localStorage.removeItem('useremail');
-          localStorage.removeItem('token');
+          sessionStorage.removeItem('useremail');
+          sessionStorage.removeItem('token');
           return apiResponse.body.message;
         } else {
           return response;
@@ -554,11 +554,11 @@ export class KnoraService {
   }
 
   restoreToken(): UserData | undefined {
-    const user = localStorage.getItem('useremail');
+    const user = sessionStorage.getItem('useremail');
     if (user === null) {
       return undefined;
     }
-    const token = localStorage.getItem('token');
+    const token = sessionStorage.getItem('token');
     if (token === null) {
       return undefined;
     }
