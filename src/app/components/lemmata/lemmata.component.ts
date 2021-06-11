@@ -12,7 +12,9 @@ import {EditlemComponent} from '../editlem/editlem.component';
   template: `
     <div class="maindiv" layout-fill>
       <mat-card>
-        <app-lexicon [lexiconIri]="lexiconIri"></app-lexicon>
+        <div *ngIf="lexiconIri">
+          <app-lexicon [lexiconIri]="lexiconIri"></app-lexicon>
+        </div>
         <mat-card-title>
           Stichworte
         </mat-card-title>
