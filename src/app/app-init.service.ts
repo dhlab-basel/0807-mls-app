@@ -5,6 +5,7 @@ export interface IAppConfig {
   server: string;
   ontologyPrefix: string;
   servername: string;
+  iiifserver: string;
   project: string;
   port: number;
 }

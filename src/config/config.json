@@ -3,6 +3,7 @@
   "server": "https://api.staging.dasch.swiss:443",
   "ontologyPrefix": "http://api.staging.dasch.swiss",
   "servername": "api.staging.dasch.swiss",
+  "iiifserver": "https://iiif.staging.dasch.swiss",
   "project": "http://rdfh.ch/projects/0807",
   "port": 443
 }

@@ -1,8 +1,8 @@
 import {Component, ElementRef, Input, OnInit, ViewChild} from '@angular/core';
 import {FormBuilder, FormGroup, Validators} from '@angular/forms';
-import {ArticleData, KnoraService, LinkPropertyData, News, StillImagePropertyData} from '../../services/knora.service';
+import {ArticleData, KnoraService, LinkPropertyData, News, StillImagePropertyData, UploadedFileData} from '../../services/knora.service';
 // import {AppComponent} from '../../app.component';
-import {HttpClient, HttpEventType} from '@angular/common/http';
+// import {HttpClient, HttpEventType} from '@angular/common/http';
 // import {finalize} from 'rxjs/operators';
 import * as ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import {combineLatest, forkJoin, Observable} from 'rxjs';
@@ -217,7 +217,6 @@ export class EditnewsComponent implements OnInit {
   working: boolean;
 
   constructor(public knoraService: KnoraService,
-              private http: HttpClient,
               private fb: FormBuilder,
               public route: ActivatedRoute,
               private dateAdapter: DateAdapter<Date>,
@@ -337,6 +336,15 @@ export class EditnewsComponent implements OnInit {
 
     if (file) {
       this.filename = file.name;
+      this.knoraService.uploadFile(file).subscribe(
+        (data: UploadedFileData) => {
+          this.temporaryUrl = data.temporaryUrl + '/full/^!256,256/0/default.jpg';
+          this.form.value.imageid = data.internalFilename;
+          this.form.controls.imageid.setValue(data.internalFilename);
+          this.valIds.imageid.changed = true;
+        }
+      );
+      /*
       const formData = new FormData();
       formData.append('file', file);
       this.http.post('https://iiif.test.dasch.swiss/upload?token=' + encodeURIComponent(this.knoraService.token || ''),
@@ -346,6 +354,7 @@ export class EditnewsComponent implements OnInit {
           this.form.controls.imageid.setValue(x.uploadedFiles[0].internalFilename);
           this.valIds.imageid.changed = true;
         });
+       */
     }
   }
 

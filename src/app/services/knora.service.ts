@@ -55,6 +55,7 @@ import {Observable, of} from 'rxjs';
 import {catchError, map} from 'rxjs/operators';
 import {GravsearchTemplatesService} from './gravsearch-templates.service';
 import {insertAfterLastOccurrence} from '@angular/cdk/schematics';
+import {HttpClient, HttpEventType} from '@angular/common/http';
 
 export interface UserData {
   user: string;
@@ -321,6 +322,11 @@ export interface OptionType {
   name: string;
 }
 
+export interface UploadedFileData {
+  temporaryUrl: string;
+  internalFilename;
+}
+
 
 @Injectable({
   providedIn: 'root'
@@ -346,12 +352,14 @@ export class KnoraService {
 
   constructor(
     private appInitService: AppInitService,
-    private queryTemplates: GravsearchTemplatesService
+    private queryTemplates: GravsearchTemplatesService,
+    private http: HttpClient
   ) {
     const protocol = this.appInitService.getSettings().protocol;
     const servername = this.appInitService.getSettings().servername;
     const port = this.appInitService.getSettings().port;
     const config = new KnoraApiConfig(protocol, servername, port, undefined, undefined, true);
+    const iiifserver = this.appInitService.getSettings().iiifserver;
     this.knoraApiConnection = new KnoraApiConnection(config);
     this.mlsOntology = appInitService.getSettings().ontologyPrefix + '/ontology/0807/mls/v2#';
     this.loggedin = false;
@@ -512,7 +520,7 @@ export class KnoraService {
   }
 
 
-    login(email: string, password: string): Observable<{success: boolean, token: string, user: string}> {
+  login(email: string, password: string): Observable<{ success: boolean, token: string, user: string }> {
     return this.knoraApiConnection.v2.auth.login('email', email, password)
       .pipe(
         catchError((err) => {
@@ -568,6 +576,21 @@ export class KnoraService {
     this.token = token;
 
     return {user, token};
+  }
+
+  uploadFile(file: File): Observable<UploadedFileData> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post(this.appInitService.getSettings().iiifserver + '/upload?token=' + encodeURIComponent(this.token || ''),
+      formData).pipe(
+        map((data: any)  => {
+          const tmp: UploadedFileData = {
+            temporaryUrl: data.uploadedFiles[0].temporaryUrl,
+            internalFilename: data.uploadedFiles[0].internalFilename
+          };
+          return tmp;
+        })
+    );
   }
 
   getOntology(iri: string): Observable<ReadOntology> {

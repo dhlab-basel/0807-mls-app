@@ -3,6 +3,8 @@ import { Component, OnInit } from '@angular/core';
 @Component({
   selector: 'app-theproject',
   template: `
+    <div class="maindiv" layout-fill>
+      <mat-grid-list cols="1">
     <mat-card>
       <mat-card-title>Wir brauchen Sie!</mat-card-title>
       <mat-card-content>
@@ -30,18 +32,15 @@ import { Component, OnInit } from '@angular/core';
         Kooperationspartner
       </mat-card-title>
       <mat-card-content>
-        <mat-grid-list cols="4" rowHeight>
+        <mat-grid-list cols="2" rowHeight>
           <mat-grid-tile>
             <img mat-card-image src="../assets/logo-sagw.svg" class="fit" style="padding: 100px;"/>
-          </mat-grid-tile>
-          <mat-grid-tile>
-            <img mat-card-image src="../assets/DaSCH_Logo_RGB.png" class="fit" style="padding: 100px;"/>
           </mat-grid-tile>
           <mat-grid-tile>
             <img mat-card-image src="../assets/Unibe_Logo_16pt_RGB_201807_o_R_l.png" class="fit" style="padding: 100px;"/>
           </mat-grid-tile>
           <mat-grid-tile>
-            <img mat-card-image src="../assets/metagrid_logo-250@2x.png" class="fit" style="padding: 100px;"/>
+            <img mat-card-image src="../assets/DaSCH_Logo_RGB.png" class="fit" style="padding: 100px;"/>
           </mat-grid-tile>
           <mat-grid-tile>
             <img mat-card-image src="../assets/histhub.svg" class="fit" style="padding: 100px;"/>
@@ -55,13 +54,22 @@ import { Component, OnInit } from '@angular/core';
           <mat-grid-tile>
             <img mat-card-image src="../assets/EDI_NB_df_CMYK_pos_hoch.png" class="fit" style="padding: 100px;"/>
           </mat-grid-tile>
+          <mat-grid-tile>
+            <img mat-card-image src="../assets/metagrid_logo-250@2x.png" class="fit" style="padding: 100px;"/>
+          </mat-grid-tile>
         </mat-grid-list>
         <p>Logo Design: Margrit Hänni</p>
       </mat-card-content>
     </mat-card>
+      </mat-grid-list>
+    </div>
+
   `,
   styles: [
-    'img.fit {max-width: 100%; height: auto;}'
+    'img.fit {max-width: 100%; height: auto; margin: 3em;}',
+    '.maindiv {display: flex; justify-content: center; align-items: center;}',
+    '.mat-card {max-width: 800px; margin: 3em;}',
+    '.mat-card-subtitle {font-size: 16px; font-weight: bold;}',
   ]
 })
 export class TheprojectComponent implements OnInit {

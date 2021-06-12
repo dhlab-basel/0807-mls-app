@@ -5,16 +5,19 @@ import {KnoraService} from '../../services/knora.service';
 @Component({
   selector: 'app-lexica',
   template: `
-    <mat-card>
+    <div class="maindiv" layout-fill>
+      <mat-card>
         <mat-card-title>
           Für das MLS ausgewertete Lexika
         </mat-card-title>
-        <mat-card-subtitle>
-          <p>Das Musiklexikon der Schweiz greift auf eine Vielzahl bereits bestehender
+          <div>Das Musiklexikon der Schweiz greift auf eine Vielzahl bereits bestehender
           (teilweise gemeinfreier) Lexika zurück. Eine Liste dieser Lexika sehen Sie hier
           aufgelistet. Es ist möglich die Lexika einzeln aufzurufen und separat zu durchsuchen.
           Jedoch sind nicht alle Lexika in gleicher Detailtiefe erfasst. Einige sind in
-            Volltexten verfügbar, andere nur als Stichwortliste einsehbar.</p>
+            Volltexten verfügbar, andere nur als Stichwortliste einsehbar.
+          </div>
+        <br/>
+        <mat-divider></mat-divider>
           Legende:<br/>
           * = digitalisiertes Lexikon<br/>
           ° = Online Lexikon<br/>
@@ -23,7 +26,6 @@ import {KnoraService} from '../../services/knora.service';
           <div  *ngIf="allowEdit">
             <button mat-raised-button (click)="addLexicon()">Add Lexicon</button>
           </div>
-        </mat-card-subtitle>
         <mat-card-content>
             <mat-progress-bar mode="indeterminate" *ngIf="showProgbar"></mat-progress-bar>
             <table mat-table [dataSource]="lexica">
@@ -52,9 +54,13 @@ import {KnoraService} from '../../services/knora.service';
 
 
         </mat-card-content>
-    </mat-card>
+      </mat-card>
+    </div>
   `,
   styles: [
+    '.maindiv {display: flex; justify-content: center; align-items: center;}',
+    '.mat-card {max-width: 900px; margin: 3em;}',
+    '.mat-card-subtitle {font-size: 16px; font-weight: bold;}',
     'td.mat-cell {padding-left: 10px; padding-right:20px;}',
     'tr.mat-row {height: 24px;}',
     '.clickable {cursor: pointer;}'
