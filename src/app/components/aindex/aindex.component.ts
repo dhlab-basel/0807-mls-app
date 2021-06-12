@@ -15,7 +15,7 @@ import {
     </mat-button-toggle-group>
   `,
   styles: [
-    'mat-button-toggle {width: 25px;}'
+    'mat-button-toggle-group {flex-wrap: wrap;}'
   ]
 })
 
