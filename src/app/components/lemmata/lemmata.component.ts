@@ -24,10 +24,9 @@ import {EditlemComponent} from '../editlem/editlem.component';
             Sie können das Lexikon alphabetisch durchblättern oder gezielt durchsuchen.
             Vorsicht: Bislang verbirgt sich noch nicht hinter jedem Eintrag ein vollwertiger Artikel.
             Wir arbeiten daran!
-            <br/>
-            <div  *ngIf="allowEdit">
-              <button mat-raised-button (click)="addLemma()">Add Lemma</button>
-            </div>
+          </div>
+          <div  *ngIf="allowEdit">
+            <button mat-raised-button (click)="addLemma()">Add Lemma</button>
           </div>
           <form (submit)="searchEvent($event)" (keyup.enter)="searchEvent($event)">
             <mat-form-field>

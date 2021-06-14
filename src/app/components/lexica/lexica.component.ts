@@ -10,15 +10,15 @@ import {KnoraService} from '../../services/knora.service';
         <mat-card-title>
           Für das MLS ausgewertete Lexika
         </mat-card-title>
-          <div>Das Musiklexikon der Schweiz greift auf eine Vielzahl bereits bestehender
-          (teilweise gemeinfreier) Lexika zurück. Eine Liste dieser Lexika sehen Sie hier
-          aufgelistet. Es ist möglich die Lexika einzeln aufzurufen und separat zu durchsuchen.
-          Jedoch sind nicht alle Lexika in gleicher Detailtiefe erfasst. Einige sind in
+        <mat-card-content>
+            Das Musiklexikon der Schweiz greift auf eine Vielzahl bereits bestehender
+            (teilweise gemeinfreier) Lexika zurück. Eine Liste dieser Lexika sehen Sie hier
+            aufgelistet. Es ist möglich die Lexika einzeln aufzurufen und separat zu durchsuchen.
+            Jedoch sind nicht alle Lexika in gleicher Detailtiefe erfasst. Einige sind in
             Volltexten verfügbar, andere nur als Stichwortliste einsehbar.
-          </div>
-        <br/>
-        <mat-divider></mat-divider>
-          Legende:<br/>
+        </mat-card-content>
+        <mat-card-subtitle>Legende:</mat-card-subtitle>
+        <mat-card-content>
           * = digitalisiertes Lexikon<br/>
           ° = Online Lexikon<br/>
           / = gedrucktes Lexikon, es wird nur die Liste der Stichworte mitgeteilt<br/>
@@ -26,33 +26,30 @@ import {KnoraService} from '../../services/knora.service';
           <div  *ngIf="allowEdit">
             <button mat-raised-button (click)="addLexicon()">Add Lexicon</button>
           </div>
-        <mat-card-content>
-            <mat-progress-bar mode="indeterminate" *ngIf="showProgbar"></mat-progress-bar>
-            <table mat-table [dataSource]="lexica">
-                <ng-container matColumnDef="lexicon_shortname">
-                    <th mat-header-cell *matHeaderCellDef> Kürzel </th>
-                    <td mat-cell *matCellDef="let element"> {{element[1]}} </td>
-                </ng-container>
-                <ng-container matColumnDef="lexicon_citation">
-                    <th mat-header-cell *matHeaderCellDef> Zitierform </th>
-                    <td mat-cell *matCellDef="let element"> {{element[2]}} </td>
-                </ng-container>
-                <ng-container matColumnDef="lexicon_year">
-                    <th mat-header-cell *matHeaderCellDef> Jahr </th>
-                    <td mat-cell *matCellDef="let element"> {{element[3]}} </td>
-                </ng-container>
-                <tr mat-header-row *matHeaderRowDef="columnsToDisplay"></tr>
-                <tr mat-row *matRowDef="let row; columns: columnsToDisplay;" (click)="lexiconSelected(row)" class="clickable"></tr>
-            </table>
+          <mat-progress-bar mode="indeterminate" *ngIf="showProgbar"></mat-progress-bar>
+          <table mat-table [dataSource]="lexica">
+            <ng-container matColumnDef="lexicon_shortname">
+              <th mat-header-cell *matHeaderCellDef> Kürzel </th>
+              <td mat-cell *matCellDef="let element"> {{element[1]}} </td>
+            </ng-container>
+            <ng-container matColumnDef="lexicon_citation">
+              <th mat-header-cell *matHeaderCellDef> Zitierform </th>
+              <td mat-cell *matCellDef="let element"> {{element[2]}} </td>
+            </ng-container>
+            <ng-container matColumnDef="lexicon_year">
+              <th mat-header-cell *matHeaderCellDef> Jahr </th>
+              <td mat-cell *matCellDef="let element"> {{element[3]}} </td>
+            </ng-container>
+            <tr mat-header-row *matHeaderRowDef="columnsToDisplay"></tr>
+            <tr mat-row *matRowDef="let row; columns: columnsToDisplay;" (click)="lexiconSelected(row)" class="clickable"></tr>
+          </table>
 
-            <mat-paginator *ngIf="nLexica > 25" [length]="nLexica"
-                           [pageIndex]="page"
-                           [pageSize]="25"
-                           [pageSizeOptions]="[25]"
-                           (page)="pageChanged($event)">
-            </mat-paginator>
-
-
+          <mat-paginator *ngIf="nLexica > 25" [length]="nLexica"
+                         [pageIndex]="page"
+                         [pageSize]="25"
+                         [pageSizeOptions]="[25]"
+                         (page)="pageChanged($event)">
+          </mat-paginator>
         </mat-card-content>
       </mat-card>
     </div>
