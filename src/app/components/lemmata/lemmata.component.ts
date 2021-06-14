@@ -10,70 +10,71 @@ import {EditlemComponent} from '../editlem/editlem.component';
 @Component({
   selector: 'app-lemmata',
   template: `
-    <mat-card *ngIf="lexiconIri">
-      <app-lexicon [lexiconIri]="lexiconIri"></app-lexicon>
-    </mat-card>
-    <mat-card>
-      <mat-card-title>
-        Stichworte
-      </mat-card-title>
-      <mat-card-subtitle>
-        Auf dieser Seite finden Sie eine Übersicht über alle im MLS verzeichneten Stichwörter/Lemmata.
-        Sie können das Lexikon alphabetisch durchblättern oder gezielt durchsuchen.
-        Vorsicht: Bislang verbirgt sich noch nicht hinter jedem Eintrag ein vollwertiger Artikel.
-        Wir arbeiten daran!
-        <br/>
-        <div  *ngIf="allowEdit">
-          <button mat-raised-button (click)="addLemma()">Add Lemma</button>
+    <div class="maindiv" layout-fill>
+      <mat-card>
+        <div *ngIf="lexiconIri">
+          <app-lexicon [lexiconIri]="lexiconIri"></app-lexicon>
         </div>
+        <mat-card-title>
+          Stichworte
+        </mat-card-title>
+        <mat-card-content>
+          <div>
+            Auf dieser Seite finden Sie eine Übersicht über alle im MLS verzeichneten Stichwörter/Lemmata.
+            Sie können das Lexikon alphabetisch durchblättern oder gezielt durchsuchen.
+            Vorsicht: Bislang verbirgt sich noch nicht hinter jedem Eintrag ein vollwertiger Artikel.
+            Wir arbeiten daran!
+          </div>
+          <div  *ngIf="allowEdit">
+            <button mat-raised-button (click)="addLemma()">Add Lemma</button>
+          </div>
+          <form (submit)="searchEvent($event)" (keyup.enter)="searchEvent($event)">
+            <mat-form-field>
+              <input #searchField
+                     name="searchterm"
+                     [value]="searchterm"
+                     matInput
+                     type="search"
+                     placeholder="Stichwortsuche"/>
+              <mat-icon matSuffix class="clickable" (click)="searchEvent($event)">search</mat-icon>
+              <mat-icon matSuffix class="clickable" (click)="searchCancel($event)">cancel</mat-icon>
+              <mat-hint>Suche</mat-hint>
+            </mat-form-field>
+          </form>
+          <app-aindex *ngIf="showAindex" [activeChar]="startchar" (charChange)='charChanged($event)'></app-aindex>
+          <mat-progress-bar mode="indeterminate" *ngIf="showProgbar"></mat-progress-bar>
+          <table mat-table layout-fill [dataSource]="lemmata">
+            <ng-container matColumnDef="lemma_text">
+              <th mat-header-cell *matHeaderCellDef> Stichwort</th>
+              <td mat-cell *matCellDef="let element"> {{element[1]}} </td>
+            </ng-container>
+            <ng-container matColumnDef="lemma_start">
+              <th mat-header-cell *matHeaderCellDef> Von</th>
+              <td mat-cell *matCellDef="let element"> {{element[2]}} </td>
+            </ng-container>
+            <ng-container matColumnDef="lemma_end">
+              <th mat-header-cell *matHeaderCellDef> Bis</th>
+              <td mat-cell *matCellDef="let element"> {{element[3]}} </td>
+            </ng-container>
+            <tr mat-header-row *matHeaderRowDef="columnsToDisplay"></tr>
+            <tr mat-row *matRowDef="let row; columns: columnsToDisplay;" (click)="lemmaSelected(row)"
+                class="clickable"></tr>
+          </table>
 
-
-      </mat-card-subtitle>
-      <mat-card-content>
-        <form (submit)="searchEvent($event)" (keyup.enter)="searchEvent($event)">
-          <mat-form-field>
-            <input #searchField
-                   name="searchterm"
-                   [value]="searchterm"
-                   matInput
-                   type="search"
-                   placeholder="Stichwortsuche"/>
-            <mat-icon matSuffix class="clickable" (click)="searchEvent($event)">search</mat-icon>
-            <mat-icon matSuffix class="clickable" (click)="searchCancel($event)">cancel</mat-icon>
-            <mat-hint>Suche</mat-hint>
-          </mat-form-field>
-        </form>
-        <app-aindex *ngIf="showAindex" [activeChar]="startchar" (charChange)='charChanged($event)'></app-aindex>
-        <mat-progress-bar mode="indeterminate" *ngIf="showProgbar"></mat-progress-bar>
-        <table mat-table [dataSource]="lemmata">
-          <ng-container matColumnDef="lemma_text">
-            <th mat-header-cell *matHeaderCellDef> Stichwort</th>
-            <td mat-cell *matCellDef="let element"> {{element[1]}} </td>
-          </ng-container>
-          <ng-container matColumnDef="lemma_start">
-            <th mat-header-cell *matHeaderCellDef> Von</th>
-            <td mat-cell *matCellDef="let element"> {{element[2]}} </td>
-          </ng-container>
-          <ng-container matColumnDef="lemma_end">
-            <th mat-header-cell *matHeaderCellDef> Bis</th>
-            <td mat-cell *matCellDef="let element"> {{element[3]}} </td>
-          </ng-container>
-          <tr mat-header-row *matHeaderRowDef="columnsToDisplay"></tr>
-          <tr mat-row *matRowDef="let row; columns: columnsToDisplay;" (click)="lemmaSelected(row)"
-              class="clickable"></tr>
-        </table>
-
-        <mat-paginator *ngIf="nLemmata > 25" [length]="nLemmata"
-                       [pageIndex]="page"
-                       [pageSize]="25"
-                       [pageSizeOptions]="[25]"
-                       (page)="pageChanged($event)" showFirstLastButtons>
-        </mat-paginator>
-
-      </mat-card-content>
-    </mat-card>
+          <mat-paginator *ngIf="nLemmata > 25" [length]="nLemmata"
+                         [pageIndex]="page"
+                         [pageSize]="25"
+                         [pageSizeOptions]="[25]"
+                         (page)="pageChanged($event)" showFirstLastButtons>
+          </mat-paginator>
+        </mat-card-content>
+      </mat-card>
+    </div>
   `,
   styles: [
+    '.maindiv {display: flex; justify-content: center; align-items: center;}',
+    '.mat-card {max-width: 900px; margin: 3em;}',
+    '.mat-card-subtitle {font-size: 16px; font-weight: bold;}',
     'td.mat-cell {padding-left: 10px; padding-right:20px;}',
     'tr.mat-row {height: 24px;}',
     '.clickable {cursor: pointer;}'

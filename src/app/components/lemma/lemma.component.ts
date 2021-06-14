@@ -9,52 +9,57 @@ import {ClipboardModule} from '@angular/cdk/clipboard';
 @Component({
   selector: 'app-lemma',
   template: `
-    <mat-card>
-      <mat-card-title>
-        {{ lemma.label }} <span
-        *ngIf="lemma.properties[hasDeceasedValue] && (lemma.properties[hasDeceasedValue].values[0] == 'Ja')">†</span>
-      </mat-card-title>
-      <div *ngIf="lemma.properties[hasVariants]">
-        {{ lemma.properties[hasVariants].label }}:
-        <span *ngFor="let val of lemma.properties[hasVariants].values">{{ val }}</span>
-      </div>
-      <div *ngIf="lemma.properties[hasPseudonym]">
-        {{ lemma.properties[hasPseudonym].label }}:
-        <span *ngFor="let val of lemma.properties[hasPseudonym].values">{{ val }}</span>
-      </div>
-      <div>
-        <span *ngIf="lemma.properties[hasStartDateInfo]">{{ lemma.properties[hasStartDateInfo].values[0] }}</span>
-        <span *ngIf="lemma.properties[hasStartDate]"> {{ lemma.properties[hasStartDate].values[0] }}</span>
-        <span *ngIf="lemma.properties[hasEndDateInfo]">, {{ lemma.properties[hasEndDateInfo].values[0] }}</span>
-        <span *ngIf="lemma.properties[hasEndDate]"> {{ lemma.properties[hasEndDate].values[0] }}</span>
-      </div>
-      <div *ngIf="lemma.properties[hasViaf]">
-        {{lemma.properties[hasViaf].label}}: <a href="http://viaf.org/viaf/{{ lemma.properties[hasViaf].values[0] }}"
-                                                target="_blank">{{ lemma.properties[hasViaf].values[0] }}</a>
-      </div>
-      <div *ngIf="lemma.properties[hasGnd]">
-        {{lemma.properties[hasGnd].label}}: <a href="http://d-nb.info/gnd/{{ lemma.properties[hasGnd].values[0] }}"
-                                               target="_blank">{{ lemma.properties[hasGnd].values[0] }}</a>
-      </div>
-      <div style="padding-top: 10px;">
-        ARK-ID: {{lemma.arkUrl}} &nbsp;
-        <button mat-raised-button [cdkCopyToClipboard]="lemma.arkUrl" matTooltip="In Zwischenablage kopieren"><mat-icon>content_copy</mat-icon></button>
-      </div>
-      <mat-card-actions *ngIf="allowEdit">
-        <button mat-raised-button (click)="editLemma()">Edit Lemma</button>
-        <button mat-raised-button (click)="addArticle()">Add article</button>
-      </mat-card-actions>
-    </mat-card>
-    <mat-card>
-      <mat-card-title>
-        In Lexika:
-      </mat-card-title>
-      <app-lex-from-lemma [lemmaIri]="lemmaIri">
-      </app-lex-from-lemma>
-    </mat-card>
-
+    <div class="maindiv" layout-fill>
+      <mat-card class="maxw">
+        <mat-card-title>
+          {{ lemma.label }} <span
+          *ngIf="lemma.properties[hasDeceasedValue] && (lemma.properties[hasDeceasedValue].values[0] == 'Ja')">†</span>
+        </mat-card-title>
+        <div *ngIf="lemma.properties[hasVariants]">
+          {{ lemma.properties[hasVariants].label }}:
+          <span *ngFor="let val of lemma.properties[hasVariants].values">{{ val }}</span>
+        </div>
+        <div *ngIf="lemma.properties[hasPseudonym]">
+          {{ lemma.properties[hasPseudonym].label }}:
+          <span *ngFor="let val of lemma.properties[hasPseudonym].values">{{ val }}</span>
+        </div>
+        <div>
+          <span *ngIf="lemma.properties[hasStartDateInfo]">{{ lemma.properties[hasStartDateInfo].values[0] }}</span>
+          <span *ngIf="lemma.properties[hasStartDate]"> {{ lemma.properties[hasStartDate].values[0] }}</span>
+          <span *ngIf="lemma.properties[hasEndDateInfo]">, {{ lemma.properties[hasEndDateInfo].values[0] }}</span>
+          <span *ngIf="lemma.properties[hasEndDate]"> {{ lemma.properties[hasEndDate].values[0] }}</span>
+        </div>
+        <div *ngIf="lemma.properties[hasViaf]">
+          {{lemma.properties[hasViaf].label}}: <a href="http://viaf.org/viaf/{{ lemma.properties[hasViaf].values[0] }}"
+                                                  target="_blank">{{ lemma.properties[hasViaf].values[0] }}</a>
+        </div>
+        <div *ngIf="lemma.properties[hasGnd]">
+          {{lemma.properties[hasGnd].label}}: <a href="http://d-nb.info/gnd/{{ lemma.properties[hasGnd].values[0] }}"
+                                                 target="_blank">{{ lemma.properties[hasGnd].values[0] }}</a>
+        </div>
+        <div style="padding-top: 10px;">
+          ARK-ID: {{lemma.arkUrl}} &nbsp;
+          <button mat-raised-button [cdkCopyToClipboard]="lemma.arkUrl" matTooltip="In Zwischenablage kopieren"><mat-icon>content_copy</mat-icon></button>
+        </div>
+        <br/>
+        <mat-divider></mat-divider>
+        <br/>
+        <mat-card-subtitle>
+          In Lexika:
+        </mat-card-subtitle>
+        <app-lex-from-lemma [lemmaIri]="lemmaIri">
+        </app-lex-from-lemma>
+        <mat-card-actions *ngIf="allowEdit">
+          <button mat-raised-button (click)="editLemma()">Edit Lemma</button>
+          <button mat-raised-button (click)="addArticle()">Add article</button>
+        </mat-card-actions>
+      </mat-card>
+    </div>
   `,
   styles: [
+    '.maindiv {display: flex; justify-content: center; align-items: center;}',
+    '.mat-card {max-width: 800px; margin: 3em;}',
+    '.mat-card-subtitle {font-size: 16px; font-weight: bold;}',
     'td.mat-cell {padding-left: 10px; padding-right:20px;}',
     'tr.mat-row {height: 24px;}',
     '.clickable {cursor: pointer;}',

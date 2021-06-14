@@ -13,13 +13,10 @@ import {
     <mat-button-toggle-group #aindexGroup="matButtonToggleGroup" name="aIndex" aria-label="Alpha Index">
         <mat-button-toggle *ngFor="let c of chars" value="{{c}}" (change)="charClicked($event)">{{c}}</mat-button-toggle>
     </mat-button-toggle-group>
-    <!--
-    <p>
-      <button *ngFor="let c of chars" #{{c}} (click)="charClicked(c, $event)">{{c}}</button>
-    </p>
-    -->
   `,
-  styles: []
+  styles: [
+    'mat-button-toggle-group {flex-wrap: wrap;}'
+  ]
 })
 
 export class AindexComponent implements OnInit {

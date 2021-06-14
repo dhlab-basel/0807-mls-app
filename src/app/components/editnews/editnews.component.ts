@@ -1,17 +1,19 @@
 import {Component, ElementRef, Input, OnInit, ViewChild} from '@angular/core';
 import {FormBuilder, FormGroup, Validators} from '@angular/forms';
-import {ArticleData, KnoraService, LinkPropertyData, News, StillImagePropertyData} from '../../services/knora.service';
-import {AppComponent} from '../../app.component';
-import {HttpClient, HttpEventType} from '@angular/common/http';
-import {finalize} from 'rxjs/operators';
+import {ArticleData, KnoraService, LinkPropertyData, News, StillImagePropertyData, UploadedFileData} from '../../services/knora.service';
+// import {AppComponent} from '../../app.component';
+// import {HttpClient, HttpEventType} from '@angular/common/http';
+// import {finalize} from 'rxjs/operators';
 import * as ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import {combineLatest, forkJoin, Observable} from 'rxjs';
 import {ActivatedRoute} from '@angular/router';
 import { DateAdapter } from '@angular/material/core';
-import { MomentDateModule, MomentDateAdapter } from '@angular/material-moment-adapter';
+// import { MomentDateModule, MomentDateAdapter } from '@angular/material-moment-adapter';
 import {Constants} from '@dasch-swiss/dsp-js';
 import {Location} from '@angular/common';
-import {MatAutocompleteModule} from '@angular/material/autocomplete';
+// import {MatAutocompleteModule} from '@angular/material/autocomplete';
+import {MatSnackBar} from '@angular/material/snack-bar';
+// import {MatProgressSpinner} from '@angular/material/progress-spinner';
 
 interface ValInfo {
   id?: string;
@@ -184,11 +186,10 @@ class NewsIds {
         <mat-card-actions>
           <button appBackButton class="mat-raised-button" matTooltip="Zurück ohne zu sichern">Cancel</button>
           <button type="submit" class="mat-raised-button mat-primary" (click)="save()">Save</button>
+          <mat-progress-bar *ngIf="working" mode="indeterminate"></mat-progress-bar>
         </mat-card-actions>
-
       </mat-card-content>
     </mat-card>
-
   `,
   styles: [
     '.maxw { min-width: 500px; max-width: 1000px; }',
@@ -213,17 +214,18 @@ export class EditnewsComponent implements OnInit {
   options: Array<{id: string, label: string}> = [];
   resId: string;
   lastmod: string;
-
+  working: boolean;
 
   constructor(public knoraService: KnoraService,
-              private http: HttpClient,
               private fb: FormBuilder,
               public route: ActivatedRoute,
               private dateAdapter: DateAdapter<Date>,
-              private location: Location) {
+              private location: Location,
+              private snackBar: MatSnackBar) {
     this.inData = {};
     this.dateAdapter.setLocale('de'); // dd/MM/yyyy
     this.temporaryUrl = '/assets/dummy-256x256.jpg';
+    this.working = false;
   }
 
   @Input()
@@ -238,6 +240,7 @@ export class EditnewsComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.working = false;
     combineLatest([this.route.params, this.route.queryParams]).subscribe(arr => {
       if (arr[0].iri !== undefined) {
         this.inData.newsItemIri = arr[0].iri;
@@ -333,6 +336,15 @@ export class EditnewsComponent implements OnInit {
 
     if (file) {
       this.filename = file.name;
+      this.knoraService.uploadFile(file).subscribe(
+        (data: UploadedFileData) => {
+          this.temporaryUrl = data.temporaryUrl + '/full/^!256,256/0/default.jpg';
+          this.form.value.imageid = data.internalFilename;
+          this.form.controls.imageid.setValue(data.internalFilename);
+          this.valIds.imageid.changed = true;
+        }
+      );
+      /*
       const formData = new FormData();
       formData.append('file', file);
       this.http.post('https://iiif.test.dasch.swiss/upload?token=' + encodeURIComponent(this.knoraService.token || ''),
@@ -342,6 +354,7 @@ export class EditnewsComponent implements OnInit {
           this.form.controls.imageid.setValue(x.uploadedFiles[0].internalFilename);
           this.valIds.imageid.changed = true;
         });
+       */
     }
   }
 
@@ -352,7 +365,6 @@ export class EditnewsComponent implements OnInit {
   }
 
   _handleLinkInput(what: string): void {
-    console.log('this.form.value.lemma=', this.form.value.lemma);
     this.knoraService.getResourcesByLabel(this.form.value.lemma, this.knoraService.mlsOntology + 'Lemma').subscribe(
       res => {
         console.log('RES=', res);
@@ -465,6 +477,7 @@ export class EditnewsComponent implements OnInit {
   }
 
   save() {
+    this.working = true;
     if (this.inData.newsItemIri === undefined) {
       //
       // we create a new article
@@ -472,7 +485,15 @@ export class EditnewsComponent implements OnInit {
       this.knoraService.createNews(this.form.value).subscribe(
         res => {
           console.log('CREATE_RESULT:', res);
+          this.working = false;
+          this.location.back();
         },
+        error => {
+          this.snackBar.open('Fehler beim Speichern der Daten des News-Eintrags!', 'OK');
+          console.log('EditNewsComponent.save(): ERROR', error);
+          this.working = false;
+          this.location.back();
+        }
       );
     } else {
       const obs: Array<Observable<string>> = [];
@@ -511,7 +532,6 @@ export class EditnewsComponent implements OnInit {
         }
         obs.push(gaga);
       }
-
 
       if (this.valIds.imageid.toBeDeleted && this.valIds.imageid.id !== undefined) {
         let gaga: Observable<string>;
@@ -652,9 +672,14 @@ export class EditnewsComponent implements OnInit {
       }
 
       forkJoin(obs).subscribe(res => {
-        console.log('forkJoin:', res);
-      });
-      this.location.back();
+          this.working = false;
+          this.location.back();
+        },
+        error => {
+          this.snackBar.open('Fehler beim Speichern der Daten des News-Eintrags!', 'OK');
+          this.working = false;
+          this.location.back();
+        });
     }
   }
 

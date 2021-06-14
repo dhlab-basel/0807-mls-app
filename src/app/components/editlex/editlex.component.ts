@@ -5,6 +5,7 @@ import {ActivatedRoute} from '@angular/router';
 import {Location} from '@angular/common';
 import {combineLatest, forkJoin, Observable} from 'rxjs';
 import {map} from 'rxjs/operators';
+import {MatSnackBar} from '@angular/material/snack-bar';
 
 interface ValInfo {
   id?: string;
@@ -279,6 +280,7 @@ class LexiconIds {
       <mat-card-actions>
         <button appBackButton class="mat-raised-button" matTooltip="Zurück ohne zu sichern">Cancel</button>
         <button type="submit" class="mat-raised-button mat-primary" (click)="save()">Save</button>
+        <mat-progress-bar *ngIf="working" mode="indeterminate"></mat-progress-bar>
       </mat-card-actions>
     </mat-card>
   `,
@@ -300,15 +302,18 @@ export class EditlexComponent implements ControlValueAccessor, OnInit {
 
   resId: string;
   lastmod: string;
+  working: boolean;
   public valIds: LexiconIds = new LexiconIds();
 
   constructor(public knoraService: KnoraService,
               private fb: FormBuilder,
               public route: ActivatedRoute,
               private location: Location,
+              private snackBar: MatSnackBar,
               @Optional() @Self() public ngControl: NgControl) {
     this.inData = {};
     this.resId = '';
+    this.working = false;
   }
 
   @Input()
@@ -327,6 +332,7 @@ export class EditlexComponent implements ControlValueAccessor, OnInit {
   }
 
   ngOnInit(): void {
+    this.working = false;
     combineLatest([this.route.params, this.route.queryParams]).subscribe(arr  => {
       if (arr[0].iri !== undefined) {
         this.inData.lexiconIri = arr[0].iri;
@@ -609,6 +615,7 @@ export class EditlexComponent implements ControlValueAccessor, OnInit {
   }
 
   save() {
+    this.working = true;
     if (this.inData.lexiconIri === undefined) {
       //
       // we create a new lexicon
@@ -616,7 +623,15 @@ export class EditlexComponent implements ControlValueAccessor, OnInit {
       this.knoraService.createLexicon(this.form.value).subscribe(
         res => {
           console.log('CREATE_RESULT:', res);
+          this.working = false;
+          this.location.back();
         },
+        error => {
+          this.snackBar.open('Fehler beim Speichern der Daten des Lexikon-Eintrags!', 'OK');
+          console.log('EditLexComponent.save(): ERROR', error);
+          this.working = false;
+          this.location.back();
+        }
       );
     } else {
       //
@@ -956,10 +971,15 @@ export class EditlexComponent implements ControlValueAccessor, OnInit {
         obs.push(gaga);
       }
       forkJoin(obs).subscribe(res => {
-        console.log('forkJoin:', res);
-      });
+          this.working = false;
+          this.location.back();
+        },
+        error => {
+          this.snackBar.open('Fehler beim Speichern der Daten des Lexikon-Eintrags!', 'OK');
+          this.working = false;
+          this.location.back();
+        });
     }
-    this.location.back();
   }
 
 }

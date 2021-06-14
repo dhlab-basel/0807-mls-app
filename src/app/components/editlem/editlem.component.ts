@@ -4,6 +4,7 @@ import {FormBuilder, FormGroup, NgControl, Validators} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
 import {combineLatest, forkJoin, Observable} from 'rxjs';
 import {Location} from '@angular/common';
+import {MatSnackBar} from '@angular/material/snack-bar';
 
 
 interface ValInfo {
@@ -322,6 +323,7 @@ class LemmaIds {
         <mat-card-actions>
           <button appBackButton class="mat-raised-button" matTooltip="Zurück ohne zu sichern">Cancel</button>
           <button type="submit" class="mat-raised-button mat-primary" (click)="save()">Save</button>
+          <mat-progress-bar *ngIf="working" mode="indeterminate"></mat-progress-bar>
         </mat-card-actions>
 
       </mat-card-content>
@@ -349,18 +351,20 @@ export class EditlemComponent implements OnInit {
   public deceasedTypes: Array<OptionType>;
   public sexTypes: Array<OptionType>;
   public relevanceTypes: Array<OptionType>;
-
+  working: boolean;
 
   constructor(public knoraService: KnoraService,
               private fb: FormBuilder,
               public route: ActivatedRoute,
               private location: Location,
+              private snackBar: MatSnackBar,
               @Optional() @Self() public ngControl: NgControl) {
     this.inData = {};
     this.lemmaTypes = knoraService.lemmaTypes;
     this.deceasedTypes = knoraService.deceasedTypes;
     this.sexTypes = knoraService.sexTypes;
     this.relevanceTypes = knoraService.relevanceTypes;
+    this.working = false;
   }
 
   @Input()
@@ -381,6 +385,7 @@ export class EditlemComponent implements OnInit {
 
 
   ngOnInit(): void {
+    this.working = false;
     combineLatest([this.route.params]).subscribe(arr => {
       if (arr[0].iri !== undefined) {
         this.inData.lemmaIri = arr[0].iri;
@@ -737,6 +742,7 @@ export class EditlemComponent implements OnInit {
   }
 
   save() {
+    this.working = true;
     if (this.inData.lemmaIri === undefined) {
       //
       // we create a new Lemma
@@ -744,9 +750,16 @@ export class EditlemComponent implements OnInit {
       this.knoraService.createLemma(this.form.value).subscribe(
         res => {
           console.log('CREATE_RESULT:', res);
+          this.working = false;
+          this.location.back();
         },
+        error => {
+          this.snackBar.open('Fehler beim Speichern der Daten des Lemma-Eintrags!', 'OK');
+          console.log('EditLemmaComponent.save(): ERROR', error);
+          this.working = false;
+          this.location.back();
+        }
       );
-      this.location.back();
     } else {
       //
       // we edit an existing Lemma, update/create only changed fields
@@ -1220,9 +1233,14 @@ export class EditlemComponent implements OnInit {
         obs.push(gaga);
       }
       forkJoin(obs).subscribe(res => {
-        console.log('forkJoin:', res);
-      });
-      this.location.back();
+          this.working = false;
+          this.location.back();
+        },
+        error => {
+          this.snackBar.open('Fehler beim Speichern der Daten des News-Eintrags!', 'OK');
+          this.working = false;
+          this.location.back();
+        });
     }
   }
 }

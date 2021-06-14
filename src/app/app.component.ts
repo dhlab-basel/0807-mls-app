@@ -1,4 +1,4 @@
-import {Component, ElementRef, ViewChild} from '@angular/core';
+import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { LoginComponent } from './components/login/login.component';
 import { KnoraService } from './services/knora.service';
@@ -12,7 +12,7 @@ import {MatMenuModule} from '@angular/material/menu';
   styleUrls: ['./app.component.scss']
 })
 
-export class AppComponent {
+export class AppComponent implements OnInit {
   @ViewChild('drawer')
   myDrawer: ElementRef;
   title = 'Musikalisches Lexikon der Schweiz (MLS)';
@@ -38,6 +38,7 @@ export class AppComponent {
       data => {
         this.knoraService.login(data.email, data.password).subscribe(data => {
           if (!data.success) {
+            console.log('LOGIN-ERROR:', data);
             this.openLoginDialog();
           } else {
             this.logininfo = data.user;
@@ -46,6 +47,15 @@ export class AppComponent {
         });
       });
   }
+
+  ngOnInit() {
+    const udata = this.knoraService.restoreToken();
+    if (udata !== undefined) {
+      this.logininfo = udata.user;
+      this.loggedin = true;
+    }
+  }
+
 
   logout(): void {
     this.knoraService.logout().subscribe(data => {

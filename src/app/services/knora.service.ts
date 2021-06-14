@@ -55,6 +55,12 @@ import {Observable, of} from 'rxjs';
 import {catchError, map} from 'rxjs/operators';
 import {GravsearchTemplatesService} from './gravsearch-templates.service';
 import {insertAfterLastOccurrence} from '@angular/cdk/schematics';
+import {HttpClient, HttpEventType} from '@angular/common/http';
+
+export interface UserData {
+  user: string;
+  token: string;
+}
 
 export class LangString {
   data: {[index: string]: string};
@@ -316,6 +322,11 @@ export interface OptionType {
   name: string;
 }
 
+export interface UploadedFileData {
+  temporaryUrl: string;
+  internalFilename;
+}
+
 
 @Injectable({
   providedIn: 'root'
@@ -341,12 +352,14 @@ export class KnoraService {
 
   constructor(
     private appInitService: AppInitService,
-    private queryTemplates: GravsearchTemplatesService
+    private queryTemplates: GravsearchTemplatesService,
+    private http: HttpClient
   ) {
     const protocol = this.appInitService.getSettings().protocol;
     const servername = this.appInitService.getSettings().servername;
     const port = this.appInitService.getSettings().port;
     const config = new KnoraApiConfig(protocol, servername, port, undefined, undefined, true);
+    const iiifserver = this.appInitService.getSettings().iiifserver;
     this.knoraApiConnection = new KnoraApiConnection(config);
     this.mlsOntology = appInitService.getSettings().ontologyPrefix + '/ontology/0807/mls/v2#';
     this.loggedin = false;
@@ -507,7 +520,7 @@ export class KnoraService {
   }
 
 
-    login(email: string, password: string): Observable<{success: boolean, token: string, user: string}> {
+  login(email: string, password: string): Observable<{ success: boolean, token: string, user: string }> {
     return this.knoraApiConnection.v2.auth.login('email', email, password)
       .pipe(
         catchError((err) => {
@@ -519,6 +532,8 @@ export class KnoraService {
             this.loggedin = true;
             this.useremail = email;
             this.token = apiResponse.body.token;
+            sessionStorage.setItem('useremail', email);
+            sessionStorage.setItem('token', apiResponse.body.token);
             return {success: true, token: apiResponse.body.token, user: email};
           } else {
             return {success: false, token: response, user: '-'};
@@ -537,11 +552,45 @@ export class KnoraService {
           this.loggedin = false;
           this.useremail = '';
           this.token = undefined;
+          sessionStorage.removeItem('useremail');
+          sessionStorage.removeItem('token');
           return apiResponse.body.message;
         } else {
           return response;
         }
       }));
+  }
+
+  restoreToken(): UserData | undefined {
+    const user = sessionStorage.getItem('useremail');
+    if (user === null) {
+      return undefined;
+    }
+    const token = sessionStorage.getItem('token');
+    if (token === null) {
+      return undefined;
+    }
+    this.knoraApiConnection.v2.auth.jsonWebToken = token;
+    this.loggedin = true;
+    this.useremail = user;
+    this.token = token;
+
+    return {user, token};
+  }
+
+  uploadFile(file: File): Observable<UploadedFileData> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post(this.appInitService.getSettings().iiifserver + '/upload?token=' + encodeURIComponent(this.token || ''),
+      formData).pipe(
+        map((data: any)  => {
+          const tmp: UploadedFileData = {
+            temporaryUrl: data.uploadedFiles[0].temporaryUrl,
+            internalFilename: data.uploadedFiles[0].internalFilename
+          };
+          return tmp;
+        })
+    );
   }
 
   getOntology(iri: string): Observable<ReadOntology> {
@@ -599,6 +648,7 @@ export class KnoraService {
         return {
           id: data.id,
           label: data.label,
+          arkUrl: data.arkUrl,
           permission: data.userHasPermission,
           lastmod: data.lastModificationDate || '',
           properties: this.processResourceProperties(data)};
@@ -1154,10 +1204,7 @@ export class KnoraService {
     return this.knoraApiConnection.v2.res.createResource(createResource).pipe(
       map((res: ReadResource) => {
         return res.id;
-      }),
-      catchError((error: ApiResponseError) => {
-        return of('error'); }
-      )
+      })
     );
   }
 
@@ -1222,7 +1269,7 @@ export class KnoraService {
     const deleteVal = new DeleteValue();
 
     deleteVal.id = valId;
-    deleteVal.id = Constants.TextValue;
+    deleteVal.type = Constants.TextValue;
 
     const updateResource = new UpdateResource<DeleteValue>();
     updateResource.id = resId;
