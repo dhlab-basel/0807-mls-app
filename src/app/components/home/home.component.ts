@@ -12,7 +12,7 @@ import {KnoraService} from '../../services/knora.service';
           <mat-form-field fxHide fxShow.lt-md class="iswhite200">
             <input #searchField
                    name="searchterm"
-                   [value]="searchterm"
+                   [(ngModel)]="searchterm"
                    matInput
                    type="search"
                    placeholder="Suche nach..."/>
@@ -24,7 +24,7 @@ import {KnoraService} from '../../services/knora.service';
           <mat-form-field fxShow fxHide.lt-md class="iswhite400">
             <input #searchField
                    name="searchterm"
-                   [value]="searchterm"
+                   [(ngModel)]="searchterm"
                    matInput
                    type="search"
                    placeholder="Suche nach..."/>
@@ -62,6 +62,8 @@ export class HomeComponent implements OnInit {
   }
 
   searchEvent(event): boolean {
+    console.log('===EVENT===', event);
+    console.log('searchterm=', this.searchterm);
     this.searchterm = this.searchField.nativeElement.value;
     this.router.navigate(['/lemmata'], {
       queryParams: {
