@@ -37,9 +37,9 @@ import {ClipboardModule} from '@angular/cdk/clipboard';
           {{lemma.properties[hasGnd].label}}: <a href="http://d-nb.info/gnd/{{ lemma.properties[hasGnd].values[0] }}"
                                                  target="_blank">{{ lemma.properties[hasGnd].values[0] }}</a>
         </div>
-        <div style="padding-top: 10px;">
+        <div style="padding-top: 10px; font-size: 12px;">
           ARK-ID: {{lemma.arkUrl}} &nbsp;
-          <button mat-raised-button [cdkCopyToClipboard]="lemma.arkUrl" matTooltip="In Zwischenablage kopieren"><mat-icon>content_copy</mat-icon></button>
+          <button mat-mini-fab [cdkCopyToClipboard]="lemma.arkUrl" matTooltip="In Zwischenablage kopieren"><mat-icon>content_copy</mat-icon></button>
         </div>
         <br/>
         <mat-divider></mat-divider>
@@ -63,7 +63,7 @@ import {ClipboardModule} from '@angular/cdk/clipboard';
     'td.mat-cell {padding-left: 10px; padding-right:20px;}',
     'tr.mat-row {height: 24px;}',
     '.clickable {cursor: pointer;}',
-    '.full-width { width: 500px; font-size: 16px; }'
+    '.full-width { width: 500px; font-size: 16px; }',
   ]
 })
 
