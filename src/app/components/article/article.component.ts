@@ -17,9 +17,9 @@ import {SafePipe} from '../../pipes/safe.pipe';
           (Aus "{{article.lexicon}}")
         </mat-card-subtitle>
         <mat-card-content>
-          <div *ngIf="article.arkUrl" style="padding-top: 10px;">
+          <div *ngIf="article.arkUrl" style="padding-top: 10px; font-size: 12px;">
             ARK-ID: {{article.arkUrl}} &nbsp;
-            <button mat-raised-button [cdkCopyToClipboard]="article.arkUrl" matTooltip="In Zwischenablage kopieren"><mat-icon>content_copy</mat-icon></button>
+            <button mat-mini-fab [cdkCopyToClipboard]="article.arkUrl" matTooltip="In Zwischenablage kopieren"><mat-icon>content_copy</mat-icon></button>
           </div>
 
           <div [innerHTML]="article.arttext | safe: 'html'"></div>
@@ -41,9 +41,7 @@ import {SafePipe} from '../../pipes/safe.pipe';
             <mat-divider></mat-divider>
             <button mat-raised-button (click)="editArticle()">edit</button>
           </mat-card-actions>
-
         </mat-card-content>
-
       </mat-card>
      </div>
   `,
