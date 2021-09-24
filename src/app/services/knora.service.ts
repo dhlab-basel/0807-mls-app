@@ -828,7 +828,7 @@ export class KnoraService {
     if (data.theatre !== null && data.theatre !== undefined && data.theatre !== '') {
       const theatreVal = new CreateTextValueAsString();
       theatreVal.text = data.theatre;
-      props[this.mlsOntology + 'hasTheatreLexCode'] = [
+      props[this.mlsOntology + 'hasTheaterLexCode'] = [
         theatreVal
       ];
     }
