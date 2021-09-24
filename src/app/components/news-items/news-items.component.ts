@@ -32,9 +32,9 @@ interface ItemData {
     <div  *ngIf="knoraService.loggedin" class="with-margin">
       <button mat-raised-button (click)="addNewsItem()">Neuer News-Beitrag</button>
     </div>
-    <mat-grid-list #grid rowHeight="1:1.5">
+    <mat-grid-list #grid rowHeight="1:1.75">
         <mat-grid-tile *ngFor="let x of newsItems">
-          <mat-card layout-fill >
+          <mat-card>
             <mat-card-title>
               {{x.title}}
             </mat-card-title>
@@ -53,7 +53,7 @@ interface ItemData {
     </mat-grid-list>
   `,
   styles: [
-    '.mat-card {margin: 3em;}',
+    '.mat-card {margin: 3em; border-width: 1em;}',
     '.mat-card-title {font-size: 14pt;}',
     '.mat-card-content { max-height: 200px; overflow-y: auto; }',
     '.with-margin {margin-left: 50px; margin-top: 20px; margin-bottom: 10px;}',
