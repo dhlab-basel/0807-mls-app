@@ -123,7 +123,7 @@ class ArticleIds {
         </button>
         <br/>
 
-        <ckeditor matInput #editor [editor]="Editor" formControlName="article" (change)="_handleInput('article')"></ckeditor>
+        <ckeditor matInput #editor [editor]="Editor" [config]="ckeditorConfig" formControlName="article" (change)="_handleInput('article')"></ckeditor>
         <br/>
         <button *ngIf="valIds.article.changed" mat-mini-fab (click)="_handleUndo('article')">
           <mat-icon color="warn">cached</mat-icon>
@@ -278,6 +278,17 @@ export class EditartComponent implements ControlValueAccessor, OnInit {
   inData: any;
 
   public Editor = ClassicEditor;
+  ckeditorConfig = {
+    mediaEmbed: {
+      extraProviders: [
+        {
+          name: 'IIIF',
+          url: /^iiif(.+)/,
+          html: match => '<img src="https://iiif' + match[1] + '">'
+        }
+      ]
+    }
+  };
   form: FormGroup;
   options: Array<{id: string, label: string}> = [];
   public lexica: Lexica[] = [];
