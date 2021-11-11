@@ -81,10 +81,11 @@ export class ArticleComponent implements OnInit {
               break;
             }
             case this.knoraService.mlsOntology + 'hasArticleText': {
-              const regex = /<oembed.+?url="https?:\/\/www\.youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})"><\/oembed>/g;
+              const regexYoutube = /<oembed +?url="https?:\/\/www\.youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})"><\/oembed>/g;
+              const regexIiif = /<oembed +?url="(https?:\/\/iiif\.[a-zA-Z0-9_\-.,/:]*)"><\/oembed>/g;
               articledata.arttext = ele.values[0].replace(/\\n/g, '<br />');
-              articledata.arttext = articledata.arttext.replace(regex, '<iframe width="560" height="315" src="https://www.youtube.com/embed/$1" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>');
-              console.log(articledata.arttext);
+              articledata.arttext = articledata.arttext.replace(regexYoutube, '<iframe width="560" height="315" src="https://www.youtube.com/embed/$1" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>');
+              articledata.arttext = articledata.arttext.replace(regexIiif, '<img src="$1">');
               break;
             }
             case this.knoraService.mlsOntology + 'hasPages': {
