@@ -1,9 +1,9 @@
 {
   "protocol": "https",
-  "server": "https://api.test.dasch.swiss:443",
-  "ontologyPrefix": "http://api.test.dasch.swiss",
-  "servername": "api.test.dasch.swiss",
-  "iiifserver": "https://iiif.test.dasch.swiss",
+  "server": "https://api.dasch.swiss:443",
+  "ontologyPrefix": "http://api.dasch.swiss",
+  "servername": "api.dasch.swiss",
+  "iiifserver": "https://iiif.dasch.swiss",
   "project": "http://rdfh.ch/projects/0807",
   "port": 443
 }
