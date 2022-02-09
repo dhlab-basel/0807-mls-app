@@ -15,6 +15,7 @@ import {EditlexComponent} from './components/editlex/editlex.component';
 import {EditnewsComponent} from './components/editnews/editnews.component';
 import {NewsItemsComponent} from './components/news-items/news-items.component';
 import {NewsitemViewerComponent} from './components/newsitem-viewer/newsitem-viewer.component';
+import {ArkResolveComponent} from './components/ark-resolve/ark-resolve.component';
 
 const routes: Routes = [{
   path: 'home',
@@ -28,6 +29,9 @@ const routes: Routes = [{
 }, {
   path: 'lemma/:iri',
   component: LemmaComponent
+}, {
+  path: 'ark/:iri',
+  component: ArkResolveComponent
 }, {
   path: 'lexica',
   component: LexicaComponent
