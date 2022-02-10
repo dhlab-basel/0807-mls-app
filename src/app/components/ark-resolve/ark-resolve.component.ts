@@ -6,7 +6,7 @@ import {KnoraService} from "../../services/knora.service";
   selector: 'app-ark-resolve',
   template: `
     <p>
-      What is the requested thing with url {{objurl}}
+      You will be redirected to {{objurl}} shortly...
     </p>
   `,
   styles: [
@@ -32,7 +32,6 @@ export class ArkResolveComponent implements OnInit {
             this.router.navigate(['/article', this.objurl]);
           }
         }
-        console.log('==> Resource:', data);
       });
     });
   }
