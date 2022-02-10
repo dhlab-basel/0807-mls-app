@@ -56,6 +56,7 @@ import { NewsitemViewerComponent } from './components/newsitem-viewer/newsitem-v
 import { FlexLayoutModule } from '@angular/flex-layout';
 import {MatSnackBarModule} from '@angular/material/snack-bar';
 import {MatProgressSpinnerModule} from "@angular/material/progress-spinner";
+import { ArkResolveComponent } from './components/ark-resolve/ark-resolve.component';
 
 export function initializeApp(appInitService: AppInitService) {
   return (): Promise<any> => {
@@ -87,6 +88,7 @@ export function initializeApp(appInitService: AppInitService) {
     EditnewsComponent,
     SafePipe,
     NewsitemViewerComponent,
+    ArkResolveComponent,
   ],
   entryComponents: [
     LoginComponent,
