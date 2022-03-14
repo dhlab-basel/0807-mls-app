@@ -23,6 +23,14 @@ import {SafePipe} from '../../pipes/safe.pipe';
           </div>
 
           <div [innerHTML]="article.arttext | safe: 'html'"></div>
+          <mat-expansion-panel>
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+                Quellen und Bibliographie
+              </mat-panel-title>
+            </mat-expansion-panel-header>
+            <div [innerHTML]="article.source | safe: 'html'"></div>
+          </mat-expansion-panel>
           <div *ngIf="article.npages">(Seite: {{ article.npages }})</div>
           <mat-divider></mat-divider>
           <br/>
@@ -86,6 +94,10 @@ export class ArticleComponent implements OnInit {
               articledata.arttext = ele.values[0].replace(/\\n/g, '<br />');
               articledata.arttext = articledata.arttext.replace(regexYoutube, '<iframe width="560" height="315" src="https://www.youtube.com/embed/$1" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>');
               articledata.arttext = articledata.arttext.replace(regexIiif, '<img src="$1">');
+              break;
+            }
+            case this.knoraService.mlsOntology + 'hasSource': {
+              articledata.source = ele.values[0];
               break;
             }
             case this.knoraService.mlsOntology + 'hasPages': {
