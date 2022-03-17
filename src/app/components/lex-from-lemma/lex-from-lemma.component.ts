@@ -7,6 +7,24 @@ import {Constants} from '@dasch-swiss/dsp-js';
 @Component({
   selector: 'app-lex-from-lemma',
   template: `
+    <h3>Im MLS 2020</h3>
+    <table mat-table [dataSource]="mls">
+      <ng-container matColumnDef="lexicon_shortname">
+        <th mat-header-cell *matHeaderCellDef> Kürzel </th>
+        <td mat-cell *matCellDef="let element"> {{element[1]}} </td>
+      </ng-container>
+      <ng-container matColumnDef="lexicon_citation">
+        <th mat-header-cell *matHeaderCellDef> Zitierform </th>
+        <td mat-cell *matCellDef="let element"> {{element[2]}} </td>
+      </ng-container>
+      <ng-container matColumnDef="lexicon_year">
+        <th mat-header-cell *matHeaderCellDef> Jahr </th>
+        <td mat-cell *matCellDef="let element"> {{element[3]}} </td>
+      </ng-container>
+      <tr mat-header-row *matHeaderRowDef="columnsToDisplay"></tr>
+      <tr mat-row *matRowDef="let row; columns: columnsToDisplay;" (click)="articleSelected(row)" class="clickable"></tr>
+    </table>
+    <h3>In anderen Lexika</h3>
     <table mat-table [dataSource]="lexica">
         <ng-container matColumnDef="lexicon_shortname">
             <th mat-header-cell *matHeaderCellDef> Kürzel </th>
@@ -37,6 +55,7 @@ export class LexFromLemmaComponent implements OnInit, OnChanges {
   @Input()
   lemmaIri: string;
   lexica: Array<Array<string>> = [];
+  mls: Array<Array<string>> = [];
   columnsToDisplay: Array<string> = ['lexicon_shortname', 'lexicon_citation', 'lexicon_year'];
 
   constructor(private route: ActivatedRoute,
@@ -68,7 +87,8 @@ export class LexFromLemmaComponent implements OnInit, OnChanges {
     ];
     this.knoraService.gravsearchQuery('lexica_from_lemma_query', param, fields).subscribe(
       (data) => {
-        this.lexica = data;
+        this.lexica = data.filter(v => {if (v[1] !== 'MLS Online 2020') { return v; }});
+        this.mls = data.filter(v => {if (v[1] === 'MLS Online 2020') { return v; }});
       }
     );
   }

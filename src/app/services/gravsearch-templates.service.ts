@@ -214,7 +214,7 @@ export class GravsearchTemplatesService {
         OPTIONAL { ?lexicon mls:hasCitationForm ?citation . }
         OPTIONAL { ?lexicon mls:hasYear ?year . }
     }
-    ORDER BY ASC(?year)
+    ORDER BY DESC(?year)
   `, params);
     return result;
   }

@@ -373,7 +373,6 @@ export class KnoraService {
   private processResourceProperties(data: ReadResource): Array<PropertyData> {
     const propdata: Array<PropertyData> = [];
     for (const prop in data.properties) {
-      console.log('---------->', prop)
       if (data.properties.hasOwnProperty(prop)) {
         switch (data.getValues(prop)[0].type) {
           case Constants.StillImageFileValue: {
