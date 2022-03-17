@@ -56,6 +56,7 @@ import {catchError, map} from 'rxjs/operators';
 import {GravsearchTemplatesService} from './gravsearch-templates.service';
 import {insertAfterLastOccurrence} from '@angular/cdk/schematics';
 import {HttpClient, HttpEventType} from '@angular/common/http';
+import {ReadTextValueAsXml} from '@dasch-swiss/dsp-js/src/models/v2/resources/values/read/read-text-value';
 
 export interface UserData {
   user: string;
@@ -411,9 +412,14 @@ export class KnoraService {
             break;
           }
           case Constants.TextValue: {
-            const vals = data.getValuesAs(prop, ReadTextValueAsString);
+            let vals: ReadTextValueAsString[] | ReadTextValueAsXml[];
+            try {
+              vals = data.getValuesAs(prop, ReadTextValueAsString);
+            } catch (e) {
+              vals = data.getValuesAs(prop, ReadTextValueAsXml);
+            }
             const label: string = vals[0].propertyLabel || '?';
-            const values: Array<string> = vals.map(v => v.text);
+            const values: Array<string> = vals.map(v => v.text || v.xml);
             const ids: Array<string> = vals.map(v => v.id);
             const comments: Array<string | undefined> = vals.map(v => v.valueHasComment);
             const permissions: Array<string> = vals.map(v => v.userHasPermission);

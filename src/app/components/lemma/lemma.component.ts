@@ -44,9 +44,6 @@ import {ClipboardModule} from '@angular/cdk/clipboard';
         <br/>
         <mat-divider></mat-divider>
         <br/>
-        <mat-card-subtitle>
-          In Lexika:
-        </mat-card-subtitle>
         <app-lex-from-lemma [lemmaIri]="lemmaIri">
         </app-lex-from-lemma>
         <mat-card-actions *ngIf="allowEdit">
