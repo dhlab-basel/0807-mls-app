@@ -53,10 +53,11 @@ interface ItemData {
     </mat-grid-list>
   `,
   styles: [
-    '.mat-card {margin: 3em; border-width: 1em;}',
+    '.mat-grid-list {margin-top: 10px;}',
+    '.mat-card {margin: 0.5em; border-width: 1em;}',
     '.mat-card-title {font-size: 14pt;}',
     '.mat-card-content { max-height: 200px; overflow-y: auto; }',
-    '.with-margin {margin-left: 50px; margin-top: 20px; margin-bottom: 10px;}',
+    '.with-margin {margin-left: 5px; margin-top: 5px; margin-bottom: 5px;}',
     '.clickable {cursor: pointer;}'
   ]
 })

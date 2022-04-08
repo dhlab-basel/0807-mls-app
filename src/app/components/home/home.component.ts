@@ -41,7 +41,7 @@ import {KnoraService} from '../../services/knora.service';
   `,
   styles: [
     // '.bgimg {background: url("/assets/mls-title-bg-img.jpg"); background-repeat: no-repeat; background-size: cover; background-position: center; margin-left: 50px; margin-right: 50px;}',
-    '.bgimg {background-repeat: no-repeat; background-size: cover; background-position: center; margin-left: 50px; margin-right: 50px;}',
+    '.bgimg {background-repeat: no-repeat; background-size: cover; background-position: center; margin-left: 0px; margin-right: 0px;}',
     '.gaga {min-height: max-content;}',
     '.gugus {min-height: 400px;}',
     '.iswhite200 {background-color: white; min-width: 200px;}',
@@ -62,7 +62,6 @@ export class HomeComponent implements OnInit {
   }
 
   searchEvent(event): boolean {
-    console.log('===EVENT===', event);
     console.log('searchterm=', this.searchterm);
     this.searchterm = this.searchField.nativeElement.value;
     this.router.navigate(['/lemmata'], {
