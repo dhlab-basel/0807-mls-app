@@ -288,8 +288,9 @@ export class EditartComponent implements ControlValueAccessor, OnInit {
         },
         {
           name: 'switchTube',
-          url: /^https:\/\/tube\.switch\.ch(.+)/,
-          html: match => '<img src="https://tube.switch.ch' + match[1] + '">'
+          url: /^https:\/\/tube\.switch\.ch\/videos(.+)/,
+          // html: match => '<img src="https://tube.switch.ch/embed' + match[1] + '">'
+          html: match => '<iframe width="560" height="315" src="https://tube.switch.ch/embed' + match[1] + '" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>'
         }
       ]
     }
