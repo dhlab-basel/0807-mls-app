@@ -37,10 +37,76 @@ import {KnoraService} from '../../services/knora.service';
         </form>
       </mat-card-actions>
     </mat-card>
+
+    <mat-tab-group>
+      <mat-tab label="DE">
+        <mat-card>
+          <mat-card-content class="info">
+            Das Musiklexikon der Schweiz (MLS) ist das spartenübergreifende Online-Fachlexikon zur Schweizerischen
+            Musikgeschichte. Es versteht sich als zentrale Informationsplattform zum Musikleben in der Schweiz und
+            richtet sich sowohl an Wissenschaftler*innen und Studierende als auch an Interessierte aus der breiten
+            Öffentlichkeit. Das MLS stellt nicht nur Artikel zu Persönlichkeiten der Schweizer Musikgeschichte zur
+            Verfügung, sondern
+            beschäftigt sich auch mit Orten, Institutionen und Objekten aus allen Sparten des Musiklebens.
+            <br/>Die endgültige Fassung des MLS wird durchgehend mehrsprachig sein.
+          </mat-card-content>
+        </mat-card>
+      </mat-tab>
+      <mat-tab label="FR">
+        <mat-card>
+          <mat-card-content class="info">
+            Le Dictionnaire de la musique en Suisse (DMS) est un dictionnaire numérique spécialisé sur l’histoire de la
+            musique en Suisse. Recouvrant tous les genres et tous les styles musicaux, il se conçoit comme une
+            plate-forme d’information centrale sur la musique en Suisse. Il s’adresse aussi bien aux chercheuses et aux
+            chercheurs
+            qu’aux étudiant.e.s et aux mélomanes. Le DMS contient des articles sur les personnalités qui ont forgé
+            l’histoire
+            de la musique de la Suisse, mais aussi des articles sur les lieux, les institutions et les objets qui ont
+            trait à la vie
+            musicale du pays.
+            <br/> La version finale du dictionnaire sera entièrement plurilingue.
+          </mat-card-content>
+        </mat-card>
+      </mat-tab>
+      <mat-tab label="IT">
+        <mat-card>
+          <mat-card-content class="info">
+            L'Enciclopedia Musicale Svizzera (MLS) è l'enciclopedia interdisciplinare online della storia della musica
+            svizzera. storia della musica. Si considera una piattaforma centrale d'informazione sulla vita musicale in
+            Svizzera e
+            indirizzi studiosi e studenti, così come i membri interessati del pubblico in generale.
+            pubblico generale. La MLS non fornisce solo articoli su personalità della storia della musica svizzera, ma
+            si occupa anche di
+            luoghi, istituzioni e oggetti di tutti i settori della storia della musica.
+            ma si occupa anche di luoghi, istituzioni e oggetti di tutti i settori della vita musicale.
+            <br/> Il finale versione della MLS sarà multilingue in tutto.
+          </mat-card-content>
+        </mat-card>
+      </mat-tab>
+      <mat-tab label="EN">
+        <mat-card>
+          <mat-card-content class="info">
+            The Swiss Music Encyclopedia (MLS) is the interdisciplinary online encyclopedia on Swiss music history.
+            music history. It sees itself as a central information platform on the musical life in Switzerland and
+            addresses
+            scholars and students as well as interested members of the general public.
+            general public.
+            The MLS not only provides articles on personalities in Swiss music history, but also deals with places,
+            institutions and objects from all areas of music history.
+            but also deals with places, institutions and objects from all areas of musical life.
+            <br/> The
+            final
+            version of the MLS will be multilingual throughout.
+          </mat-card-content>
+        </mat-card>
+      </mat-tab>
+    </mat-tab-group>
     <app-news-items></app-news-items>
   `,
   styles: [
     // '.bgimg {background: url("/assets/mls-title-bg-img.jpg"); background-repeat: no-repeat; background-size: cover; background-position: center; margin-left: 50px; margin-right: 50px;}',
+    '.mat-tab-group {margin: auto; max-width: 800px;}',
+    '.info {font-size: 16px;}',
     '.bgimg {background-repeat: no-repeat; background-size: cover; background-position: center; margin-left: 0px; margin-right: 0px;}',
     '.gaga {min-height: max-content;}',
     '.gugus {min-height: 400px;}',
