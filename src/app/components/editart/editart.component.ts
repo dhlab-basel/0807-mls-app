@@ -285,6 +285,11 @@ export class EditartComponent implements ControlValueAccessor, OnInit {
           name: 'IIIF',
           url: /^iiif(.+)/,
           html: match => '<img src="https://iiif' + match[1] + '">'
+        },
+        {
+          name: 'switchTube',
+          url: /^https:\/\/tube\.switch\.ch(.+)/,
+          html: match => '<img src="https://tube.switch.ch' + match[1] + '">'
         }
       ]
     }
