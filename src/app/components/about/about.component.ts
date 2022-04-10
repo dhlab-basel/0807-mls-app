@@ -97,7 +97,7 @@ import { Component, OnInit } from '@angular/core';
             BIC POFICHBEXXX<br/>
             Referenz: Spende MLS<br/>
             <h2>Informationen zum Projekt erhalten Sie unter:</h2>
-            <a href="https://www.smg-ssm.ch/smg-ssm/forschungs-publikationen/musiklexikon-der-schweiz/">https://www.smg-ssm.ch/smg-ssm/forschungs-publikationen/musiklexikon-der-schweiz/</a>
+            <a href="https://www.smg-ssm.ch/smg-ssm/publikationen/musiklexikon-der-schweiz">https://www.smg-ssm.ch/smg-ssm/publikationen/musiklexikon-der-schweiz</a>
             <p>Informationen zur Gesellschaft und zum aktuellen Programm aller Sektionen finden Sie unter:<br/>
               <a href="https://www.smg-ssm.ch">www.smg-ssm.ch</a>
             </p>

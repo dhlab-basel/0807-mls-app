@@ -87,8 +87,8 @@ export class LexFromLemmaComponent implements OnInit, OnChanges {
     ];
     this.knoraService.gravsearchQuery('lexica_from_lemma_query', param, fields).subscribe(
       (data) => {
-        this.lexica = data.filter(v => {if (v[1] !== 'MLS Online 2020') { return v; }});
-        this.mls = data.filter(v => {if (v[1] === 'MLS Online 2020') { return v; }});
+        this.lexica = data.filter(v => {if ((v[1] !== 'MLS Online 2020') && (v[1] !== 'MLS Online')){ return v; }});
+        this.mls = data.filter(v => {if ((v[1] === 'MLS Online 2020') || (v[1] === 'MLS Online')) { return v; }});
       }
     );
   }
