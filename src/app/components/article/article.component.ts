@@ -90,6 +90,7 @@ export class ArticleComponent implements OnInit {
             }
             case this.knoraService.mlsOntology + 'hasArticleText': {
               const regexYoutube = /<oembed +?url="https?:\/\/www\.youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})"><\/oembed>/g;
+              const regexYoutubeShort = /<oembed +?url="https?:\/\/www\.youtu\.be\/([a-zA-Z0-9_-]{11})"><\/oembed>/g;
               const regexSwitchtube = /<oembed +?url="https?:\/\/tube\.switch\.ch\/videos\/([a-zA-Z0-9_-]*)"><\/oembed>/g;
               const regexIiif = /<oembed +?url="(https?:\/\/iiif\.[a-zA-Z0-9_\-.,/:]*)"><\/oembed>/g;
               articledata.arttext = ele.values[0].replace(/\\n/g, '<br />');
