@@ -54,9 +54,9 @@ interface ItemData {
   `,
   styles: [
     '.mat-grid-list {margin-top: 10px; justify-content: flex-start !important; align-items: flex-start !important;}',
-    '.mat-card {margin: 0.5em; border-width: 1em;}',
+    '.mat-card {margin: 1.5em; border-width: 1em;}',
     '.mat-card-title {font-size: 14pt;}',
-    '.mat-card-content { max-height: 200px; overflow-y: auto; }',
+    '.mat-card-content { height: 200px; overflow-y: auto; }',
     '.with-margin {margin-left: 5px; margin-top: 5px; margin-bottom: 5px;}',
     '.clickable {cursor: pointer;}'
   ]
